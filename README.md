@@ -33,7 +33,7 @@
 | **Run the model** | [Quick start](#quick-start) · [PlaSiC Studio](#plasic-studio) · [Experiments](#experiments-out-of-the-box) · [Build dependencies](#build-dependencies) |
 | **Watch the video** | **▶ [PlaSiC Studio interface walkthrough on Bilibili](https://www.bilibili.com/video/BV1Q4h26FELk/)** |
 | **Understand the design** | [Project website](https://sunmoumou1.github.io/PlaSiC/) · [Source tour](https://sunmoumou1.github.io/PlaSiC/source.html) · [Benchmarks](#benchmarks) |
-| **Join in** | [Roadmap](#roadmap) · [Contributing](#contributing) · [Citing PlaSiC](#citing-plasic) · [About the author](#about-the-author) |
+| **Join in** | [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md) · [Citing PlaSiC](#citing-plasic) · [About the author](#about-the-author) |
 
 ## What is PlaSiC?
 
@@ -341,6 +341,9 @@ Planned for future releases (✅ = delivered, ⬜ = planned):
 Ideas, feature requests and contributions are welcome — see below.
 
 ## Contributing
+
+> [!IMPORTANT]
+> **Building your own GCM, or adding major features to PlaSiC? Read [CONTRIBUTING.md](CONTRIBUTING.md) first** — lessons from vibe-coding PlaSiC with AI agents.
 
 PlaSiC is an open project and contributions of every size are useful:
 
