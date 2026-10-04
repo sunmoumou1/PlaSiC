@@ -19,3 +19,5 @@ experiments/forecast_era5/runs/
 docs-site/docs/tutorial/assets/slide/
 
 build/
+
+docs-site/build_pdf.py
