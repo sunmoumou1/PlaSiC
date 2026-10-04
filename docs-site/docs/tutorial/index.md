@@ -75,7 +75,7 @@ PlaSiC is an actively developed model. The following features are not yet implem
 
 ## How to report problems
 
-- If you find documentation errors, broken links or formula rendering problems, please open an issue on [GitHub Issues](https://github.com/sunmoumou1/PLASIM/issues);
+- If you find documentation errors, broken links or formula rendering problems, please open an issue on [GitHub Issues](https://github.com/sunmoumou1/plasic/issues);
 - If you want to improve the documentation or tutorial content, pull requests are welcome;
 - For problems related to running the model, please attach `run.log` and the relevant configuration to the issue so that it can be diagnosed.
 
