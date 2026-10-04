@@ -175,13 +175,17 @@ for every available switch.
 ## Experiments out of the box
 
 Every experiment below is reproducible with the scripts in this repository, and
-each is documented, figure by figure, in the tutorial.
+each is documented, figure by figure, in the tutorial. The three groups are a
+historical simulation, the idealized CO₂ projections, and ERA5-initialized
+weather forecasts.
 
-**Historical experiment (1850–2014)** — prescribed monthly CO₂ from the CMIP6
-dataset (284.3 → 397.6 ppmv) drives a T21, 10-level coupled run, after a 500-year
-ocean spin-up. The ensemble-mean near-surface warming reaches **+1.04 K by 2014**,
-close to the observational estimate, with stratospheric cooling and tropospheric
-warming aloft. The full pipeline takes roughly 7–8 hours on a modern laptop.
+### 1. Historical (1850–2014)
+
+Prescribed monthly CO₂ from the CMIP6 dataset (284.3 → 397.6 ppmv) drives a T21,
+10-level coupled run, after a 500-year ocean spin-up. The ensemble-mean
+near-surface warming reaches **+1.04 K by 2014**, close to the observational
+estimate, with stratospheric cooling and tropospheric warming aloft. The full
+pipeline takes roughly 7–8 hours on a modern laptop.
 
 ```bash
 make -C src historical INITIAL_CONDITION=data/earth_t21_l10.restart
@@ -195,10 +199,12 @@ make -C src historical INITIAL_CONDITION=data/earth_t21_l10.restart
 
 <p align="center"><sub><b>Forced surface warming relative to control.</b> Annual global near-surface air-temperature anomalies for two branches, their smoothed ensemble mean, and the observed estimate.</sub></p>
 
-**`1pctCO2` and `abrupt-4xCO2`** — run with a coupled ocean from the same
-equilibrated initial state. In `1pctCO2`, spatially uniform CO₂ rises by 1% yr⁻¹,
-compounded monthly, for 140 years and reaches approximately 4× its initial
-concentration; the model warms by **+5.37 K in year 140**. The transient climate
+### 2. Idealized CO₂ (`1pctCO2` and `abrupt-4xCO2`)
+
+Run with a coupled ocean from the same equilibrated initial state. In
+`1pctCO2`, spatially uniform CO₂ rises by 1% yr⁻¹, compounded monthly, for 140
+years and reaches approximately 4× its initial concentration; the model warms
+by **+5.37 K in year 140**. The transient climate
 response is **TCR = 3.29 K**, defined as the 20-year mean temperature anomaly
 over protocol years 61–80 (calendar years 1910–1929). In `abrupt-4xCO2`, CO₂ is
 stepped immediately to about 1,137 ppm (4×) and held for 150 years; the model
@@ -216,6 +222,29 @@ the 1.831–5.616 K range (30 models).
 </p>
 
 <p align="center"><sub><b>Climate sensitivity compared with CMIP6.</b> Transient climate response (TCR, left) and effective ECS (right): grey points and violins are CMIP6 models, red diamonds are PlaSiC's single-member values. CMIP6 diagnostics from <a href="https://github.com/mark-ringer/cmip6">mark-ringer/cmip6</a> (CC BY-SA 4.0).</sub></p>
+
+### 3. Weather forecast (ERA5-initialized 10-day forecasts)
+
+PlaSiC is initialized from ERA5 reanalysis and integrated freely for 10 days at
+T85/L25 (128 × 256 Gaussian grid, 25 σ levels, 15-minute dynamics, 96 steps per
+day), then verified against ERA5 at matching valid times with the WeatherBench 2
+headline variables and metrics. Three 2020 cases are archived: a winter
+mid-latitude flow, a summer circulation and Typhoon Maysak. Each case is run
+from two initial states — a **direct** analysis, written to the two leapfrog levels
+at the start time, and a **nudged** analysis, in which a 12-hour window is
+integrated in one-hour cycles that relax the model toward the mapped ERA5
+analysis, so the free forecast begins from a state the model has adjusted to.
+
+Overall, the nudged initialization keeps useful large-scale skill for about
+five days against a climatology baseline. One case is shown below:
+
+→ [Chapter 6.6, ERA5-initialized 10-day forecasts](https://sunmoumou1.github.io/PlaSiC/tutorial/6-experiments/6.6-era5-initialized-10day-forecasts/)
+
+<p align="center">
+  <img src="docs-site/docs/tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="880" alt="Western North Pacific 10-day forecast of Typhoon Maysak: for nine diagnostics the ERA5 analysis is shown above the nudged PlaSiC forecast at lead times from the analysis time to +240 h">
+</p>
+
+<p align="center"><sub><b>Typhoon Maysak in a 10-day forecast.</b> Western North Pacific zoom (100–180 °E, 0–60 °N) of the typhoon2020 case; each diagnostic occupies two rows — ERA5 above, the nudged PlaSiC forecast below — at lead times from the analysis to +240 h.</sub></p>
 
 ## Benchmarks
 
@@ -290,17 +319,24 @@ python3 -m venv .venv
   <a href="https://github.com/sunmoumou1/PlaSiC/commits/main"><img src="https://img.shields.io/github/commit-activity/m/sunmoumou1/PlaSiC?style=for-the-badge&amp;color=2f855a" alt="Commit activity per month"></a>
 </p>
 
-Planned for future releases:
+Planned for future releases (✅ = delivered, ⬜ = planned):
 
-- **Aerosol-related physical processes.**
-- **External ozone forcing** — ozone will be read from external data rather than
+- ⬜ **Aerosol-related physical processes.**
+- ⬜ **External ozone forcing** — ozone will be read from external data rather than
   prescribed internally, so historical experiments can be driven by CO₂ and ozone
   together.
-- **Particle tracking and visualization** — follow air parcels and tracers through
+- ⬜ **Particle tracking and visualization** — follow air parcels and tracers through
   the simulated circulation, with visualization support.
-- **Weather simulation experiments** — initialize from an observed weather state and
-  integrate forward, quantifying forecast-error growth from day 0 to day 10.
-- **More grid** - Despite of conventional Gaussian grid, I plan to support the Octahedral Gaussian grid (Malardel, Sylvie, et al. "A new grid for the IFS." ECMWF newsletter 146.23-28 (2016): 321.) and the HEALPix grid (Gorski, Krzysztof M., et al. "HEALPix: A framework for high-resolution discretization and fast analysis of data distributed on the sphere." The Astrophysical Journal 622.2 (2005): 759-771.).
+- ✅ **Weather simulation experiments** — initialize from an observed weather state
+  and integrate forward, quantifying forecast-error growth from day 0 to day 10.
+  Delivered as the [ERA5-initialized 10-day
+  forecasts](https://sunmoumou1.github.io/PlaSiC/tutorial/6-experiments/6.6-era5-initialized-10day-forecasts/).
+- ⬜ **More grids** — beyond the conventional Gaussian grid, I plan to support the
+  Octahedral Gaussian grid (Malardel, Sylvie, et al. "A new grid for the IFS."
+  ECMWF newsletter 146.23-28 (2016): 321.) and the HEALPix grid (Gorski, Krzysztof
+  M., et al. "HEALPix: A framework for high-resolution discretization and fast
+  analysis of data distributed on the sphere." The Astrophysical Journal 622.2
+  (2005): 759-771.).
 
 Ideas, feature requests and contributions are welcome — see below.
 

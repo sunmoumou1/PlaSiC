@@ -147,9 +147,18 @@ _MODEL_BUILD_DEFAULT = PROJECT_ROOT / "build" / (
     f"T{NTRU}_L{NLEV}{_MPI_SUFFIX}{_OCEAN_SUFFIX}"
 )
 MODEL_BUILD_DIR = Path(os.environ.get("PLASIC_BUILD_DIR", _MODEL_BUILD_DEFAULT))
+# Slab-ocean forecasts use a copy of the packaged restart with the optional
+# three-dimensional ocean records removed.  Keeping that file beside the
+# experiment makes the model/data contract explicit and prevents a slab run
+# from accidentally inheriting a deep-ocean state.  Other grids still fall
+# back to their matching source restart unless an explicit path is supplied.
+_SLAB_TEMPLATE_DEFAULT = EXPERIMENT_ROOT / f"earth_t{NTRU}_l{NLEV}_slab.restart"
+_SOURCE_TEMPLATE_DEFAULT = SRC_ROOT / f"data/earth_t{NTRU}_l{NLEV}.restart"
 TEMPLATE_RESTART = Path(os.environ.get(
     "PLASIC_TEMPLATE_RESTART",
-    SRC_ROOT / f"data/earth_t{NTRU}_l{NLEV}.restart",
+    _SLAB_TEMPLATE_DEFAULT
+    if not USE_DEEP_OCEAN and _SLAB_TEMPLATE_DEFAULT.exists()
+    else _SOURCE_TEMPLATE_DEFAULT,
 ))
 
 PLARAD = 6371220.0                          # 地球半径（m）/ planetary radius (m)

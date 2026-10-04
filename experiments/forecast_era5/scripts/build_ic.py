@@ -665,7 +665,8 @@ def build_case(case: common.ForecastCase, nudge: bool = True) -> None:
         # direct analysis at t0
         # 中文说明：t0 时刻的直接分析初值。
         state_t0 = builder.build_state(builder.t0)
-        spectra_t0 = blend_top_levels(builder.analyse(state_t0, tmpdir / "t0"), background, weights)
+        era5_spectra_t0 = builder.analyse(state_t0, tmpdir / "t0")
+        spectra_t0 = blend_top_levels(era5_spectra_t0, background, weights)
         nstep_t0 = common.nstep_for_datetime(builder.t0)
         direct = builder.build_restart(spectra_t0, state_t0, template, nstep_t0)
         restart_io.write_raw_records(out_dir / "direct.restart", direct)
@@ -686,8 +687,13 @@ def build_case(case: common.ForecastCase, nudge: bool = True) -> None:
         restart_io.write_raw_records(out_dir / "nudge_start.restart", start_restart)
         print(f"[{case.key}] nudging start IC written (nstep={nstep_start})")
 
-        # hourly target spectra over the nudging window
-        # 中文说明：松弛窗口内逐小时的目标谱系数与地表目标场。
+        # Hourly targets are pure mapped ERA5 spectra.  The background blend
+        # above is used only to assemble the starting restart; applying it to
+        # these targets would incorrectly pull the fifth layer toward the
+        # fixed template during every cycle.  run_forecasts skips the top four
+        # layers when inserting the atmospheric increment.
+        # 中文说明：逐小时目标只使用 ERA5 谱系数；模板混合仅用于构造起始
+        # restart，不能应用到目标，否则第 5 层仍会逐小时向固定模板松弛。
         entries = []
         surface_entries = []
         for hour in range(common.NUDGE_WINDOW_HOURS + 1):
@@ -696,11 +702,9 @@ def build_case(case: common.ForecastCase, nudge: bool = True) -> None:
             # Reuse the t0 analysis at the final hour to avoid duplicate work.
             state = state_t0 if hour == common.NUDGE_WINDOW_HOURS else builder.build_state(when)
             spectra = (
-                spectra_t0
+                era5_spectra_t0
                 if hour == common.NUDGE_WINDOW_HOURS
-                else blend_top_levels(
-                    builder.analyse(state, tmpdir / f"h{hour:02d}"), background, weights
-                )
+                else builder.analyse(state, tmpdir / f"h{hour:02d}")
             )
             entries.append((common.nstep_for_datetime(when), spectra))
             surface_entries.append((common.nstep_for_datetime(when),

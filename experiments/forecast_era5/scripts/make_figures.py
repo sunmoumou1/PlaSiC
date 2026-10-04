@@ -43,7 +43,7 @@ import frame_io  # noqa: E402
 mpl.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["DejaVu Sans", "Arial", "Helvetica"],
-    "font.size": 6.5,
+    "font.size": 8.0,
     "axes.linewidth": 0.6,
     "axes.spines.right": False,
     "axes.spines.top": False,
@@ -52,6 +52,8 @@ mpl.rcParams.update({
     "ytick.major.width": 0.6,
     "xtick.major.size": 2.0,
     "ytick.major.size": 2.0,
+    "svg.fonttype": "none",
+    "pdf.fonttype": 42,
 })
 
 LAT = build_ic.MODEL_LAT                   # 模式纬度 / model latitudes
@@ -127,9 +129,9 @@ def field_color_scale(name: str) -> tuple[float, float, str, str]:
     if name == "t":
         return 210.0, 285.0, "RdYlBu_r", "K"
     if name == "u":
-        return -45.0, 45.0, "RdBu_r", "m s^-1"
+        return -45.0, 45.0, "RdBu_r", "m s⁻¹"
     if name == "q":
-        return 0.0, 8.0, "YlGnBu", "g kg^-1"
+        return 0.0, 8.0, "YlGnBu", "g kg⁻¹"
     raise KeyError(name)
 
 
@@ -192,12 +194,12 @@ def figure_state(case: common.ForecastCase, method: str = "direct") -> plt.Figur
                     # 左侧竖排标注数据源与时效 / vertical labels for source and lead
                     ax.text(-0.055, 0.5, source, transform=ax.transAxes,
                             fontsize=6.2, color="0.2", ha="right", va="center",
-                            rotation=90)
+                            rotation=90, rotation_mode="anchor")
                     if row_offset == 0:
                         label = "Analysis" if lead_hour == 0 else f"+{lead_hour} h"
                         ax.text(-0.14, 0.5, label, transform=ax.transAxes,
                                 fontsize=6.2, color="0.25", ha="right", va="center",
-                                rotation=90)
+                                rotation=90, rotation_mode="anchor")
         norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
         # A horizontal bar under each variable column avoids shrinking any
         # map to make room for a vertical colorbar.
@@ -205,8 +207,8 @@ def figure_state(case: common.ForecastCase, method: str = "direct") -> plt.Figur
         cax = fig.add_axes([0.105 + vi * 0.285, 0.035, 0.225, 0.012])
         cb = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax,
                           orientation="horizontal")
-        cb.set_label(f"[{unit}]", fontsize=6.2, labelpad=2.0)
-        cb.ax.tick_params(labelsize=5.5, length=1.5, pad=1.0)
+        cb.set_label(f"[{unit}]", fontsize=7.0, labelpad=2.0)
+        cb.ax.tick_params(labelsize=8.5, length=1.5, pad=1.0)
     fig.suptitle(f"{case.key}: ERA5 analysis (top) and PlaSiC forecast (bottom)",
                  fontsize=9.0, y=0.968)
     return fig
@@ -222,12 +224,12 @@ def figure_state(case: common.ForecastCase, method: str = "direct") -> plt.Figur
 # (key, label, unit, vmin, vmax, cmap, scale)
 ZOOM_FIELDS = [
     ("mslp", "Mean sea-level pressure", "hPa", 960.0, 1035.0, "RdBu_r", 0.01),
-    ("wind10", "10 m wind speed", "m s$^{-1}$", 0.0, 32.0, "YlOrRd", 1.0),
-    ("vort850", "850 hPa vorticity", "$10^{-5}$ s$^{-1}$", -10.0, 45.0, "PuOr", 1.0e5),
+    ("wind10", "10 m wind speed", "m s⁻¹", 0.0, 32.0, "YlOrRd", 1.0),
+    ("vort850", "850 hPa vorticity", "10⁻⁵ s⁻¹", -10.0, 45.0, "PuOr", 1.0e5),
     ("z500", "500 hPa height", "m", 5300.0, 6000.0, "viridis", 1.0),
     ("t500", "500 hPa temperature", "K", 240.0, 280.0, "Spectral_r", 1.0),
-    ("wind250", "250 hPa wind speed", "m s$^{-1}$", 0.0, 80.0, "magma", 1.0),
-    ("q700", "700 hPa specific humidity", "g kg$^{-1}$", 0.0, 14.0, "YlGnBu", 1000.0),
+    ("wind250", "250 hPa wind speed", "m s⁻¹", 0.0, 80.0, "magma", 1.0),
+    ("q700", "700 hPa specific humidity", "g kg⁻¹", 0.0, 14.0, "YlGnBu", 1000.0),
     ("tcc", "Total cloud cover", "%", 0.0, 100.0, "Greys", 100.0),
     ("t2m", "2 m temperature", "K", 265.0, 310.0, "RdYlBu_r", 1.0),
 ]
@@ -348,35 +350,37 @@ def figure_zoom(case: common.ForecastCase, method: str = "nudged") -> plt.Figure
                 if 2 * fi + row == nrow - 1:
                     # 仅最底行显示横轴刻度标签 / only the bottom row shows x labels
                     ax.set_xticklabels(["110°E", "130°E", "150°E", "170°E"],
-                                       fontsize=5.2, rotation=45, ha="right",
+                                       fontsize=7.0, rotation=45, ha="right",
                                        rotation_mode="anchor")
                 else:
                     ax.set_xticklabels([])
                 if col == 0:
-                    ax.set_yticklabels(["10°N", "25°N", "40°N", "55°N"], fontsize=5.2)
+                    ax.set_yticklabels(["10°N", "25°N", "40°N", "55°N"], fontsize=7.0)
                 else:
                     ax.set_yticklabels([])
                 ax.tick_params(pad=0.8, length=1.4)
                 if row == 0 and fi == 0:
                     # 第一行变量标注各列时效 / the first variable row labels each lead
                     head = "Analysis" if lead_hours[col] == 0 else f"+{lead_hours[col]} h"
-                    ax.set_title(head, fontsize=5.8, pad=1.5)
+                    ax.set_title(head, fontsize=7.0, pad=1.5)
                 if key == "tcc" and row == 1 and col == 0:
                     # 模式没有初始云量场，给出文字说明 / model has no initial cloud field
                     ax.text(0.5, 0.5, "no initial cloud field", transform=ax.transAxes,
-                            fontsize=5.0, color="0.45", ha="center", va="center")
+                            fontsize=7.0, color="0.45", ha="center", va="center")
         # 每行左侧竖排标注数据源 ERA5/PlaSiC / vertical source labels per row
         for row, tag in enumerate(["ERA5", "PlaSiC"]):
             fig.text(0.085, top - (2 * fi + row + 0.5) / nrow * (top - bottom),
-                     tag, fontsize=5.4, ha="right", va="center", rotation=90, color="0.25")
+                     tag, fontsize=7.0, ha="right", va="center", rotation=90,
+                     rotation_mode="anchor", color="0.25")
         # 每个变量的分组标签 / group label for each variable block
         fig.text(0.028, top - (2 * fi + 1.0) / nrow * (top - bottom),
-                 label, fontsize=6.4, ha="center", va="center", rotation=90, fontweight="bold")
+                 label, fontsize=8.0, ha="center", va="center", rotation=90,
+                 rotation_mode="anchor", fontweight="bold")
         block_height = (top - bottom) / nvar
         cax = fig.add_axes([0.895, top - (fi + 0.8) * block_height, 0.009, 0.6 * block_height])
         cb = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax)
-        cb.set_label(f"[{unit}]", fontsize=5.2, labelpad=1.0)
-        cb.ax.tick_params(labelsize=4.8, length=1.2, pad=0.8)
+        cb.set_label(f"[{unit}]", fontsize=7.0, labelpad=1.0)
+        cb.ax.tick_params(labelsize=8.5, length=1.2, pad=0.8)
     fig.suptitle(
         f"{case.key}: western North Pacific evolution "
         f"({west:.0f}–{east:.0f}°E, {south:.0f}–{north:.0f}°N)",
@@ -433,8 +437,8 @@ def figure_seeps() -> plt.Figure:
         """
         bar = fig.colorbar(mappable, ax=ax, orientation="horizontal",
                            fraction=0.05, pad=0.03, aspect=26)
-        bar.ax.tick_params(labelsize=5.0, length=1.5, pad=1.0)
-        bar.set_label(label, fontsize=5.4, labelpad=1.0)
+        bar.ax.tick_params(labelsize=8.5, length=1.5, pad=1.0)
+        bar.set_label(label, fontsize=7.5, labelpad=1.0)
         return bar
 
     # (a) climatological dry fraction
@@ -448,7 +452,7 @@ def figure_seeps() -> plt.Figure:
     ax.contour(LON_SHIFTED, LAT, shifted, levels=[0.1, 0.85], colors="0.1",
                linewidths=0.45, linestyles="--", transform=DATA_CRS)
     strip_ticks(ax)
-    ax.set_title("(a) dry fraction p1 (1990-2019 mean)", fontsize=6.2, pad=2.5)
+    ax.set_title("(a) dry fraction p1 (1990-2019 mean)", fontsize=8.0, pad=2.5)
     horizontal_bar(ax, mesh, "p1 [-]")
 
     # (b)-(d) wet threshold of each case at +24 h
@@ -467,7 +471,7 @@ def figure_seeps() -> plt.Figure:
         strip_ticks(ax)
         letter = "bcd"[index]
         ax.set_title(f"({letter}) {case.key}: wet threshold at +{SEEPS_LEAD_HOURS} h",
-                     fontsize=6.2, pad=2.5)
+                     fontsize=8.0, pad=2.5)
         horizontal_bar(ax, mesh, "24 h threshold [mm]")
 
     return fig
@@ -478,12 +482,16 @@ def figure_seeps() -> plt.Figure:
 # 保存
 # ---------------------------------------------------------------------------
 def save(fig: plt.Figure, name: str) -> None:
-    """Save a figure as a 400-dpi PNG and close it.
+    """Save editable vector files and a 600-dpi raster preview.
 
     中文说明：把图件以 400 dpi 的 PNG 保存并关闭。
     """
     common.FIGURE_ROOT.mkdir(parents=True, exist_ok=True)
-    fig.savefig(common.FIGURE_ROOT / f"{name}.png", dpi=400, bbox_inches="tight")
+    base = common.FIGURE_ROOT / name
+    fig.savefig(base.with_suffix(".svg"), bbox_inches="tight")
+    fig.savefig(base.with_suffix(".pdf"), bbox_inches="tight")
+    fig.savefig(base.with_suffix(".png"), dpi=600, bbox_inches="tight")
+    fig.savefig(base.with_suffix(".tiff"), dpi=600, bbox_inches="tight")
     plt.close(fig)
     print(f"[figure] {name}")
 

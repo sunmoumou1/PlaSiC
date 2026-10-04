@@ -46,6 +46,8 @@ mpl.rcParams.update({
     "ytick.labelsize": 9,
     "legend.fontsize": 9,
     "legend.frameon": False,
+    "svg.fonttype": "none",
+    "pdf.fonttype": 42,
 })
 
 
@@ -58,12 +60,16 @@ def load(case: str, method: str) -> dict[str, np.ndarray]:
 
 
 def save(fig: plt.Figure, stem: str) -> None:
-    """Save a figure as a 300-dpi PNG and close it.
+    """Save editable vector files and a 600-dpi raster preview.
 
     中文说明：把图件以 300 dpi 的 PNG 保存并关闭。
     """
     OUT.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT / f"{stem}.png", dpi=300, bbox_inches="tight")
+    base = OUT / stem
+    fig.savefig(base.with_suffix(".svg"), bbox_inches="tight")
+    fig.savefig(base.with_suffix(".pdf"), bbox_inches="tight")
+    fig.savefig(base.with_suffix(".png"), dpi=600, bbox_inches="tight")
+    fig.savefig(base.with_suffix(".tiff"), dpi=600, bbox_inches="tight")
     plt.close(fig)
 
 

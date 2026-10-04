@@ -42,6 +42,12 @@ SEGMENT1_FRAME_INTERVAL = common.STEPS_PER_HOUR    # 第一段帧间隔 1 小时
 SEGMENT2_STEPS = common.FORECAST_STEPS - SEGMENT1_STEPS  # 第二段 216 小时 / segment 2: remaining hours
 SEGMENT2_FRAME_INTERVAL = common.STEPS_PER_6H      # 第二段帧间隔 6 小时 / segment 2 frame interval: 6 h
 
+# Keep the four uppermost sigma layers freely evolving during nudging.  ERA5
+# relaxation starts at the fifth layer (zero-based index 4).
+# 中文说明：松弛循环中最上面的四个 sigma 层保持模式自由演化；从第 5 层
+# （下标 4）开始才应用 ERA5 松弛。
+NUDGE_FREE_TOP_LEVELS = 4
+
 
 def run_model(restart: Path, steps: int, output: Path, frames: Path | None,
               frame_interval: int, log: Path, co2_ppm: float = 410.0) -> None:
@@ -84,15 +90,28 @@ def blend_restart(model_restart: Path, target: dict[str, np.ndarray],
     increment smoothly instead of being restarted from a cold state every hour.
     """
     records = restart_io.read_raw_records(model_restart)
+    current = dict(records)
     replacements: dict[str, bytes] = {}
-    for name in ("st", "sd", "sz", "sq", "sp"):
-        model = restart_io.decode_float(dict(records)[name])
-        # 新值 = 目标 + γ·(模式 − 目标)，γ = exp(−Δt/τ) 由调用方计算。
-        # new = target + gamma * (model - target), with gamma = exp(-dt/tau).
-        blended = np.asarray(target[name], dtype="<f4") + gamma * (
-            model - np.asarray(target[name], dtype="<f4")
+    for name in ("st", "sd", "sz", "sq"):
+        model = restart_io.decode_float(current[name]).reshape(common.NLEV, common.NRSP)
+        target_values = np.asarray(target[name], dtype=np.float64).reshape(
+            common.NLEV, common.NRSP
         )
-        replacements[name] = restart_io.encode_float(blended)
+        # Leave levels 0..3 untouched.  From level 4 downward:
+        # new = target + gamma * (model - target), i.e. 63.2% target and
+        # 36.8% post-step model for the default one-hour relaxation.
+        blended = model.copy()
+        blended[NUDGE_FREE_TOP_LEVELS:] = target_values[NUDGE_FREE_TOP_LEVELS:] + gamma * (
+            model[NUDGE_FREE_TOP_LEVELS:] - target_values[NUDGE_FREE_TOP_LEVELS:]
+        )
+        replacements[name] = restart_io.encode_float(blended.reshape(-1))
+
+    # Surface pressure has no vertical levels and keeps the existing update.
+    model = restart_io.decode_float(current["sp"])
+    target_values = np.asarray(target["sp"], dtype=np.float64)
+    replacements["sp"] = restart_io.encode_float(
+        target_values + gamma * (model - target_values)
+    )
     restart_io.write_raw_records(
         output, restart_io.replace_records(records, replacements)
     )
