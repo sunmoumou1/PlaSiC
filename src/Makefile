@@ -558,7 +558,29 @@ PROGRAM = $(BUILD_DIR)/plasic.x
 #
 # 即使源码目录中恰好存在名为 all、clean、run 等文件，
 # make 仍然会执行对应规则，而不会错误地认为目标已经是最新状态。
-.PHONY: all clean strict run historical historical-run test test-data test-runtime
+.PHONY: all clean help strict run historical historical-run test test-data test-runtime
+
+
+# ----------------------------------------------------------------------------
+# Command overview
+# ----------------------------------------------------------------------------
+#
+# Keep the most common entry points discoverable without requiring users to
+# read the full Makefile first.
+help:
+	@echo "PlaSiC build targets:"
+	@echo "  make                  Build the model"
+	@echo "  make run              Build and run a short integration"
+	@echo "  make test             Run data and runtime tests"
+	@echo "  make strict           Build with warnings treated as errors"
+	@echo "  make clean            Remove build and run products"
+	@echo ""
+	@echo "Common options:"
+	@echo "  MPI=0                 Build without MPI"
+	@echo "  NLAT=64 NLEV=16      Set horizontal and vertical resolution"
+	@echo "  NPRO=4                Set the number of MPI processes"
+	@echo "  STEPS=100             Set the number of run steps"
+	@echo "  SHTNS_PREFIX=/path    Use a custom SHTns installation"
 
 
 # -----------------------------------------------------------------------------
