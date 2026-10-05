@@ -1203,7 +1203,7 @@ body.theme-sensitivity .nav .tick{background:rgba(45,98,128,.25)}
   padding:clamp(4.05rem,5.9vh,5.5rem) clamp(1.2rem,5vw,5.5rem) clamp(1.4rem,3vh,2.5rem);
   color:var(--fc-ink);
   background:
-    radial-gradient(66% 95% at 92% 8%,rgba(91,157,211,.3),transparent 68%),
+    radial-gradient(66% 95% at 92% 8%,rgba(196,116,104,.26),transparent 68%),
     radial-gradient(55% 75% at 8% 96%,rgba(127,224,242,.18),transparent 70%),
     linear-gradient(137deg,#edf6fb 0%,#dcecf5 52%,#c6dfeb 100%);
 }
@@ -1231,19 +1231,27 @@ body.theme-sensitivity .nav .tick{background:rgba(45,98,128,.25)}
 .fc-band-head{position:relative;height:1.25rem;margin:0 0 .18rem}
 .fc-band-head span{position:absolute;top:0;transform:translateX(-50%);font-family:var(--font-mono);font-size:clamp(.56rem,.7vw,.68rem);letter-spacing:.1em;text-transform:uppercase;color:#64829a;white-space:nowrap}
 .fc-band{position:relative;overflow:hidden;border:1px solid rgba(45,98,128,.18);border-radius:14px;background:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
-.fc-band-body{display:grid;grid-template-columns:minmax(0,1fr) 6.44%}
+/* The band crops one 4620 x 7733 source figure, so every offset below is a
+   source pixel: the map column keeps the rotated ERA5/PlaSiC row labels and
+   the latitude ticks (x 300..4210, the seven panels start at x 619) and the
+   colour scale keeps its bar, ticks, numbers and unit (x 4245..4570).
+   A row is 372 px tall (a 370 px panel plus a hair) and the two rows of a
+   diagnostic are 403 px apart in the source; --y1/--y2 (set per tab) are the
+   tops of those two rows, and the colour scale hangs off the same --y1 so
+   bar and maps stay level. */
+.fc-band-body{display:grid;grid-template-columns:minmax(0,1fr) 7.6741%}
 .fc-band-maps{display:flex;flex-direction:column;min-width:0}
-.fc-band-cbar{position:relative;overflow:hidden;align-self:start;aspect-ratio:184/440}
+.fc-band-cbar{position:relative;overflow:hidden;align-self:start;aspect-ratio:325/881}
 .fc-row{position:relative;overflow:hidden}
 .fc-row img,.fc-band-cbar img{display:block;height:auto;max-width:none}
-.fc-row img{width:calc(3012 / 2674 * 100%)}
-.fc-row-era5{aspect-ratio:2674/256}
-.fc-row-era5 img{transform:translate(calc(150 / 3012 * -100%),calc(var(--y1,184) / 5127 * -100%))}
-.fc-row-plasic{aspect-ratio:2674/256;margin-top:clamp(11px,1.15%,26px)}
-.fc-row-plasic img{transform:translate(calc(150 / 3012 * -100%),calc(var(--y2,453) / 5127 * -100%))}
-.fc-row-lon{aspect-ratio:2674/82}
-.fc-row-lon img{transform:translate(calc(150 / 3012 * -100%),calc(var(--y3,5004) / 5127 * -100%))}
-.fc-band-cbar img{width:calc(3012 / 184 * 100%);transform:translate(calc(2824 / 3012 * -100%),calc(var(--y1,184) / 5127 * -100%))}
+.fc-row img{width:calc(4620 / 3910 * 100%)}
+.fc-row-era5{aspect-ratio:3910/372}
+.fc-row-era5 img{transform:translate(calc(300 / 4620 * -100%),calc(var(--y1,279) / 7733 * -100%))}
+.fc-row-plasic{aspect-ratio:3910/372;margin-top:clamp(8px,.72%,20px)}
+.fc-row-plasic img{transform:translate(calc(300 / 4620 * -100%),calc(var(--y2,682) / 7733 * -100%))}
+.fc-row-lon{aspect-ratio:3910/170}
+.fc-row-lon img{transform:translate(calc(300 / 4620 * -100%),calc(7502 / 7733 * -100%))}
+.fc-band-cbar img{width:calc(4620 / 325 * 100%);transform:translate(calc(4245 / 4620 * -100%),calc((var(--y1,279) - 55) / 7733 * -100%))}
 .forecast-chart-card figcaption{padding:.45rem .15rem 0;font-size:clamp(.96rem,1.08vw,1.1rem);line-height:1.45;color:#57728b}
 .forecast-chart-card figcaption strong{color:#2c4a62;font-weight:500}
 .forecast-source{margin-top:.4rem;text-align:center;font-family:var(--font-mono);font-size:clamp(.62rem,.74vw,.74rem);letter-spacing:.05em;line-height:1.55;color:#6a8293}
@@ -2085,34 +2093,34 @@ body.theme-forecast .nav .tick{background:rgba(45,98,128,.25)}
           </div>
           <div class="fc-band-scroll">
             <div class="fc-band-head" aria-hidden="true">
-              <span style="left:14.94%">2020-09-01 00 UTC</span>
-              <span style="left:26.98%">+24 h</span>
-              <span style="left:38.98%">+48 h</span>
-              <span style="left:50.98%">+72 h</span>
-              <span style="left:63.02%">+120 h</span>
-              <span style="left:75.02%">+168 h</span>
-              <span style="left:87.02%">+240 h</span>
+              <span style="left:13.41%">2020-09-01 00 UTC</span>
+              <span style="left:25.56%">+24 h</span>
+              <span style="left:37.7%">+48 h</span>
+              <span style="left:49.84%">+72 h</span>
+              <span style="left:61.98%">+120 h</span>
+              <span style="left:74.12%">+168 h</span>
+              <span style="left:86.26%">+240 h</span>
             </div>
-            <div class="fc-band" id="fc-band" role="tabpanel" aria-labelledby="fc-tab-mslp" tabindex="0" style="--y1:184;--y2:453">
+            <div class="fc-band" id="fc-band" role="tabpanel" aria-labelledby="fc-tab-mslp" tabindex="0" style="--y1:279;--y2:682">
               <div class="fc-band-body">
                 <div class="fc-band-maps">
                   <div class="fc-row fc-row-era5">
-                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="3012" height="5127" loading="lazy" decoding="async" alt="ERA5 analysis or verification maps at seven lead times">
+                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="4620" height="7733" loading="lazy" decoding="async" alt="ERA5 analysis or verification maps at seven lead times">
                   </div>
                   <div class="fc-row fc-row-plasic">
-                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="3012" height="5127" loading="lazy" decoding="async" alt="PlaSiC forecast maps at seven lead times">
+                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="4620" height="7733" loading="lazy" decoding="async" alt="PlaSiC forecast maps at seven lead times">
                   </div>
                   <div class="fc-row fc-row-lon">
-                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="3012" height="5127" loading="lazy" decoding="async" alt="Longitude axis labels, 110°E to 170°E every 20 degrees">
+                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="4620" height="7733" loading="lazy" decoding="async" alt="Longitude axis labels, 110°E to 170°E every 20 degrees">
                   </div>
                 </div>
                 <div class="fc-band-cbar">
-                  <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="3012" height="5127" loading="lazy" decoding="async" alt="Colour scale for the selected diagnostic">
+                  <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="4620" height="7733" loading="lazy" decoding="async" alt="Colour scale for the selected diagnostic">
                 </div>
               </div>
             </div>
           </div>
-          <figcaption id="forecast-chart-caption"><strong>ERA5 vs PlaSiC.</strong> Each diagnostic stacks the ERA5 analysis or verification (top) above the corresponding PlaSiC forecast (bottom) at seven lead times. The forecast starts from a 12-hour ERA5 nudging window and is verified against ERA5 at matching valid times; the maps cover 100–180°E, 0–60°N on the model’s 128 × 256 Gaussian grid.</figcaption>
+          <figcaption id="forecast-chart-caption"><strong>ERA5 vs PlaSiC.</strong> The forecast starts from a 12-hour ERA5 nudging window and is verified against ERA5 at matching valid times; the maps cover 100–180°E, 0–60°N on the model’s 128 × 256 Gaussian grid.</figcaption>
           <p class="forecast-source">From the <a href="tutorial/6-experiments/6.6-era5-initialized-10day-forecasts/">ERA5-initialized 10-day forecast experiment</a> · <a href="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" target="_blank" rel="noopener">open the full-resolution figure</a></p>
           <p class="forecast-note">PlaSiC has not yet been through careful engineering tuning — <strong>further optimisation is expected to improve these forecasts</strong>.</p>
         </figure>
@@ -3130,20 +3138,22 @@ window.addEventListener("resize", function(){
 
 /* ============================================================
    FORECAST BANDS — zoom_typhoon2020.png is one tall comparison
-   figure (3012 x 5127): nine diagnostics, each two map rows
-   (ERA5 above, PlaSiC below). Each tab shows the band of one
-   diagnostic; y1/y2 are the pixel offsets of the two map rows
-   in that source. x=150 trims the rotated group label, and the
-   longitude strip (y=5004) sits under every band.
+   figure (4620 x 7733): nine diagnostics, each two map rows
+   (ERA5 above, PlaSiC below) plus its own colour scale on the
+   right. Each tab shows the band of one diagnostic; y1/y2 are
+   the source-pixel offsets of the two map rows in that band
+   (rows are 403 px apart) and the colour scale takes its cue
+   from the same y1. The longitude strip under the figure's last
+   diagnostic is shared by every tab (see .fc-row-lon).
    ============================================================ */
 var FORECAST_BANDS = {
-  mslp:    { y1: 184,  y2: 453 },
-  vort850: { y1: 720,  y2: 989 },
-  t500:    { y1: 2330, y2: 2599 },
-  z500:    { y1: 1793, y2: 2062 },
-  wind250: { y1: 2867, y2: 3136 },
-  q700:    { y1: 3403, y2: 3672 },
-  cloud:   { y1: 3940, y2: 4209 }
+  mslp:    { y1: 279,  y2: 682 },
+  vort850: { y1: 1889, y2: 2292 },
+  t500:    { y1: 3499, y2: 3902 },
+  z500:    { y1: 2694, y2: 3097 },
+  wind250: { y1: 4304, y2: 4707 },
+  q700:    { y1: 5109, y2: 5512 },
+  cloud:   { y1: 5914, y2: 6317 }
 };
 function initForecastTabs(){
   var tablist = document.querySelector(".fc-tabs");

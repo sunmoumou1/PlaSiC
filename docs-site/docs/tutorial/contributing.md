@@ -48,9 +48,11 @@ Thinking these questions through in advance is crucial.
 
 For example, before you start development, you should already have a framework something like this in your head:
 
-<p align="center">
-  <img src="./assets/images/plasic_atmospheric_parameterizations.png" width="880" alt="Call order of the dynamical core and the physical parameterizations in one PlaSiC time step, with the variables exchanged between them">
-</p>
+![Experiment design and prescribed CO₂ forcing](./assets/images/plasic_atmospheric_parameterizations.png)
+
+Fig. 0.3.1. **Call order of PlaSiC.** Call order of the dynamical core and the physical parameterizations in one PlaSiC time step, with the variables exchanged between them.
+
+
 
 ## Principle 2
 
@@ -62,9 +64,10 @@ So before anything else, you need to understand how a GCM actually works.
 
 Here I strongly recommend four resources. In fact, it was only after working through these four carefully that I personally felt ready to take on the design and development of a GCM:
 
-<p align="center">
-  <img src="./assets/images/resources.png" width="560" alt="Four recommended resources: Warner, Numerical Weather and Climate Prediction; Stocker, Introduction to Climate Modelling; SpeedyWeather.jl; and the Planet Simulator reference manual">
-</p>
+
+![Experiment design and prescribed CO₂ forcing](./assets/images/resources.png)
+
+Fig. 0.3.2. **Recommended resources.**
 
 If you want to build your own GCM from scratch, I strongly recommend starting with the four resources above. At the very least, work through one of them in full—or use other resources that you find more suitable.
 
