@@ -95,14 +95,20 @@ def land_mask() -> np.ndarray:
     return grouped["land_mask"][0].values[0]
 
 
-def add_coastlines(ax, land, color="0.25", linewidth=0.3, alpha=0.9):
-    """Draw the model land mask as a coastline contour.
+def add_coastlines(ax, land=None, color="0.25", linewidth=0.3, alpha=0.9):
+    """Draw Natural Earth coastlines in geographic coordinates.
 
-    中文说明：把模式陆地掩膜的 0.5 等值线画成海岸线。
+    中文说明：使用 Cartopy 的 Natural Earth 海岸线数据绘制地理海岸线。
+
+    The old implementation contoured the model's 128 x 256 land mask.  That
+    mask is useful for the model physics, but its grid-cell contour is visibly
+    stepped and can place the coastline half a grid cell away from the true
+    shoreline.  Natural Earth keeps the diagnostic maps geographically
+    accurate while Cartopy handles the projection transform.
     """
-    shifted = np.roll(land, LON.size // 2, axis=-1)
-    ax.contour(LON_SHIFTED, LAT, shifted, levels=[0.5], colors=color,
-               linewidths=linewidth, alpha=alpha, transform=DATA_CRS)
+    del land  # retained in the signature for callers that already pass it
+    ax.coastlines(resolution="110m", color=color, linewidth=linewidth,
+                  alpha=alpha)
 
 
 def plot_global(ax, field, cmap, vmin, vmax, land=None):
