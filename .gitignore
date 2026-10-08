@@ -9,7 +9,14 @@ __pycache__/
 
 .openchamber/
 
-JOSS_paper/
+JOSS_paper/assets/
+JOSS_paper/figures/
+JOSS_paper/Makefile
+JOSS_paper/paper.bib
+JOSS_paper/paper.pdf
+JOSS_paper/paper.tex
+JOSS_paper/README.md
+JOSS_paper/paper.md
 
 experiments/forecast_era5/data/
 experiments/forecast_era5/figures/
