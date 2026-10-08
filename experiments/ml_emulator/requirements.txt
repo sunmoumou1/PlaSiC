@@ -1,0 +1,4 @@
+torch>=2.0
+netCDF4>=1.6
+numpy>=1.24
+matplotlib>=3.5  # only needed for plot_results.py
