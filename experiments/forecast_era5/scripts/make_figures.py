@@ -42,8 +42,15 @@ import frame_io  # noqa: E402
 # spines, frameless legend).
 mpl.rcParams.update({
     "font.family": "sans-serif",
-    "font.sans-serif": ["DejaVu Sans", "Arial", "Helvetica"],
+    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
     "font.size": 8.0,
+    # Render scientific superscripts using Arial digits, rather than missing
+    # Unicode superscript glyphs in the macOS Arial font.
+    "mathtext.fontset": "custom",
+    "mathtext.rm": "Arial",
+    "mathtext.it": "Arial:italic",
+    "mathtext.bf": "Arial:bold",
+    "mathtext.cal": "Arial",
     "axes.linewidth": 0.6,
     "axes.spines.right": False,
     "axes.spines.top": False,
@@ -229,15 +236,14 @@ def figure_state(case: common.ForecastCase, method: str = "direct") -> plt.Figur
 # English: each item is (key, label, unit, vmin, vmax, cmap, scale).
 # (key, label, unit, vmin, vmax, cmap, scale)
 ZOOM_FIELDS = [
-    ("mslp", "Mean sea-level pressure", "hPa", 960.0, 1035.0, "RdBu_r", 0.01),
-    ("wind10", "10 m wind speed", "m s⁻¹", 0.0, 32.0, "YlOrRd", 1.0),
-    ("vort850", "850 hPa vorticity", "10⁻⁵ s⁻¹", -10.0, 45.0, "PuOr", 1.0e5),
-    ("z500", "500 hPa height", "m", 5300.0, 6000.0, "viridis", 1.0),
-    ("t500", "500 hPa temperature", "K", 240.0, 280.0, "Spectral_r", 1.0),
-    ("wind250", "250 hPa wind speed", "m s⁻¹", 0.0, 80.0, "magma", 1.0),
-    ("q700", "700 hPa specific humidity", "g kg⁻¹", 0.0, 14.0, "YlGnBu", 1000.0),
-    ("tcc", "Total cloud cover", "%", 0.0, 100.0, "Greys", 100.0),
-    ("t2m", "2 m temperature", "K", 265.0, 310.0, "RdYlBu_r", 1.0),
+    ("mslp", "Mean sea-level\npressure", "hPa", 960.0, 1035.0, "RdBu_r", 0.01),
+    ("vort850", "850 hPa\nvorticity", r"10$^{-5}$ s$^{-1}$", -10.0, 45.0, "PuOr", 1.0e5),
+    ("z500", "500 hPa\nheight", "m", 5300.0, 6000.0, "viridis", 1.0),
+    ("t500", "500 hPa\ntemperature", "K", 240.0, 280.0, "cividis", 1.0),
+    ("wind250", "250 hPa\nwind speed", r"m s$^{-1}$", 0.0, 80.0, "magma", 1.0),
+    ("q700", "700 hPa\nspecific humidity", r"g kg$^{-1}$", 0.0, 14.0, "YlGnBu", 1000.0),
+    ("tcc", "Total cloud\ncover", "%", 0.0, 100.0, "Greys", 100.0),
+    ("t2m", "2 m\ntemperature", "K", 265.0, 310.0, "cividis", 1.0),
 ]
 
 
@@ -315,14 +321,16 @@ def figure_zoom(case: common.ForecastCase, method: str = "nudged") -> plt.Figure
 
     中文说明：西北太平洋区域的 ERA5 与 PlaSiC 放大对比图。
 
-    Nine diagnostics are shown for the typhoon case; each variable occupies
+    Eight diagnostics are shown for the typhoon case; each variable occupies
     two rows so that every ERA5 map sits directly above its PlaSiC partner.
+    Wrapped, rotated variable names form two text columns in the left gutter.
+    Source labels and colour bars follow the actual map bounds after Cartopy
+    has applied the map aspect ratio.
 
-    中文说明：台风个例展示九个诊断量；每个变量占两行，使每一幅 ERA5 图都
-    正好位于其 PlaSiC 对应图的上方。
+    中文说明：台风个例展示八个诊断量（不包含 10 m 风场）；变量名换行为两列
+    竖排文字。数据源标注与色标按实际地图边界对齐。
     """
     data = load(case.key, method)
-    land = land_mask()
     lead_hours = data["map_times_h"].astype(int)
     west, east, south, north = case.focus_region
     # 按关注区域裁剪经纬度 / slice longitudes and latitudes to the focus region
@@ -332,65 +340,82 @@ def figure_zoom(case: common.ForecastCase, method: str = "nudged") -> plt.Figure
     lat_zoom = LAT[lat_mask]
 
     nvar = len(ZOOM_FIELDS)
-    nrow, ncol = 2 * nvar, len(lead_hours)
-    figure_width, figure_height = 8.0, 13.3
+    ncol = len(lead_hours)
+    figure_width, figure_height = 9.2, 13.2
     fig = plt.figure(figsize=(figure_width, figure_height))
-    left, right, top, bottom = 0.14, 0.885, 0.955, 0.05
-    grid = fig.add_gridspec(nrow, ncol, hspace=0.06, wspace=0.06,
+    left, right, top, bottom = 0.145, 0.875, 0.955, 0.055
+    # Larger gaps separate variables; paired source rows remain close together.
+    # 中文说明：变量组之间留白略大，同一变量的两行保持紧凑。
+    grid = fig.add_gridspec(nvar, 1, hspace=0.17,
                             left=left, right=right, top=top, bottom=bottom)
     for fi, (key, label, unit, vmin, vmax, cmap, scale) in enumerate(ZOOM_FIELDS):
         truth_series, model_series = zoom_series(data, key)
         norm = zoom_norm(key, vmin, vmax)
+        block = grid[fi].subgridspec(2, ncol, hspace=0.06, wspace=0.08)
+        row_axes = [[], []]
         for col in range(ncol):
             # 上行为 ERA5，下行为 PlaSiC / ERA5 on top, PlaSiC below
             for row, field in enumerate([truth_series, model_series]):
                 values = np.asarray(field[col], dtype=float)[lat_mask][:, lon_mask] * scale
-                ax = fig.add_subplot(grid[2 * fi + row, col], projection=DATA_CRS)
+                ax = fig.add_subplot(block[row, col], projection=DATA_CRS)
+                row_axes[row].append(ax)
                 ax.pcolormesh(lon_zoom, lat_zoom, values, cmap=cmap, norm=norm,
                               shading="auto", rasterized=True, transform=DATA_CRS)
-                add_coastlines(ax, land)
+                add_coastlines(ax)
                 ax.set_xlim(west, east)
                 ax.set_ylim(south, north)
-                ax.set_xticks([110, 130, 150, 170])
-                ax.set_yticks([10, 25, 40, 55])
-                if 2 * fi + row == nrow - 1:
+                ax.set_xticks([110, 140, 170])
+                ax.set_yticks([10, 30, 50])
+                if fi == nvar - 1 and row == 1:
                     # 仅最底行显示横轴刻度标签 / only the bottom row shows x labels
-                    ax.set_xticklabels(["110°E", "130°E", "150°E", "170°E"],
-                                       fontsize=7.0, rotation=45, ha="right",
+                    ax.set_xticklabels(["110°E", "140°E", "170°E"],
+                                       fontsize=8.5, rotation=45, ha="right",
                                        rotation_mode="anchor")
                 else:
                     ax.set_xticklabels([])
                 if col == 0:
-                    ax.set_yticklabels(["10°N", "25°N", "40°N", "55°N"], fontsize=7.0)
+                    ax.set_yticklabels(["10°N", "30°N", "50°N"], fontsize=8.5)
                 else:
                     ax.set_yticklabels([])
-                ax.tick_params(pad=0.8, length=1.4)
+                ax.tick_params(pad=1.5, length=1.8, labelcolor="black")
                 if row == 0 and fi == 0:
                     # 第一行变量标注各列时效 / the first variable row labels each lead
                     head = "Analysis" if lead_hours[col] == 0 else f"+{lead_hours[col]} h"
-                    ax.set_title(head, fontsize=7.0, pad=1.5)
+                    ax.set_title(head, fontsize=9.5, pad=3.5)
                 if key == "tcc" and row == 1 and col == 0:
                     # 模式没有初始云量场，给出文字说明 / model has no initial cloud field
-                    ax.text(0.5, 0.5, "no initial cloud field", transform=ax.transAxes,
-                            fontsize=7.0, color="0.45", ha="center", va="center")
-        # 每行左侧竖排标注数据源 ERA5/PlaSiC / vertical source labels per row
-        for row, tag in enumerate(["ERA5", "PlaSiC"]):
-            fig.text(0.085, top - (2 * fi + row + 0.5) / nrow * (top - bottom),
-                     tag, fontsize=7.0, ha="right", va="center", rotation=90,
-                     rotation_mode="anchor", color="0.25")
-        # 每个变量的分组标签 / group label for each variable block
-        fig.text(0.028, top - (2 * fi + 1.0) / nrow * (top - bottom),
-                 label, fontsize=8.0, ha="center", va="center", rotation=90,
-                 rotation_mode="anchor", fontweight="bold")
-        block_height = (top - bottom) / nvar
-        cax = fig.add_axes([0.895, top - (fi + 0.8) * block_height, 0.009, 0.6 * block_height])
+                    ax.text(0.5, 0.5, "No initial\ncloud field", transform=ax.transAxes,
+                            fontsize=8.5, color="black", ha="center", va="center",
+                            linespacing=1.2)
+
+        # Cartopy can shrink subplot boxes to preserve the geographical aspect.
+        # Anchor labels to the resulting maps, rather than estimated row slots.
+        # 中文说明：应用地图纵横比后，再按地图的真实中心定位标注。
+        for axes, tag in zip(row_axes, ("ERA5", "PlaSiC")):
+            for ax in axes:
+                ax.apply_aspect()
+            bounds = axes[0].get_position()
+            fig.text(0.080, (bounds.y0 + bounds.y1) / 2,
+                     tag, fontsize=9.5, ha="center", va="center", rotation=90,
+                     rotation_mode="anchor", color="black")
+        upper = row_axes[0][0].get_position().y1
+        lower = row_axes[1][0].get_position().y0
+        center = (upper + lower) / 2
+        fig.text(0.028, center, label, fontsize=10.5,
+                 ha="center", va="center", rotation=90,
+                 rotation_mode="anchor", fontweight="bold", linespacing=1.15)
+        bar_height = 0.72 * (upper - lower)
+        cax = fig.add_axes([0.892, center - bar_height / 2, 0.012, bar_height])
         cb = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax)
-        cb.set_label(f"[{unit}]", fontsize=7.0, labelpad=1.0)
-        cb.ax.tick_params(labelsize=8.5, length=1.2, pad=0.8)
+        cb.locator = mpl.ticker.MaxNLocator(nbins=3)
+        cb.update_ticks()
+        cb.set_label(f"({unit})", fontsize=9.0, labelpad=3.0)
+        cb.ax.tick_params(labelsize=8.5, length=1.8, pad=2.0)
+        cb.outline.set_linewidth(0.6)
     fig.suptitle(
-        f"{case.key}: western North Pacific evolution "
-        f"({west:.0f}–{east:.0f}°E, {south:.0f}–{north:.0f}°N)",
-        fontsize=8.5, y=0.982,
+        f"{case.key}: ERA5 and PlaSiC over the western North Pacific\n"
+        f"{west:.0f}–{east:.0f}°E, {south:.0f}–{north:.0f}°N",
+        fontsize=10.5, y=0.997, linespacing=1.3,
     )
     return fig
 
@@ -488,17 +513,17 @@ def figure_seeps() -> plt.Figure:
 # 保存
 # ---------------------------------------------------------------------------
 def save(fig: plt.Figure, name: str) -> None:
-    """Save editable vector files and a 600-dpi raster preview.
+    """Save only the 600-dpi PNG and remove obsolete exports of this figure.
 
-    中文说明：把图件以 400 dpi 的 PNG 保存并关闭。
+    中文说明：仅保留 600 dpi 的 PNG，清理同名的旧 PDF、SVG 和 TIFF。
     """
     common.FIGURE_ROOT.mkdir(parents=True, exist_ok=True)
     base = common.FIGURE_ROOT / name
-    fig.savefig(base.with_suffix(".svg"), bbox_inches="tight")
-    fig.savefig(base.with_suffix(".pdf"), bbox_inches="tight")
-    fig.savefig(base.with_suffix(".png"), dpi=600, bbox_inches="tight")
-    fig.savefig(base.with_suffix(".tiff"), dpi=600, bbox_inches="tight")
+    fig.savefig(base.with_suffix(".png"), dpi=600, bbox_inches="tight",
+                pad_inches=0.08, facecolor="white")
     plt.close(fig)
+    for suffix in (".pdf", ".svg", ".tiff"):
+        base.with_suffix(suffix).unlink(missing_ok=True)
     print(f"[figure] {name}")
 
 
