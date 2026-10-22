@@ -1,4 +1,87 @@
-# How to Vibe-Code Your Own GCM — Lessons from Experience
+# Contributing to PlaSiC
+
+## Contributors & acknowledgements
+
+<p align="center">
+  <sub>THE PEOPLE BEHIND PLASIC</sub><br>
+  <strong>Built with curiosity. Improved together.</strong>
+</p>
+
+Thank you to everyone who has helped PlaSiC grow. From model development and
+experiments to documentation and everyday usability, every contribution makes
+the project better for the next person who uses it.
+
+<table>
+  <thead>
+    <tr>
+      <th align="center" width="160">Contributor</th>
+      <th align="left">Contributions</th>
+      <th align="center" width="140">Personal website</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/sunmoumou1"><img src="https://avatars.githubusercontent.com/u/111992706?s=112&amp;v=4" width="56" height="56" alt="Sencan Sun's GitHub avatar"></a><br>
+        <strong>Sencan Sun</strong><br>
+        <sub><a href="https://github.com/sunmoumou1">@sunmoumou1</a> · Creator &amp; maintainer</sub>
+      </td>
+      <td>
+        <strong>Model, software &amp; teaching</strong><br>
+        Project design and maintenance; the C11 climate model, coupled experiments,
+        PlaSiC Studio, and the online tutorial.
+      </td>
+      <td align="center"><a href="https://sunmoumou1.github.io/">Visit website ↗</a></td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/ARETE-zzwl"><img src="https://avatars.githubusercontent.com/u/241761117?s=112&amp;v=4" width="56" height="56" alt="ARETE-zzwl's GitHub avatar"></a><br>
+        <strong><a href="https://github.com/ARETE-zzwl">ARETE-zzwl</a></strong>
+      </td>
+      <td>
+        <strong>Machine learning &amp; documentation</strong><br>
+        ML emulator tutorial: four neural architectures, baseline comparisons,
+        multi-step rollout evaluation, and reproducible examples. Also repaired
+        the tutorial's issue-reporting link.<br>
+        <sub><a href="https://github.com/sunmoumou1/PlaSiC/pull/4">ML tutorial · #4</a> · <a href="https://github.com/sunmoumou1/PlaSiC/pull/1">Documentation fix · #1</a></sub>
+      </td>
+      <td align="center">—</td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/QianyeSu"><img src="https://avatars.githubusercontent.com/u/112712604?s=112&amp;v=4" width="56" height="56" alt="Qianye Su's GitHub avatar"></a><br>
+        <strong>Qianye Su</strong><br>
+        <sub><a href="https://github.com/QianyeSu">@QianyeSu</a></sub>
+      </td>
+      <td>
+        <strong>Developer experience</strong><br>
+        Added <code>make help</code> to make common build and run commands,
+        resolution settings, MPI options, and dependency paths easier to discover.<br>
+        <sub><a href="https://github.com/sunmoumou1/PlaSiC/pull/3">Makefile help · #3</a></sub>
+      </td>
+      <td align="center">—</td>
+    </tr>
+  </tbody>
+</table>
+
+**Make this your space.** Contributors are warmly invited to add their personal
+website by submitting a pull request. Edit your row in
+[`CONTRIBUTING.md`](https://github.com/sunmoumou1/PlaSiC/blob/main/CONTRIBUTING.md)
+and its [online tutorial copy](https://github.com/sunmoumou1/PlaSiC/blob/main/docs-site/docs/tutorial/contributing.md).
+A dash simply means a website has not been added yet. Corrections and additions
+to the contribution descriptions are welcome too.
+
+### Explore the ML emulator
+
+ARETE-zzwl's ML emulator contribution is preserved on the dedicated
+[`codex/ml-emulator` branch](https://github.com/sunmoumou1/PlaSiC/tree/codex/ml-emulator/experiments/ml_emulator),
+where its README, training scripts, and example figures live together. To use or
+develop the tutorial, switch to that branch; `experiments/ml_emulator` is kept
+off `main`.
+
+---
+
+## How to Vibe-Code Your Own GCM — Lessons from Experience
 
 This document is for people who want to vibe-code their own GCM, or who want to make major additions or improvements to PlaSiC. If all you want to do is use PlaSiC to run experiments, you can safely skip this document.
 
@@ -8,7 +91,7 @@ That means we need to learn how to work with AI agents as collaborators, and how
 
 I will not go into every detail here. Instead, I will focus on a few basic principles—and these principles matter a great deal. In fact, I think they matter more than any step-by-step recipe for development. The exact tools and workflows will change quickly; the principles probably will not.
 
-## Principle 1
+### Principle 1
 
 !!! warning "⚠️ GCMs are extremely complex! ×3"
 
@@ -54,7 +137,7 @@ Fig. 0.3.1. **Call order of PlaSiC.** Call order of the dynamical core and the p
 
 
 
-## Principle 2
+### Principle 2
 
 A coding agent is an assistant, not Aladdin’s lamp. How far you can go with an agent still depends, to a large extent, on how far you could get on your own.
 
@@ -71,13 +154,13 @@ Fig. 0.3.2. **Recommended resources.**
 
 If you want to build your own GCM from scratch, I strongly recommend starting with the four resources above. At the very least, work through one of them in full—or use other resources that you find more suitable.
 
-## Principle 3
+### Principle 3
 
 **Being the engineer of a project is not only writing code; I can say plainly that writing code takes only a small part of a project's development and maintenance time. An engineer's main responsibility is to design, develop, maintain, apply and promote a project. An engineer is responsible for the entire lifecycle of the project — responsible! None of these steps is simple.**
 
 So before you try to develop your own GCM, be fully mentally prepared: this is a hard, protracted war. (In fact, I developed PlaSiC from February 2026 until the end of September 2026.) And make sure you can coordinate a large amount of sustained time investment — a large amount of sustained time investment, a large amount of sustained time investment.
 
-## Principle 4
+### Principle 4
 
 !!! info "⚙️ To use a tool well, you must understand how it works! ×3"
 
@@ -96,7 +179,7 @@ Here is one concrete example of why this matters: context is crucial.
 Suppose you ask a coding agent to implement the Kuo convection parameterization. You could place a `kuo_convection.md` file in the repository containing clear notes you made while reading the classic papers. You could also create a `reference_code/` directory with implementations from SpeedyWeather.jl or other models.
 That way, the coding agent has immediate access to the relevant theory, your own understanding of it, and working reference implementations it can inspect while developing the new module.
 
-## Principle 5
+### Principle 5
 
 !!! tip "🎯 In early development, only results matter! ×3"
 
@@ -106,7 +189,7 @@ Understanding this can make your development process dramatically more efficient
 
 2. You can go a step further by bringing in other agents as reviewers. If agent *a*, powered by LLM A, writes the code, then have agent *b*, powered by LLM B, review it independently and verify that the implementation is actually complete and correct. You can even assign the same task to several agents independently and keep only the best implementation in the Git repository. I used exactly this strategy when testing PlaSiC's weather-forecasting capability. I had three agents, each powered by a different LLM, independently build the same end-to-end workflow: automatically download ERA5 data, preprocess it, perform data assimilation, run the forecast, evaluate the results, and generate plots. In the end, I kept the implementation that produced the smallest forecast error.
 
-## Principle 6
+### Principle 6
 
 **Review code selectively and in layers.**
 
@@ -118,7 +201,7 @@ More importantly, review strategically. Do not begin by diving straight into the
 
 This gives you two major advantages. First, you can build a high-level mental model of the implementation very quickly, which makes the detailed code review much faster afterward. Second, conceptual or architectural flaws often become obvious at this stage, before you spend time digging through implementation details that may need to be rewritten anyway.
 
-## Principle 7
+### Principle 7
 
 Tokens are not free, so save them where you can. There is no reason to throw your most capable—and most expensive—LLM at every task. Learn to match the model to the difficulty of the problem.
 
@@ -128,7 +211,7 @@ My day-to-day development stack looks roughly like this. For difficult planning 
 
 Of course, knowing which model is appropriate for which task is not something you learn overnight. It takes a lot of hands-on use before you develop a reliable intuition for when a stronger model is genuinely worth the extra cost—and when it is simply overkill.
 
-## Principle 8
+### Principle 8
 
 **Review the entire codebase periodically.** This is important—important enough that it can determine whether a project actually makes it to completion or gets abandoned halfway through.
 
@@ -144,7 +227,7 @@ Regularly clean up duplication as well. One common weakness of coding agents is 
 
 Always remember: every extra line of code increases the long-term maintenance burden. A healthy codebase is not one that only grows—it is one that is regularly pruned.
 
-## Principle 9
+### Principle 9
 
 !!! tip "👣 Get your hands dirty — a journey of a thousand miles begins with a single step! ×3"
 

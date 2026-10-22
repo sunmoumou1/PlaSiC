@@ -33,7 +33,7 @@
 | **Run the model** | [Quick start](#quick-start) · [PlaSiC Studio](#plasic-studio) · [Experiments](#experiments-out-of-the-box) · [Build dependencies](#build-dependencies) |
 | **Watch the video** | **▶ [PlaSiC Studio interface walkthrough on Bilibili](https://www.bilibili.com/video/BV1Q4h26FELk/)** |
 | **Understand the design** | [Project website](https://sunmoumou1.github.io/PlaSiC/) · [Source tour](https://sunmoumou1.github.io/PlaSiC/source.html) · [Benchmarks](#benchmarks) |
-| **Join in** | [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md) · [Citing PlaSiC](#citing-plasic) · [About the author](#about-the-author) |
+| **Join in** | [Roadmap](#roadmap) · [Contributors & thanks](CONTRIBUTING.md#contributors--acknowledgements) · [Contributing](CONTRIBUTING.md) · [Citing PlaSiC](#citing-plasic) · [About the author](#about-the-author) |
 
 ## What is PlaSiC?
 
