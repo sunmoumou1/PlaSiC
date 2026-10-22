@@ -304,6 +304,13 @@ python3 -m venv .venv
 .venv/bin/mkdocs serve -f mkdocs.yml
 ```
 
+## Branch contents
+
+| Branch | Contents |
+|---|---|
+| [`main`](https://github.com/sunmoumou1/PlaSiC/tree/main) | The core PlaSiC model, tutorial, and Studio. |
+| [`codex/ml-emulator`](https://github.com/sunmoumou1/PlaSiC/tree/codex/ml-emulator) | ARETE-zzwl's ML emulator README, training scripts, and example figures are together in [`experiments/ml_emulator`](https://github.com/sunmoumou1/PlaSiC/tree/codex/ml-emulator/experiments/ml_emulator). Switch to this branch to use or develop the tutorial; it is kept off `main`. |
+
 ## Roadmap
 
 > [!IMPORTANT]

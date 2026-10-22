@@ -24,13 +24,9 @@ the project better for the next person who uses it.
       <td align="center">
         <a href="https://github.com/sunmoumou1"><img src="https://avatars.githubusercontent.com/u/111992706?s=112&amp;v=4" width="56" height="56" alt="Sencan Sun's GitHub avatar"></a><br>
         <strong>Sencan Sun</strong><br>
-        <sub><a href="https://github.com/sunmoumou1">@sunmoumou1</a> · Creator &amp; maintainer</sub>
+        <sub><a href="https://github.com/sunmoumou1">@sunmoumou1</a></sub>
       </td>
-      <td>
-        <strong>Model, software &amp; teaching</strong><br>
-        Project design and maintenance; the C11 climate model, coupled experiments,
-        PlaSiC Studio, and the online tutorial.
-      </td>
+      <td>Creator &amp; maintainer</td>
       <td align="center"><a href="https://sunmoumou1.github.io/">Visit website ↗</a></td>
     </tr>
     <tr>
@@ -38,13 +34,7 @@ the project better for the next person who uses it.
         <a href="https://github.com/ARETE-zzwl"><img src="https://avatars.githubusercontent.com/u/241761117?s=112&amp;v=4" width="56" height="56" alt="ARETE-zzwl's GitHub avatar"></a><br>
         <strong><a href="https://github.com/ARETE-zzwl">ARETE-zzwl</a></strong>
       </td>
-      <td>
-        <strong>Machine learning &amp; documentation</strong><br>
-        ML emulator tutorial: four neural architectures, baseline comparisons,
-        multi-step rollout evaluation, and reproducible examples. Also repaired
-        the tutorial's issue-reporting link.<br>
-        <sub><a href="https://github.com/sunmoumou1/PlaSiC/pull/4">ML tutorial · #4</a> · <a href="https://github.com/sunmoumou1/PlaSiC/pull/1">Documentation fix · #1</a></sub>
-      </td>
+      <td><a href="https://github.com/sunmoumou1/PlaSiC/pull/4">PR #4</a> · <a href="https://github.com/sunmoumou1/PlaSiC/pull/1">PR #1</a></td>
       <td align="center">—</td>
     </tr>
     <tr>
@@ -53,12 +43,7 @@ the project better for the next person who uses it.
         <strong>Qianye Su</strong><br>
         <sub><a href="https://github.com/QianyeSu">@QianyeSu</a></sub>
       </td>
-      <td>
-        <strong>Developer experience</strong><br>
-        Added <code>make help</code> to make common build and run commands,
-        resolution settings, MPI options, and dependency paths easier to discover.<br>
-        <sub><a href="https://github.com/sunmoumou1/PlaSiC/pull/3">Makefile help · #3</a></sub>
-      </td>
+      <td><a href="https://github.com/sunmoumou1/PlaSiC/pull/3">PR #3</a></td>
       <td align="center">—</td>
     </tr>
   </tbody>
@@ -68,16 +53,7 @@ the project better for the next person who uses it.
 website by submitting a pull request. Edit your row in
 [`CONTRIBUTING.md`](https://github.com/sunmoumou1/PlaSiC/blob/main/CONTRIBUTING.md)
 and its [online tutorial copy](https://github.com/sunmoumou1/PlaSiC/blob/main/docs-site/docs/tutorial/contributing.md).
-A dash simply means a website has not been added yet. Corrections and additions
-to the contribution descriptions are welcome too.
-
-### Explore the ML emulator
-
-ARETE-zzwl's ML emulator contribution is preserved on the dedicated
-[`codex/ml-emulator` branch](https://github.com/sunmoumou1/PlaSiC/tree/codex/ml-emulator/experiments/ml_emulator),
-where its README, training scripts, and example figures live together. To use or
-develop the tutorial, switch to that branch; `experiments/ml_emulator` is kept
-off `main`.
+A dash simply means a website has not been added yet.
 
 ---
 
