@@ -173,11 +173,10 @@ nav:
   - 2.2 Ten-Step Algorithm: tutorial/2-dynamical-core/2.2-ten-step-algorithm.md
   - 2.3 Spherical Harmonic Spectra & Transforms Method: tutorial/2-dynamical-core/2.3-spectral-transform-and-fft.md
   - 2.4 σ Vertical Discretization: tutorial/2-dynamical-core/2.4-sigma-vertical-discretization.md
-  - 2.5 Grid-Point Nonlinear Dynamics: tutorial/2-dynamical-core/2.5-gridpoint-nonlinear-dynamics.md
-  - 2.6 Semi-Implicit Gravity-Wave Solver: tutorial/2-dynamical-core/2.6-semi-implicit-gravity-wave-solver.md
-  - 2.7 Leapfrog Time Stepping: tutorial/2-dynamical-core/2.7-leapfrog-time-stepping.md
-  - 2.8 Robert–Asselin Filtering: tutorial/2-dynamical-core/2.8-robert-asselin-filtering.md
-  - 2.9 Spectral Dissipation: tutorial/2-dynamical-core/2.9-spectral-dissipation.md
+  - 2.5 Semi-Implicit Gravity-Wave Solver: tutorial/2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md
+  - 2.6 Leapfrog Time Stepping: tutorial/2-dynamical-core/2.6-leapfrog-time-stepping.md
+  - 2.7 Robert–Asselin Filtering: tutorial/2-dynamical-core/2.7-robert-asselin-filtering.md
+  - 2.8 Spectral Dissipation: tutorial/2-dynamical-core/2.8-spectral-dissipation.md
 - 3 Parameterizations:
   - 3.1 Why Parameterization?: tutorial/3-parameterizations/3.1-why-parameterization.md
   - 3.2 Surface Fluxes: tutorial/3-parameterizations/3.2-surface-fluxes.md

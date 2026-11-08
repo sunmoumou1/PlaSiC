@@ -10,9 +10,9 @@ math/dynamical-core.md: tutorial/2-dynamical-core/2.1-governing-equations.md
 math/continuous-control-equations.md: tutorial/2-dynamical-core/2.1-governing-equations.md
 math/spectral-transform-and-fft.md: tutorial/2-dynamical-core/2.3-spectral-transform-and-fft.md
 math/dynamical-core-gridpoint-dynamics.md: tutorial/2-dynamical-core/2.4-sigma-vertical-discretization.md
-math/dynamical-core-semi-implicit-time-stepping.md: tutorial/2-dynamical-core/2.6-semi-implicit-gravity-wave-solver.md
-math/dynamical-core-leapfrog-time-stepping.md: tutorial/2-dynamical-core/2.7-leapfrog-time-stepping.md
-math/dynamical-core-dissipation.md: tutorial/2-dynamical-core/2.9-spectral-dissipation.md
+math/dynamical-core-semi-implicit-time-stepping.md: tutorial/2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md
+math/dynamical-core-leapfrog-time-stepping.md: tutorial/2-dynamical-core/2.6-leapfrog-time-stepping.md
+math/dynamical-core-dissipation.md: tutorial/2-dynamical-core/2.8-spectral-dissipation.md
 math/surface-flux-parameterization.md: tutorial/3-parameterizations/3.2-surface-fluxes.md
 math/horizontal-vertical-diffusion.md: tutorial/3-parameterizations/3.3-horizontal-and-vertical-diffusion.md
 math/radiation-parameterization.md: tutorial/3-parameterizations/3.4-radiation-parameterization.md
@@ -44,9 +44,9 @@ appendix/pyside6-quickstart.md: tutorial/9-appendix/9.4-pyside6-quickstart.md
 2 动力核/2.2 控制方程的推导.md: tutorial/2-dynamical-core/2.1-governing-equations.md
 2 动力核/2.3 球谐谱、FFT 与 SHTns.md: tutorial/2-dynamical-core/2.3-spectral-transform-and-fft.md
 2 动力核/2.4 σ 垂直离散与格点非线性动力.md: tutorial/2-dynamical-core/2.4-sigma-vertical-discretization.md
-2 动力核/2.5 半隐式重力波求解.md: tutorial/2-dynamical-core/2.6-semi-implicit-gravity-wave-solver.md
-2 动力核/2.6 跃蛙时间推进与 Robert–Asselin 滤波.md: tutorial/2-dynamical-core/2.7-leapfrog-time-stepping.md
-2 动力核/2.7 摩擦、谱耗散与耗散回热.md: tutorial/2-dynamical-core/2.9-spectral-dissipation.md
+2 动力核/2.5 半隐式重力波求解.md: tutorial/2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md
+2 动力核/2.6 跃蛙时间推进与 Robert–Asselin 滤波.md: tutorial/2-dynamical-core/2.6-leapfrog-time-stepping.md
+2 动力核/2.7 摩擦、谱耗散与耗散回热.md: tutorial/2-dynamical-core/2.8-spectral-dissipation.md
 3 参数化/3.1 表面通量.md: tutorial/3-parameterizations/3.2-surface-fluxes.md
 3 参数化/3.2 水平与垂直扩散.md: tutorial/3-parameterizations/3.3-horizontal-and-vertical-diffusion.md
 3 参数化/3.3 辐射参数化.md: tutorial/3-parameterizations/3.4-radiation-parameterization.md
@@ -94,36 +94,36 @@ appendix/pyside6-quickstart.md: tutorial/9-appendix/9.4-pyside6-quickstart.md
 2-dynamical-core/2.1 控制方程.md: tutorial/2-dynamical-core/2.1-governing-equations.md
 2-dynamical-core/2.2 控制方程的推导.md: tutorial/2-dynamical-core/2.1-governing-equations.md
 2-dynamical-core/2.4 σ 垂直离散与格点非线性动力.md: tutorial/2-dynamical-core/2.4-sigma-vertical-discretization.md
-2-dynamical-core/2.5 半隐式重力波求解.md: tutorial/2-dynamical-core/2.6-semi-implicit-gravity-wave-solver.md
-2-dynamical-core/2.6 跃蛙时间推进与 Robert–Asselin 滤波.md: tutorial/2-dynamical-core/2.7-leapfrog-time-stepping.md
-2-dynamical-core/2.7 摩擦、谱耗散与耗散回热.md: tutorial/2-dynamical-core/2.9-spectral-dissipation.md
+2-dynamical-core/2.5 半隐式重力波求解.md: tutorial/2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md
+2-dynamical-core/2.6 跃蛙时间推进与 Robert–Asselin 滤波.md: tutorial/2-dynamical-core/2.6-leapfrog-time-stepping.md
+2-dynamical-core/2.7 摩擦、谱耗散与耗散回热.md: tutorial/2-dynamical-core/2.8-spectral-dissipation.md
 
 # ---------------------------------------------------------------------------
 # 7. 2.7 translated and renamed to an English filename.
 # ---------------------------------------------------------------------------
-2-dynamical-core/2.7 跃蛙时间推进与 Robert–Asselin 滤波.md: tutorial/2-dynamical-core/2.7-leapfrog-time-stepping.md
+2-dynamical-core/2.7 跃蛙时间推进与 Robert–Asselin 滤波.md: tutorial/2-dynamical-core/2.6-leapfrog-time-stepping.md
 
 # ---------------------------------------------------------------------------
 # 8. 2.8 renamed to an English filename.
 # ---------------------------------------------------------------------------
-2-dynamical-core/2.8 摩擦、谱耗散与耗散回热.md: tutorial/2-dynamical-core/2.9-spectral-dissipation.md
+2-dynamical-core/2.8 摩擦、谱耗散与耗散回热.md: tutorial/2-dynamical-core/2.8-spectral-dissipation.md
 
 # ---------------------------------------------------------------------------
 # 9. 2.8 renamed a second time to a shorter English filename.
 # ---------------------------------------------------------------------------
-2-dynamical-core/2.8-friction-spectral-dissipation-and-dissipation-heating.md: tutorial/2-dynamical-core/2.9-spectral-dissipation.md
+2-dynamical-core/2.8-friction-spectral-dissipation-and-dissipation-heating.md: tutorial/2-dynamical-core/2.8-spectral-dissipation.md
 
 # ---------------------------------------------------------------------------
 # 10. 2.5 and 2.6 renamed to English filenames.
 # ---------------------------------------------------------------------------
 2-dynamical-core/2.5 σ 垂直离散与格点非线性动力.md: tutorial/2-dynamical-core/2.4-sigma-vertical-discretization.md
-2-dynamical-core/2.6 半隐式重力波求解.md: tutorial/2-dynamical-core/2.6-semi-implicit-gravity-wave-solver.md
+2-dynamical-core/2.6 半隐式重力波求解.md: tutorial/2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md
 
 # ---------------------------------------------------------------------------
 # 11. 2.7 was split into 2.7 Leapfrog Time Stepping and 2.8 Robert–Asselin
 #     Filtering; the former 2.8 Spectral Dissipation became 2.9.
 # ---------------------------------------------------------------------------
-2-dynamical-core/2.7-leapfrog-time-stepping-and-robert-asselin-filtering.md: tutorial/2-dynamical-core/2.7-leapfrog-time-stepping.md
+2-dynamical-core/2.7-leapfrog-time-stepping-and-robert-asselin-filtering.md: tutorial/2-dynamical-core/2.6-leapfrog-time-stepping.md
 
 # ---------------------------------------------------------------------------
 # 12. Chapter 3 renumbering: a new note 3.1 Why Parameterization? was inserted;
@@ -199,10 +199,10 @@ appendix/pyside6-quickstart.md: tutorial/9-appendix/9.4-pyside6-quickstart.md
 #     2.6-2.9, and every earlier URL is redirected to its new page.
 # ---------------------------------------------------------------------------
 2-dynamical-core/2.4-sigma-vertical-discretization-and-gridpoint-nonlinear-dynamics.md: tutorial/2-dynamical-core/2.4-sigma-vertical-discretization.md
-2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md: tutorial/2-dynamical-core/2.6-semi-implicit-gravity-wave-solver.md
-2-dynamical-core/2.6-leapfrog-time-stepping.md: tutorial/2-dynamical-core/2.7-leapfrog-time-stepping.md
-2-dynamical-core/2.7-robert-asselin-filtering.md: tutorial/2-dynamical-core/2.8-robert-asselin-filtering.md
-2-dynamical-core/2.8-spectral-dissipation.md: tutorial/2-dynamical-core/2.9-spectral-dissipation.md
+2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md: tutorial/2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md
+2-dynamical-core/2.6-leapfrog-time-stepping.md: tutorial/2-dynamical-core/2.6-leapfrog-time-stepping.md
+2-dynamical-core/2.7-robert-asselin-filtering.md: tutorial/2-dynamical-core/2.7-robert-asselin-filtering.md
+2-dynamical-core/2.8-spectral-dissipation.md: tutorial/2-dynamical-core/2.8-spectral-dissipation.md
 
 # ---------------------------------------------------------------------------
 # 22. Chapter 5 Time Control was inserted: 8.8 Model Time and Calendar became
@@ -245,3 +245,13 @@ appendix/pyside6-quickstart.md: tutorial/9-appendix/9.4-pyside6-quickstart.md
 #     became 1.1 Running PlaSiC first!; redirect the previously published URL.
 # ---------------------------------------------------------------------------
 1-user-guide/1.1-compiling-running-and-a-makefile-primer.md: tutorial/1-user-guide/1.1-Running-PlaSiC-first.md
+
+# ---------------------------------------------------------------------------
+# 25. The standalone Grid-Point Nonlinear Dynamics note was removed. Its old
+#     URL leads to the Ten-Step Algorithm, and 2.6-2.9 moved up to 2.5-2.8.
+# ---------------------------------------------------------------------------
+tutorial/2-dynamical-core/2.5-gridpoint-nonlinear-dynamics.md: tutorial/2-dynamical-core/2.2-ten-step-algorithm.md
+tutorial/2-dynamical-core/2.6-semi-implicit-gravity-wave-solver.md: tutorial/2-dynamical-core/2.5-semi-implicit-gravity-wave-solver.md
+tutorial/2-dynamical-core/2.7-leapfrog-time-stepping.md: tutorial/2-dynamical-core/2.6-leapfrog-time-stepping.md
+tutorial/2-dynamical-core/2.8-robert-asselin-filtering.md: tutorial/2-dynamical-core/2.7-robert-asselin-filtering.md
+tutorial/2-dynamical-core/2.9-spectral-dissipation.md: tutorial/2-dynamical-core/2.8-spectral-dissipation.md
