@@ -23,7 +23,7 @@ experiments/forecast_era5/figures/
 experiments/forecast_era5/frames/
 experiments/forecast_era5/runs/
 
-docs-site/docs/tutorial/assets/slide/
+docs-site/docs/tutorial/assets/slide/PlaSiC_slide.pptx
 
 build/
 
@@ -38,3 +38,5 @@ historical_3d_500y/
 experiments/co2_4xCO2_1pctCO2/
 
 experiments/historical_3d_500y/
+
+分享如何利用agent辅助开发.MOV
