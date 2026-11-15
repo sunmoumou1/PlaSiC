@@ -40,7 +40,7 @@ I would especially like to thank Prof. Wang Shuyu (王淑瑜) of the School of A
 
 Naive as it looks to me now, that project planted the first seed of an idea in my mind: simulating the Earth.
 
-Later, in the first semester of my junior year, I began to study numerical models more systematically in *Numerical Weather Prediction* (《数值天气预报》), a course taught by Prof. Sun Xuguang (孙旭光). I worked hard all semester, but to be honest, I only half understood the material — and by the end of the following summer, I had forgotten almost all of it.
+Later, in the first semester of my junior year, I began to study numerical models more systematically in *Numerical Weather Prediction* (《数值天气预报》). I worked hard all semester, but to be honest, I only half understood the material — and by the end of the following summer, I had forgotten almost all of it.
 
 Still unwilling to give up, I took another course in the autumn of 2022, the first semester of my senior year: *Atmospheric Numerical Simulation Experiments* (《大气数值模拟实验》), taught by Yang Ben (杨犇). The course focused mainly on running numerical experiments with WRF (the Weather Research and Forecasting model) rather than on the principles behind numerical models.
 
