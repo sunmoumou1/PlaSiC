@@ -1,165 +1,160 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="1090" viewBox="0 0 1180 1090" role="img" aria-labelledby="title desc">
-  <title id="title">Horizontal decomposition, halo exchange and the land mask</title>
-  <desc id="desc">The left panel shows the Gaussian grid split by latitude into rank blocks: each rank sends its outermost boundary rows to fill the ghost rows of its neighbours, while the global north and south edges use linear extrapolation. The right panel shows how horizontal differences behave under the land mask: ocean pairs use central differences, a coastline uses a one-sided difference, and land pairs give zero gradient.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="973" viewBox="0 0 1000 973" role="img" aria-labelledby="title desc">
+<title id="title">Horizontal decomposition, halo exchange and the land mask</title>
+<desc id="desc">Left: the Gaussian grid is split by latitude into rank blocks; each rank sends its boundary rows to fill the ghost rows of its neighbours, and the global north and south edges are mirrored with extrapolated sine latitude. Right: horizontal differences under the land mask: two ocean neighbours give a central difference, one land neighbour a one-sided difference on the ocean side, and two land neighbours a zero gradient.</desc>
+<defs>
+<marker id="arrow" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L12,6 L0,12 Z" fill="#94a3b8"/></marker>
+<marker id="arrowFb" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L12,6 L0,12 Z" fill="#3b82f6"/></marker>
+<style>
+text{font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif}
+.flow{fill:none;stroke:#94a3b8;stroke-width:2.6;marker-end:url(#arrow)}
+.dash{fill:none;stroke:#94a3b8;stroke-width:2.2;stroke-dasharray:7 6;marker-end:url(#arrow)}
+.loop{fill:none;stroke:#3b82f6;stroke-width:2.2;stroke-dasharray:7 6;stroke-linecap:round;marker-end:url(#arrowFb)}
+</style>
+<!-- MathJax TeX-font glyphs (same font as the formulas in the text) -->
+<path id="mj-N-73" d="M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z"/>
+<path id="mj-N-69" d="M69 609Q69 637 87 653T131 669Q154 667 171 652T188 609Q188 579 171 564T129 549Q104 549 87 564T69 609ZM247 0Q232 3 143 3Q132 3 106 3T56 1L34 0H26V46H42Q70 46 91 49Q100 53 102 60T104 102V205V293Q104 345 102 359T88 378Q74 385 41 385H30V408Q30 431 32 431L42 432Q52 433 70 434T106 436Q123 437 142 438T171 441T182 442H185V62Q190 52 197 50T232 46H255V0H247Z"/>
+<path id="mj-N-6E" d="M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z"/>
+<path id="mj-N-2061" d=""/>
+<path id="mj-I-1D711" d="M92 210Q92 176 106 149T142 108T185 85T220 72L235 70L237 71L250 112Q268 170 283 211T322 299T370 375T429 423T502 442Q547 442 582 410T618 302Q618 224 575 152T457 35T299 -10Q273 -10 273 -12L266 -48Q260 -83 252 -125T241 -179Q236 -203 215 -212Q204 -218 190 -218Q159 -215 159 -185Q159 -175 214 -2L209 0Q204 2 195 5T173 14T147 28T120 46T94 71T71 103T56 142T50 190Q50 238 76 311T149 431H162Q183 431 183 423Q183 417 175 409Q134 361 114 300T92 210ZM574 278Q574 320 550 344T486 369Q437 369 394 329T323 218Q309 184 295 109L286 64Q304 62 306 62Q423 62 498 131T574 278Z"/>
+<path id="mj-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"/>
+<path id="mj-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"/>
+<path id="mj-N-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"/>
+<path id="mj-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"/>
+<path id="mj-N-2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"/>
+<path id="mj-I-1D715" d="M202 508Q179 508 169 520T158 547Q158 557 164 577T185 624T230 675T301 710L333 715H345Q378 715 384 714Q447 703 489 661T549 568T566 457Q566 362 519 240T402 53Q321 -22 223 -22Q123 -22 73 56Q42 102 42 148V159Q42 276 129 370T322 465Q383 465 414 434T455 367L458 378Q478 461 478 515Q478 603 437 639T344 676Q266 676 223 612Q264 606 264 572Q264 547 246 528T202 508ZM430 306Q430 372 401 400T333 428Q270 428 222 382Q197 354 183 323T150 221Q132 149 132 116Q132 21 232 21Q244 21 250 22Q327 35 374 112Q389 137 409 196T430 306Z"/>
+<path id="mj-I-1D44B" d="M42 0H40Q26 0 26 11Q26 15 29 27Q33 41 36 43T55 46Q141 49 190 98Q200 108 306 224T411 342Q302 620 297 625Q288 636 234 637H206Q200 643 200 645T202 664Q206 677 212 683H226Q260 681 347 681Q380 681 408 681T453 682T473 682Q490 682 490 671Q490 670 488 658Q484 643 481 640T465 637Q434 634 411 620L488 426L541 485Q646 598 646 610Q646 628 622 635Q617 635 609 637Q594 637 594 648Q594 650 596 664Q600 677 606 683H618Q619 683 643 683T697 681T738 680Q828 680 837 683H845Q852 676 852 672Q850 647 840 637H824Q790 636 763 628T722 611T698 593L687 584Q687 585 592 480L505 384Q505 383 536 304T601 142T638 56Q648 47 699 46Q734 46 734 37Q734 35 732 23Q728 7 725 4T711 1Q708 1 678 1T589 2Q528 2 496 2T461 1Q444 1 444 10Q444 11 446 25Q448 35 450 39T455 44T464 46T480 47T506 54Q523 62 523 64Q522 64 476 181L429 299Q241 95 236 84Q232 76 232 72Q232 53 261 47Q262 47 267 47T273 46Q276 46 277 46T280 45T283 42T284 35Q284 26 282 19Q279 6 276 4T261 1Q258 1 243 1T201 2T142 2Q64 2 42 0Z"/>
+<path id="mj-I-1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"/>
+<path id="mj-N-2248" d="M55 319Q55 360 72 393T114 444T163 472T205 482Q207 482 213 482T223 483Q262 483 296 468T393 413L443 381Q502 346 553 346Q609 346 649 375T694 454Q694 465 698 474T708 483Q722 483 722 452Q722 386 675 338T555 289Q514 289 468 310T388 357T308 404T224 426Q164 426 125 393T83 318Q81 289 69 289Q55 289 55 319ZM55 85Q55 126 72 159T114 210T163 238T205 248Q207 248 213 248T223 249Q262 249 296 234T393 179L443 147Q502 112 553 112Q609 112 649 141T694 220Q694 249 708 249T722 217Q722 153 675 104T555 55Q514 55 468 76T388 123T308 170T224 192Q164 192 125 159T83 84Q80 55 69 55Q55 55 55 85Z"/>
+<path id="mj-I-1D438" d="M492 213Q472 213 472 226Q472 230 477 250T482 285Q482 316 461 323T364 330H312Q311 328 277 192T243 52Q243 48 254 48T334 46Q428 46 458 48T518 61Q567 77 599 117T670 248Q680 270 683 272Q690 274 698 274Q718 274 718 261Q613 7 608 2Q605 0 322 0H133Q31 0 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H757Q764 676 764 669Q764 664 751 557T737 447Q735 440 717 440H705Q698 445 698 453L701 476Q704 500 704 528Q704 558 697 578T678 609T643 625T596 632T532 634H485Q397 633 392 631Q388 629 386 622Q385 619 355 499T324 377Q347 376 372 376H398Q464 376 489 391T534 472Q538 488 540 490T557 493Q562 493 565 493T570 492T572 491T574 487T577 483L544 351Q511 218 508 216Q505 213 492 213Z"/>
+<path id="mj-I-1D44A" d="M436 683Q450 683 486 682T553 680Q604 680 638 681T677 682Q695 682 695 674Q695 670 692 659Q687 641 683 639T661 637Q636 636 621 632T600 624T597 615Q597 603 613 377T629 138L631 141Q633 144 637 151T649 170T666 200T690 241T720 295T759 362Q863 546 877 572T892 604Q892 619 873 628T831 637Q817 637 817 647Q817 650 819 660Q823 676 825 679T839 682Q842 682 856 682T895 682T949 681Q1015 681 1034 683Q1048 683 1048 672Q1048 666 1045 655T1038 640T1028 637Q1006 637 988 631T958 617T939 600T927 584L923 578L754 282Q586 -14 585 -15Q579 -22 561 -22Q546 -22 542 -17Q539 -14 523 229T506 480L494 462Q472 425 366 239Q222 -13 220 -15T215 -19Q210 -22 197 -22Q178 -22 176 -15Q176 -12 154 304T131 622Q129 631 121 633T82 637H58Q51 644 51 648Q52 671 64 683H76Q118 680 176 680Q301 680 313 683H323Q329 677 329 674T327 656Q322 641 318 637H297Q236 634 232 620Q262 160 266 136L501 550L499 587Q496 629 489 632Q483 636 447 637Q428 637 422 639T416 648Q416 650 418 660Q419 664 420 669T421 676T424 680T428 682T436 683Z"/>
+<path id="mj-N-394" d="M51 0Q46 4 46 7Q46 9 215 357T388 709Q391 716 416 716Q439 716 444 709Q447 705 616 357T786 7Q786 4 781 0H51ZM507 344L384 596L137 92L383 91H630Q630 93 507 344Z"/>
+<path id="mj-I-1D443" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"/>
+<path id="mj-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"/>
+<path id="mj-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"/>
+<path id="mj-N-2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"/>
+</defs>
 
-  <defs>
-    <marker id="arrowUp" markerWidth="13" markerHeight="13" refX="12.5" refY="6.5" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L13,6.5 L0,13 Z" fill="#94a3b8"/>
-    </marker>
-    <marker id="arrowDown" markerWidth="13" markerHeight="13" refX="12.5" refY="6.5" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L13,6.5 L0,13 Z" fill="#60a5fa"/>
-    </marker>
-    <filter id="shadow" x="-8%" y="-8%" width="116%" height="124%">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.05"/>
-    </filter>
-    <style>
-      .title{font:700 29px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#0f172a}
-      .subtitle{font:400 16px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#64748b}
-      .panelTitle{font:700 20px Arial, 'Helvetica Neue', Helvetica, sans-serif}
-      .panelSub{font:400 14.5px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#64748b}
-      .rankHead{font:700 12.5px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#1e3a8a}
-      .rankRow{font:500 11.5px Arial, 'Helvetica Neue', Helvetica, sans-serif}
-      .xchgBlue{font:600 13.5px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#1d4ed8}
-      .xchgGray{font:600 13.5px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#475569}
-      .convTitle{font:700 15px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#4338ca}
-      .cellLabel{font:700 17px Arial, 'Cambria Math', 'STIX Two Math', 'Times New Roman', serif}
-      .cardTitle{font:700 16.5px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#0f172a}
-      .formula{font:500 17px Arial, 'Cambria Math', 'STIX Two Math', 'Times New Roman', serif;fill:#1e293b}
-      .note{font:400 15px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#64748b}
-      .small{font:400 14px Arial, 'Helvetica Neue', Helvetica, sans-serif;fill:#64748b}
-      .downArrow{fill:none;stroke:#60a5fa;stroke-width:3;marker-end:url(#arrowDown)}
-      .upArrow{fill:none;stroke:#94a3b8;stroke-width:3;marker-end:url(#arrowUp)}
-    </style>
-  </defs>
+<rect width="1000" height="973" rx="16" fill="#ffffff"/>
 
-  <rect x="1" y="1" width="1178" height="1088" rx="26" fill="#f8fafc" stroke="#e8edf4" stroke-width="1.5"/>
+<!-- cards -->
+<rect x="18" y="6" width="472" height="960.89" rx="18" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.6"/>
+<rect x="510" y="6" width="472" height="960.89" rx="18" fill="#f0fdf4" stroke="#a7f3d0" stroke-width="1.6"/>
 
-  <text x="590" y="56" text-anchor="middle" class="title">The same Gaussian grid: latitude blocks, ghost rows and the land mask</text>
-  <text x="590" y="88" text-anchor="middle" class="subtitle">Each rank advances only its own latitude band; neighbours exchange one ring of ghost rows</text>
-  <line x1="60" y1="108" x2="1120" y2="108" stroke="#e2e8f0" stroke-width="1.4"/>
+<!-- connectors -->
+<path d="M72 271.66 H63 Q54 271.66 54 280.66 V418.66 Q54 427.66 63 427.66 H70.5" class="flow"/>
+<path d="M436 465.66 H445 Q454 465.66 454 456.66 V318.66 Q454 309.66 445 309.66 H437.5" class="flow"/>
+<path d="M72 541.66 H63 Q54 541.66 54 550.66 V688.66 Q54 697.66 63 697.66 H70.5" class="flow"/>
+<path d="M436 735.66 H445 Q454 735.66 454 726.66 V588.66 Q454 579.66 445 579.66 H437.5" class="flow"/>
 
-  <!-- Panel A: latitude blocking and halo exchange -->
-  <rect x="60" y="122" width="520" height="924" rx="20" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.8"/>
-  <text x="320" y="166" text-anchor="middle" class="panelTitle" fill="#4338ca">Latitude blocking and halo exchange</text>
-  <text x="320" y="192" text-anchor="middle" class="panelSub">Boundary rows are sent out; ghost rows are filled by the neighbours</text>
-
-  <!-- rank 0 -->
-  <rect x="115" y="222" width="410" height="26" rx="6" fill="#c7d2fe" stroke="#818cf8" stroke-width="1.2"/>
-  <text x="320" y="240" text-anchor="middle" class="rankHead">rank 0 · northern hemisphere (incl. North Pole)</text>
-  <rect x="115" y="252" width="410" height="22" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 4"/>
-  <text x="320" y="267" text-anchor="middle" class="rankRow" fill="#475569">north ghost row · mirror fill</text>
-  <rect x="115" y="278" width="410" height="22" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.2"/>
-  <text x="320" y="293" text-anchor="middle" class="rankRow" fill="#1e40af">interior row 1</text>
-  <rect x="115" y="304" width="410" height="22" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.2"/>
-  <text x="320" y="319" text-anchor="middle" class="rankRow" fill="#1e40af">interior row 2</text>
-  <rect x="115" y="330" width="410" height="24" rx="4" fill="#fed7aa" stroke="#f97316" stroke-width="1.6"/>
-  <text x="320" y="346" text-anchor="middle" class="rankRow" fill="#9a3412">southern boundary row · sent out</text>
-  <rect x="115" y="358" width="410" height="22" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 4"/>
-  <text x="320" y="373" text-anchor="middle" class="rankRow" fill="#475569">south ghost row · filled by rank 1</text>
-
-  <!-- exchange rank 0 <-> rank 1 -->
-  <path d="M140 386 V432" class="downArrow"/>
-  <path d="M500 432 V386" class="upArrow"/>
-  <text x="320" y="404" text-anchor="middle" class="xchgBlue">rank 0 southern boundary → rank 1 northern ghost</text>
-  <text x="320" y="428" text-anchor="middle" class="xchgGray">rank 1 northern boundary → rank 0 southern ghost</text>
-
-  <!-- rank 1 -->
-  <rect x="115" y="440" width="410" height="26" rx="6" fill="#c7d2fe" stroke="#818cf8" stroke-width="1.2"/>
-  <text x="320" y="458" text-anchor="middle" class="rankHead">rank 1 · middle latitudes</text>
-  <rect x="115" y="470" width="410" height="22" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 4"/>
-  <text x="320" y="485" text-anchor="middle" class="rankRow" fill="#475569">north ghost row · filled by rank 0</text>
-  <rect x="115" y="496" width="410" height="24" rx="4" fill="#fed7aa" stroke="#f97316" stroke-width="1.6"/>
-  <text x="320" y="512" text-anchor="middle" class="rankRow" fill="#9a3412">northern boundary row · sent out</text>
-  <rect x="115" y="524" width="410" height="22" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.2"/>
-  <text x="320" y="539" text-anchor="middle" class="rankRow" fill="#1e40af">interior row</text>
-  <rect x="115" y="550" width="410" height="24" rx="4" fill="#fed7aa" stroke="#f97316" stroke-width="1.6"/>
-  <text x="320" y="566" text-anchor="middle" class="rankRow" fill="#9a3412">southern boundary row · sent out</text>
-  <rect x="115" y="578" width="410" height="22" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 4"/>
-  <text x="320" y="593" text-anchor="middle" class="rankRow" fill="#475569">south ghost row · filled by rank 2</text>
-
-  <!-- exchange rank 1 <-> rank 2 -->
-  <path d="M140 604 V650" class="downArrow"/>
-  <path d="M500 650 V604" class="upArrow"/>
-  <text x="320" y="622" text-anchor="middle" class="xchgBlue">rank 1 southern boundary → rank 2 northern ghost</text>
-  <text x="320" y="646" text-anchor="middle" class="xchgGray">rank 2 northern boundary → rank 1 southern ghost</text>
-
-  <!-- rank 2 -->
-  <rect x="115" y="658" width="410" height="26" rx="6" fill="#c7d2fe" stroke="#818cf8" stroke-width="1.2"/>
-  <text x="320" y="676" text-anchor="middle" class="rankHead">rank 2 · southern hemisphere (incl. South Pole)</text>
-  <rect x="115" y="688" width="410" height="22" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 4"/>
-  <text x="320" y="703" text-anchor="middle" class="rankRow" fill="#475569">north ghost row · filled by rank 1</text>
-  <rect x="115" y="714" width="410" height="24" rx="4" fill="#fed7aa" stroke="#f97316" stroke-width="1.6"/>
-  <text x="320" y="730" text-anchor="middle" class="rankRow" fill="#9a3412">northern boundary row · sent out</text>
-  <rect x="115" y="742" width="410" height="22" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.2"/>
-  <text x="320" y="757" text-anchor="middle" class="rankRow" fill="#1e40af">interior row 2</text>
-  <rect x="115" y="768" width="410" height="22" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.2"/>
-  <text x="320" y="783" text-anchor="middle" class="rankRow" fill="#1e40af">interior row 3</text>
-  <rect x="115" y="794" width="410" height="22" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 4"/>
-  <text x="320" y="809" text-anchor="middle" class="rankRow" fill="#475569">south ghost row · mirror fill</text>
-
-  <!-- conventions -->
-  <rect x="115" y="836" width="410" height="168" rx="12" fill="#fff" stroke="#c7d2fe" stroke-width="1.4"/>
-  <text x="137" y="874" class="convTitle">Conventions</text>
-  <text x="137" y="904" class="small">Orange: this rank's boundary row, sent out</text>
-  <text x="137" y="930" class="small">Dashed grey: ghost row, filled by the neighbour</text>
-  <text x="137" y="956" class="small">Longitude is periodic: no exchange needed</text>
-  <text x="137" y="982" class="small">The global north/south edges use extrapolation</text>
-
-  <!-- Panel B: land mask and coastal differences -->
-  <rect x="620" y="122" width="520" height="924" rx="20" fill="#f0fdf4" stroke="#a7f3d0" stroke-width="1.8"/>
-  <text x="880" y="166" text-anchor="middle" class="panelTitle" fill="#047857">Land mask and coastal differences</text>
-  <text x="880" y="192" text-anchor="middle" class="panelSub">Green = ocean point; grey = land point</text>
-
-  <g stroke-width="1.4">
-    <rect x="745" y="214" width="54" height="54" fill="#e2e8f0" stroke="#cbd5e1"/>
-    <rect x="799" y="214" width="54" height="54" fill="#e2e8f0" stroke="#cbd5e1"/>
-    <rect x="853" y="214" width="54" height="54" fill="#e2e8f0" stroke="#cbd5e1"/>
-    <rect x="907" y="214" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="961" y="214" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="745" y="268" width="54" height="54" fill="#e2e8f0" stroke="#cbd5e1"/>
-    <rect x="799" y="268" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="853" y="268" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="907" y="268" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="961" y="268" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="745" y="322" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="799" y="322" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="853" y="322" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="907" y="322" width="54" height="54" fill="#e2e8f0" stroke="#cbd5e1"/>
-    <rect x="961" y="322" width="54" height="54" fill="#e2e8f0" stroke="#cbd5e1"/>
-    <rect x="745" y="376" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="799" y="376" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="853" y="376" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="907" y="376" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="961" y="376" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="745" y="430" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="799" y="430" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="853" y="430" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="907" y="430" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-    <rect x="961" y="430" width="54" height="54" fill="#bbf7d0" stroke="#86efac"/>
-  </g>
-  <text x="826" y="410" text-anchor="middle" class="cellLabel" fill="#166534">O</text>
-  <text x="772" y="356" text-anchor="middle" class="cellLabel" fill="#475569">L</text>
-  <text x="934" y="356" text-anchor="middle" class="cellLabel" fill="#475569">L</text>
-  <circle cx="826" cy="403" r="26" fill="none" stroke="#16a34a" stroke-width="2.4"/>
-  <text x="880" y="510" text-anchor="middle" class="small">A 5 × 5 excerpt of the Gaussian grid</text>
-
-  <rect x="650" y="540" width="460" height="88" rx="12" fill="#fff" stroke="#a7f3d0" stroke-width="1.4"/>
-  <text x="880" y="572" text-anchor="middle" class="cardTitle">Both neighbours are ocean</text>
-  <text x="880" y="606" text-anchor="middle" class="formula">∂X/∂x ≈ (X<tspan baseline-shift="sub" font-size="12">E</tspan><tspan baseline-shift="baseline"> − X</tspan><tspan baseline-shift="sub" font-size="12">W</tspan><tspan baseline-shift="baseline">) / (2Δx)</tspan></text>
-
-  <rect x="650" y="644" width="460" height="88" rx="12" fill="#fff" stroke="#a7f3d0" stroke-width="1.4"/>
-  <text x="880" y="676" text-anchor="middle" class="cardTitle">One neighbour is land</text>
-  <text x="880" y="710" text-anchor="middle" class="formula">one-sided difference (land does not enter)</text>
-
-  <rect x="650" y="748" width="460" height="88" rx="12" fill="#fff" stroke="#a7f3d0" stroke-width="1.4"/>
-  <text x="880" y="780" text-anchor="middle" class="cardTitle">Both neighbours are land</text>
-  <text x="880" y="814" text-anchor="middle" class="formula">∂X/∂x = 0</text>
-
-  <rect x="650" y="852" width="460" height="88" rx="12" fill="#fff" stroke="#a7f3d0" stroke-width="1.4"/>
-  <text x="880" y="884" text-anchor="middle" class="cardTitle">The global north/south edge</text>
-  <text x="880" y="918" text-anchor="middle" class="formula">sinφ₀ = 2 sinφ₁ − sinφ₂</text>
-
-  <text x="880" y="978" text-anchor="middle" class="note">Advection: zero flux at the coastline</text>
-  <text x="880" y="1002" text-anchor="middle" class="note">Diffusion: a land neighbour mirrors the ocean point itself,</text>
-  <text x="880" y="1026" text-anchor="middle" class="note">so arbitrary land values can never leak into the ocean</text>
+<!-- content -->
+<text x="46" y="53.28" font-size="24" font-weight="700" fill="#0f172a">Latitude blocks and halo exchange</text>
+<text x="111.93" y="92" font-size="19" fill="#475569">each rank owns one latitude band</text>
+<text x="125.15" y="117.67" font-size="19" fill="#475569">plus a ghost row on either side</text>
+<rect x="72" y="139.66" width="364" height="34" rx="10" fill="#4f46e5" stroke="#4f46e5" stroke-width="1.4"/>
+<text x="254" y="163.16" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">rank 0 · northernmost band</text>
+<rect x="72" y="179.66" width="364" height="32" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="254" y="202.16" text-anchor="middle" font-size="18" fill="#475569">north ghost row · mirrored</text>
+<rect x="72" y="217.66" width="364" height="32" rx="8" fill="#e0e7ff" stroke="#c7d2fe" stroke-width="1.4"/>
+<text x="254" y="240.16" text-anchor="middle" font-size="18" fill="#3730a3">interior rows</text>
+<rect x="72" y="255.66" width="364" height="32" rx="8" fill="#ffedd5" stroke="#fdba74" stroke-width="1.4"/>
+<text x="254" y="278.16" text-anchor="middle" font-size="18" fill="#9a3412">southern boundary row · sent out</text>
+<rect x="72" y="293.66" width="364" height="32" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="254" y="316.16" text-anchor="middle" font-size="18" fill="#475569">south ghost row · from rank 1</text>
+<rect x="72" y="371.66" width="364" height="34" rx="10" fill="#4f46e5" stroke="#4f46e5" stroke-width="1.4"/>
+<text x="254" y="395.16" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">rank 1 · middle band</text>
+<rect x="72" y="411.66" width="364" height="32" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="254" y="434.16" text-anchor="middle" font-size="18" fill="#475569">north ghost row · from rank 0</text>
+<rect x="72" y="449.66" width="364" height="32" rx="8" fill="#ffedd5" stroke="#fdba74" stroke-width="1.4"/>
+<text x="254" y="472.16" text-anchor="middle" font-size="18" fill="#9a3412">northern boundary row · sent out</text>
+<rect x="72" y="487.66" width="364" height="32" rx="8" fill="#e0e7ff" stroke="#c7d2fe" stroke-width="1.4"/>
+<text x="254" y="510.16" text-anchor="middle" font-size="18" fill="#3730a3">interior rows</text>
+<rect x="72" y="525.66" width="364" height="32" rx="8" fill="#ffedd5" stroke="#fdba74" stroke-width="1.4"/>
+<text x="254" y="548.16" text-anchor="middle" font-size="18" fill="#9a3412">southern boundary row · sent out</text>
+<rect x="72" y="563.66" width="364" height="32" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="254" y="586.16" text-anchor="middle" font-size="18" fill="#475569">south ghost row · from rank 2</text>
+<rect x="72" y="641.66" width="364" height="34" rx="10" fill="#4f46e5" stroke="#4f46e5" stroke-width="1.4"/>
+<text x="254" y="665.16" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">rank 2 · southernmost band</text>
+<rect x="72" y="681.66" width="364" height="32" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="254" y="704.16" text-anchor="middle" font-size="18" fill="#475569">north ghost row · from rank 1</text>
+<rect x="72" y="719.66" width="364" height="32" rx="8" fill="#ffedd5" stroke="#fdba74" stroke-width="1.4"/>
+<text x="254" y="742.16" text-anchor="middle" font-size="18" fill="#9a3412">northern boundary row · sent out</text>
+<rect x="72" y="757.66" width="364" height="32" rx="8" fill="#e0e7ff" stroke="#c7d2fe" stroke-width="1.4"/>
+<text x="254" y="780.16" text-anchor="middle" font-size="18" fill="#3730a3">interior rows</text>
+<rect x="72" y="795.66" width="364" height="32" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="254" y="818.16" text-anchor="middle" font-size="18" fill="#475569">south ghost row · mirrored</text>
+<text x="254" y="354.66" text-anchor="middle" font-size="18" fill="#475569">halo exchange: one row each way</text>
+<text x="254" y="624.66" text-anchor="middle" font-size="18" fill="#475569">halo exchange: one row each way</text>
+<text x="97.67" y="859.34" font-size="19" fill="#475569">longitude is periodic, so no exchange</text>
+<text x="120.91" y="885.01" font-size="19" fill="#475569">is needed along a latitude circle</text>
+<text x="111.44" y="910.68" font-size="19" fill="#475569">global edges: tracers are mirrored</text>
+<text x="145.48" y="937.92" text-anchor="end" font-size="19" fill="#475569">and</text>
+<g transform="translate(150.76 937.92) scale(0.0228)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-N-73"></use><use xlink:href="#mj-N-69" transform="translate(394,0)"></use><use xlink:href="#mj-N-6E" transform="translate(672,0)"></use></g><g transform="translate(1228,0)"><use xlink:href="#mj-N-2061"></use></g><g transform="translate(1394.7,0)"><use xlink:href="#mj-I-1D711"></use><g transform="translate(687,-150) scale(0.707)"><use xlink:href="#mj-N-30"></use></g></g><g transform="translate(2763,0)"><use xlink:href="#mj-N-3D"></use></g><g transform="translate(3818.8,0)"><use xlink:href="#mj-N-32"></use></g><g transform="translate(4485.4,0)"><use xlink:href="#mj-N-73"></use><use xlink:href="#mj-N-69" transform="translate(394,0)"></use><use xlink:href="#mj-N-6E" transform="translate(672,0)"></use></g><g transform="translate(5713.4,0)"><use xlink:href="#mj-N-2061"></use></g><g transform="translate(5880.1,0)"><use xlink:href="#mj-I-1D711"></use><g transform="translate(687,-150) scale(0.707)"><use xlink:href="#mj-N-31"></use></g></g><g transform="translate(7192.9,0)"><use xlink:href="#mj-N-2212"></use></g><g transform="translate(8193.1,0)"><use xlink:href="#mj-N-73"></use><use xlink:href="#mj-N-69" transform="translate(394,0)"></use><use xlink:href="#mj-N-6E" transform="translate(672,0)"></use></g><g transform="translate(9421.1,0)"><use xlink:href="#mj-N-2061"></use></g><g transform="translate(9587.8,0)"><use xlink:href="#mj-I-1D711"></use><g transform="translate(687,-150) scale(0.707)"><use xlink:href="#mj-N-32"></use></g></g></g></g></g></g>
+<text x="538" y="53.28" font-size="24" font-weight="700" fill="#0f172a">Land mask and coastal differences</text>
+<text x="593.9" y="95.27" font-size="19" fill="#475569">green: ocean point · grey: land point</text>
+<rect x="625" y="113.26" width="46" height="46" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<rect x="674" y="113.26" width="46" height="46" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<rect x="723" y="113.26" width="46" height="46" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<rect x="772" y="113.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="821" y="113.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="625" y="162.26" width="46" height="46" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<rect x="674" y="162.26" width="46" height="46" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<rect x="723" y="162.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="772" y="162.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<circle cx="795" cy="185.26" r="14" fill="#ffffff" stroke="#059669" stroke-width="1.8"/>
+<text x="795" y="191.26" text-anchor="middle" font-size="18" font-weight="700" fill="#059669">a</text>
+<rect x="821" y="162.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="625" y="211.26" width="46" height="46" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<rect x="674" y="211.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<circle cx="697" cy="234.26" r="14" fill="#ffffff" stroke="#059669" stroke-width="1.8"/>
+<text x="697" y="240.26" text-anchor="middle" font-size="18" font-weight="700" fill="#059669">b</text>
+<rect x="723" y="211.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="772" y="211.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="821" y="211.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="625" y="260.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="674" y="260.26" width="46" height="46" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<rect x="723" y="260.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<circle cx="746" cy="283.26" r="14" fill="#ffffff" stroke="#059669" stroke-width="1.8"/>
+<text x="746" y="289.26" text-anchor="middle" font-size="18" font-weight="700" fill="#059669">c</text>
+<rect x="772" y="260.26" width="46" height="46" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<rect x="821" y="260.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="625" y="309.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="674" y="309.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="723" y="309.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="772" y="309.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<rect x="821" y="309.26" width="46" height="46" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<text x="603.16" y="378.22" font-size="18" fill="#475569">a 5 × 5 excerpt of the Gaussian grid</text>
+<rect x="534" y="400" width="424" height="106.98" rx="12" fill="#ffffff" stroke="#a7f3d0" stroke-width="1.4"/>
+<rect x="550" y="434.49" width="38" height="38" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<text x="569" y="459.49" text-anchor="middle" font-size="18" font-weight="700" fill="#166534">W</text>
+<rect x="591" y="434.49" width="38" height="38" rx="5" fill="#bbf7d0" stroke="#059669" stroke-width="2"/>
+<text x="610" y="459.49" text-anchor="middle" font-size="18" font-weight="700" fill="#166534">P</text>
+<rect x="632" y="434.49" width="38" height="38" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<text x="651" y="459.49" text-anchor="middle" font-size="18" font-weight="700" fill="#166534">E</text>
+<text x="688.88" y="428.4" font-size="20" font-weight="700" fill="#0f172a">a · Both neighbours ocean</text>
+<g transform="translate(719.51 475.99) scale(0.024)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><g transform="translate(220,676)"><g><use xlink:href="#mj-I-1D715"></use></g><g transform="translate(566,0)"><use xlink:href="#mj-I-1D44B"></use></g></g><g transform="translate(360,-686)"><use xlink:href="#mj-I-1D715"></use><g transform="translate(566,0)"><use xlink:href="#mj-I-1D465"></use></g></g><rect width="1618" height="60" x="120" y="220"></rect></g><g transform="translate(2135.8,0)"><use xlink:href="#mj-N-2248"></use></g><g transform="translate(3191.6,0)"><g transform="translate(220,676)"><g><g><use xlink:href="#mj-I-1D44B"></use></g><g transform="translate(861,-150) scale(0.707)"><use xlink:href="#mj-I-1D438"></use></g></g><g transform="translate(1673.5,0)"><use xlink:href="#mj-N-2212"></use></g><g transform="translate(2673.7,0)"><use xlink:href="#mj-I-1D44B"></use><g transform="translate(861,-150) scale(0.707)"><use xlink:href="#mj-I-1D44A"></use></g></g></g><g transform="translate(1430.4,-686)"><use xlink:href="#mj-N-32"></use><g transform="translate(500,0)"><use xlink:href="#mj-N-394"></use></g><g transform="translate(1333,0)"><use xlink:href="#mj-I-1D465"></use></g></g><rect width="4525.7" height="60" x="120" y="220"></rect></g></g></g></g></g>
+<rect x="534" y="518.98" width="424" height="163.32" rx="12" fill="#ffffff" stroke="#a7f3d0" stroke-width="1.4"/>
+<rect x="550" y="581.64" width="38" height="38" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<text x="569" y="606.64" text-anchor="middle" font-size="18" font-weight="700" fill="#475569">W</text>
+<rect x="591" y="581.64" width="38" height="38" rx="5" fill="#bbf7d0" stroke="#059669" stroke-width="2"/>
+<text x="610" y="606.64" text-anchor="middle" font-size="18" font-weight="700" fill="#166534">P</text>
+<rect x="632" y="581.64" width="38" height="38" rx="5" fill="#bbf7d0" stroke="#86efac" stroke-width="1.4"/>
+<text x="651" y="606.64" text-anchor="middle" font-size="18" font-weight="700" fill="#166534">E</text>
+<text x="694.44" y="547.38" font-size="20" font-weight="700" fill="#0f172a">b · One neighbour is land</text>
+<g transform="translate(722.03 594.96) scale(0.024)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><g transform="translate(220,676)"><g><use xlink:href="#mj-I-1D715"></use></g><g transform="translate(566,0)"><use xlink:href="#mj-I-1D44B"></use></g></g><g transform="translate(360,-686)"><use xlink:href="#mj-I-1D715"></use><g transform="translate(566,0)"><use xlink:href="#mj-I-1D465"></use></g></g><rect width="1618" height="60" x="120" y="220"></rect></g><g transform="translate(2135.8,0)"><use xlink:href="#mj-N-2248"></use></g><g transform="translate(3191.6,0)"><g transform="translate(220,676)"><g><g><use xlink:href="#mj-I-1D44B"></use></g><g transform="translate(861,-150) scale(0.707)"><use xlink:href="#mj-I-1D438"></use></g></g><g transform="translate(1673.5,0)"><use xlink:href="#mj-N-2212"></use></g><g transform="translate(2673.7,0)"><use xlink:href="#mj-I-1D44B"></use><g transform="translate(861,-150) scale(0.707)"><use xlink:href="#mj-I-1D443"></use></g></g></g><g transform="translate(1575.4,-686)"><use xlink:href="#mj-N-394"></use><g transform="translate(833,0)"><use xlink:href="#mj-I-1D465"></use></g></g><rect width="4315.7" height="60" x="120" y="220"></rect></g></g></g></g></g>
+<text x="719.43" y="634.91" font-size="18" fill="#475569">land to the east instead:</text>
+<g transform="translate(739.41 662.89) scale(0.0216)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-N-28"></use></g><g transform="translate(389,0)"><use xlink:href="#mj-I-1D44B"></use><g transform="translate(861,-150) scale(0.707)"><use xlink:href="#mj-I-1D443"></use></g></g><g transform="translate(2053.3,0)"><use xlink:href="#mj-N-2212"></use></g><g transform="translate(3053.5,0)"><use xlink:href="#mj-I-1D44B"></use><g transform="translate(861,-150) scale(0.707)"><use xlink:href="#mj-I-1D44A"></use></g></g><g transform="translate(4705.5,0)"><use xlink:href="#mj-N-29"></use></g><g transform="translate(5094.5,0)"><use xlink:href="#mj-N-2F"></use></g><g transform="translate(5594.5,0)"><use xlink:href="#mj-N-394"></use></g><g transform="translate(6427.5,0)"><use xlink:href="#mj-I-1D465"></use></g></g></g></g></g>
+<rect x="534" y="694.29" width="424" height="106.98" rx="12" fill="#ffffff" stroke="#a7f3d0" stroke-width="1.4"/>
+<rect x="550" y="728.78" width="38" height="38" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<text x="569" y="753.78" text-anchor="middle" font-size="18" font-weight="700" fill="#475569">W</text>
+<rect x="591" y="728.78" width="38" height="38" rx="5" fill="#bbf7d0" stroke="#059669" stroke-width="2"/>
+<text x="610" y="753.78" text-anchor="middle" font-size="18" font-weight="700" fill="#166534">P</text>
+<rect x="632" y="728.78" width="38" height="38" rx="5" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.4"/>
+<text x="651" y="753.78" text-anchor="middle" font-size="18" font-weight="700" fill="#475569">E</text>
+<text x="697.23" y="722.69" font-size="20" font-weight="700" fill="#0f172a">c · Both neighbours land</text>
+<g transform="translate(770.7 770.28) scale(0.024)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><g transform="translate(220,676)"><g><use xlink:href="#mj-I-1D715"></use></g><g transform="translate(566,0)"><use xlink:href="#mj-I-1D44B"></use></g></g><g transform="translate(360,-686)"><use xlink:href="#mj-I-1D715"></use><g transform="translate(566,0)"><use xlink:href="#mj-I-1D465"></use></g></g><rect width="1618" height="60" x="120" y="220"></rect></g><g transform="translate(2135.8,0)"><use xlink:href="#mj-N-3D"></use></g><g transform="translate(3191.6,0)"><use xlink:href="#mj-N-30"></use></g></g></g></g></g>
+<text x="577.01" y="832.95" font-size="19" fill="#475569">the same three cases apply north–south</text>
+<text x="573.31" y="858.62" font-size="19" fill="#475569">advection: zero flux through the coastline</text>
+<text x="593.54" y="884.29" font-size="19" fill="#475569">diffusion: a land neighbour takes the</text>
+<text x="607.63" y="909.96" font-size="19" fill="#475569">value of the ocean point itself, so</text>
+<text x="589.14" y="935.63" font-size="19" fill="#475569">land values never leak into the ocean</text>
 </svg>
