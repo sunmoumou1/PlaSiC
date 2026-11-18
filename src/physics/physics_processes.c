@@ -959,9 +959,14 @@ static void ice_step(void)
         }
     }
 
-    /* Keep the initial concentration as the compactness state. */
-    memcpy(ice.diagnosed_ice_cover, ice.ice_cover,
-           sizeof(ice.diagnosed_ice_cover));
+    /*
+     * diagnosed_ice_cover holds the continuous compactness c_i^* and carries
+     * over from step to step (and through the restart record "xicecc").
+     * Do not overwrite it with the binary ice_cover mask here: the mask has
+     * already been thresholded at the end of the previous step, so copying
+     * it back would reset c_i^* to 0 or 1 every step.  A cold start seeds
+     * c_i^* once in initialize_cold_start_physics().
+     */
 
     if (ice.prognostic_skin_temperature == 1)
     {

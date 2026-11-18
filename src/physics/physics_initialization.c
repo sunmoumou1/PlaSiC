@@ -646,6 +646,8 @@ static int initialize_cold_start_physics(void)
             (size_t)initial_month * PLASIC_NHOR + (size_t)point];
         ice.ice_cover[point] = ice.climatological_ice_cover[
             (size_t)initial_month * PLASIC_NHOR + (size_t)point];
+        /* Seed the continuous compactness c_i^* from the initial cover. */
+        ice.diagnosed_ice_cover[point] = ice.ice_cover[point];
         land.interpolated_albedo[point] = land.albedo_climatology[
             (size_t)initial_month * PLASIC_NHOR + (size_t)point];
         ice.snow[point] = 0.0f;
