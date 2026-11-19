@@ -1,173 +1,144 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 960" role="img" aria-labelledby="title desc">
-  <title id="title">PlaSiC surface and sea-ice–ocean coupling</title>
-  <desc id="desc">Atmospheric fluxes drive the land surface and the sea interface separately. The land updates its surface boundary without producing runoff. The sea interface averages atmospheric forcing at ocean points over the coupling window and hands it to the sea ice; the sea ice returns surface temperature, sea surface temperature, mixed-layer depth and ice/snow state. The sea ice and the mixed-layer ocean exchange heat, freshwater, stress and ocean state.</desc>
-  <defs>
-    <marker id="arrow-orange" markerWidth="9" markerHeight="9" refX="7.5" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L7.5,3 z" fill="#d97706"/>
-    </marker>
-    <marker id="arrow-blue" markerWidth="9" markerHeight="9" refX="7.5" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L7.5,3 z" fill="#2563eb"/>
-    </marker>
-    <marker id="arrow-purple" markerWidth="9" markerHeight="9" refX="7.5" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L7.5,3 z" fill="#7c3aed"/>
-    </marker>
-    <filter id="shadow" x="-8%" y="-12%" width="116%" height="128%">
-      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.10"/>
-    </filter>
-    <filter id="cardShadow" x="-10%" y="-14%" width="120%" height="132%">
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.10"/>
-    </filter>
-    <style>
-      .bg{fill:#f7f9fc}
-      .panel{stroke-width:1.6;filter:url(#shadow)}
-      .atm{fill:#eef5ff;stroke:#3b82f6}
-      .land{fill:#eefbf1;stroke:#16a34a}
-      .sea{fill:#e8fbff;stroke:#0891b2}
-      .ice{fill:#f5f1ff;stroke:#7c3aed}
-      .ocean{fill:#eef1ff;stroke:#4f46e5}
-      .card{fill:#ffffff;stroke:#dbe3ee;stroke-width:1.2;filter:url(#cardShadow)}
-      .divider{stroke:#d8e0ea;stroke-width:1.2}
-      .title{font:700 30px Arial,'Helvetica Neue',Helvetica,sans-serif;fill:#0f172a}
-      .subtitle{font:400 14.5px Arial,'Helvetica Neue',Helvetica,sans-serif;fill:#64748b}
-      .head{font:700 21px Arial,'Helvetica Neue',Helvetica,sans-serif;fill:#0f172a}
-      .code{font:600 12.5px ui-monospace,'SF Mono',Menlo,Consolas,monospace}
-      .code-atm{fill:#1d4ed8}.code-land{fill:#15803d}.code-sea{fill:#0e7490}.code-ice{fill:#6d28d9}.code-ocean{fill:#4338ca}
-      .pill-atm{fill:#dbeafe}.pill-land{fill:#dcfce7}.pill-sea{fill:#cffafe}.pill-ice{fill:#ede9fe}.pill-ocean{fill:#e0e7ff}
-      .body{font:400 13px Arial,'Helvetica Neue',Helvetica,sans-serif;fill:#334155}
-      .card-title{font:700 14.5px Arial,'Helvetica Neue',Helvetica,sans-serif;fill:#0f172a}
-      .card-line{font:400 12.2px Arial,'Helvetica Neue',Helvetica,sans-serif;fill:#475569}
-      .note{font:400 12px Arial,'Helvetica Neue',Helvetica,sans-serif}
-      .note-land{fill:#166534}.note-sea{fill:#155e75}.note-ice{fill:#5b21b6}
-      .note-box-land{fill:#dcfce7;stroke:#86efac;stroke-width:1.1}
-      .note-box-sea{fill:#cffafe;stroke:#67e8f9;stroke-width:1.1}
-      .note-box-ice{fill:#ede9fe;stroke:#c4b5fd;stroke-width:1.1}
-      .down{fill:#c2410c}.up{fill:#1d4ed8}.internal{fill:#6d28d9}
-      .forcing{fill:none;stroke:#d97706;stroke-width:2.8;marker-end:url(#arrow-orange)}
-      .feedback{fill:none;stroke:#2563eb;stroke-width:2.8;marker-end:url(#arrow-blue)}
-      .exchange{fill:none;stroke:#7c3aed;stroke-width:2.8;marker-end:url(#arrow-purple)}
-      .legend{font:400 13px Arial,'Helvetica Neue',Helvetica,sans-serif;fill:#475569}
-      @media (prefers-color-scheme:dark){
-        .bg{fill:#0b1220}
-        .atm{fill:#12233f;stroke:#60a5fa}.land{fill:#0c2a18;stroke:#4ade80}.sea{fill:#082b36;stroke:#22d3ee}.ice{fill:#241246;stroke:#a78bfa}.ocean{fill:#191f4b;stroke:#818cf8}
-        .card{fill:#16202f;stroke:#334155}
-        .divider{stroke:#334155}
-        .title,.head,.card-title{fill:#f1f5f9}
-        .subtitle,.body,.card-line,.legend{fill:#cbd5e1}
-        .code-atm{fill:#93c5fd}.code-land{fill:#86efac}.code-sea{fill:#67e8f9}.code-ice{fill:#c4b5fd}.code-ocean{fill:#a5b4fc}
-        .pill-atm{fill:#1e3a5f}.pill-land{fill:#14532d}.pill-sea{fill:#164e63}.pill-ice{fill:#3b1d6e}.pill-ocean{fill:#2a3170}
-        .note-land{fill:#bbf7d0}.note-sea{fill:#a5f3fc}.note-ice{fill:#ddd6fe}
-        .note-box-land{fill:#14532d;stroke:#22c55e}.note-box-sea{fill:#164e63;stroke:#06b6d4}.note-box-ice{fill:#3b1d6e;stroke:#8b5cf6}
-        .down{fill:#fdba74}.up{fill:#93c5fd}.internal{fill:#c4b5fd}
-      }
-    </style>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1093" viewBox="0 0 1000 1093" role="img" aria-labelledby="title desc">
+<title id="title">Coupling variables and directions between the atmosphere, land, sea ice and ocean</title>
+<desc id="desc">The atmosphere (lowest model level T, q, u, v and surface pressure p_s) exchanges with two branches that never share a grid point. Land: land_step() receives sensible and latent heat, net radiation, rain, snow and evaporation, and returns T_s, q_s, albedo, z_0 and r_h; excess bucket water leaves the system (no runoff). Ocean points: sea_step() sums the total heat flux, P-E, snowfall, surface stress and u_*^3 every step and returns T_s, q_s, albedo, z_0 and r_h blended by the ice cover c_i. At coupling instants it passes the window means to ice_step(), which returns T_s, SST, MLD, ice cover, ice thickness and snow on ice. The sea ice passes ice cover, thickness, heat, P-E, snow, stress and u_*^3 to ocean_step(), which returns SST, MLD and the ocean heat flux.</desc>
+<defs>
+<marker id="aDown" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 Z" fill="#ea580c"/></marker>
+<marker id="aUp" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 Z" fill="#2563eb"/></marker>
+<style>
+text{font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif}
+.code{font-family:SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace}
+</style>
+<!-- MathJax TeX-font glyphs (same font as the formulas in the text) -->
+<path id="mj-I-1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"/>
+<path id="mj-I-1D45E" d="M33 157Q33 258 109 349T280 441Q340 441 372 389Q373 390 377 395T388 406T404 418Q438 442 450 442Q454 442 457 439T460 434Q460 425 391 149Q320 -135 320 -139Q320 -147 365 -148H390Q396 -156 396 -157T393 -175Q389 -188 383 -194H370Q339 -192 262 -192Q234 -192 211 -192T174 -192T157 -193Q143 -193 143 -185Q143 -182 145 -170Q149 -154 152 -151T172 -148Q220 -148 230 -141Q238 -136 258 -53T279 32Q279 33 272 29Q224 -10 172 -10Q117 -10 75 30T33 157ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"/>
+<path id="mj-I-1D462" d="M21 287Q21 295 30 318T55 370T99 420T158 442Q204 442 227 417T250 358Q250 340 216 246T182 105Q182 62 196 45T238 27T291 44T328 78L339 95Q341 99 377 247Q407 367 413 387T427 416Q444 431 463 431Q480 431 488 421T496 402L420 84Q419 79 419 68Q419 43 426 35T447 26Q469 29 482 57T512 145Q514 153 532 153Q551 153 551 144Q550 139 549 130T540 98T523 55T498 17T462 -8Q454 -10 438 -10Q372 -10 347 46Q345 45 336 36T318 21T296 6T267 -6T233 -11Q189 -11 155 7Q103 38 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z"/>
+<path id="mj-I-1D463" d="M173 380Q173 405 154 405Q130 405 104 376T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Q21 294 29 316T53 368T97 419T160 441Q202 441 225 417T249 361Q249 344 246 335Q246 329 231 291T200 202T182 113Q182 86 187 69Q200 26 250 26Q287 26 319 60T369 139T398 222T409 277Q409 300 401 317T383 343T365 361T357 383Q357 405 376 424T417 443Q436 443 451 425T467 367Q467 340 455 284T418 159T347 40T241 -11Q177 -11 139 22Q102 54 102 117Q102 148 110 181T151 298Q173 362 173 380Z"/>
+<path id="mj-I-1D45D" d="M23 287Q24 290 25 295T30 317T40 348T55 381T75 411T101 433T134 442Q209 442 230 378L240 387Q302 442 358 442Q423 442 460 395T497 281Q497 173 421 82T249 -10Q227 -10 210 -4Q199 1 187 11T168 28L161 36Q160 35 139 -51T118 -138Q118 -144 126 -145T163 -148H188Q194 -155 194 -157T191 -175Q188 -187 185 -190T172 -194Q170 -194 161 -194T127 -193T65 -192Q-5 -192 -24 -194H-32Q-39 -187 -39 -183Q-37 -156 -26 -148H-6Q28 -147 33 -136Q36 -130 94 103T155 350Q156 355 156 364Q156 405 131 405Q109 405 94 377T71 316T59 280Q57 278 43 278H29Q23 284 23 287ZM178 102Q200 26 252 26Q282 26 310 49T356 107Q374 141 392 215T411 325V331Q411 405 350 405Q339 405 328 402T306 393T286 380T269 365T254 350T243 336T235 326L232 322Q232 321 229 308T218 264T204 212Q178 106 178 102Z"/>
+<path id="mj-I-1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"/>
+<path id="mj-I-1D6FC" d="M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z"/>
+<path id="mj-I-1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"/>
+<path id="mj-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"/>
+<path id="mj-I-1D45F" d="M21 287Q22 290 23 295T28 317T38 348T53 381T73 411T99 433T132 442Q161 442 183 430T214 408T225 388Q227 382 228 382T236 389Q284 441 347 441H350Q398 441 422 400Q430 381 430 363Q430 333 417 315T391 292T366 288Q346 288 334 299T322 328Q322 376 378 392Q356 405 342 405Q286 405 239 331Q229 315 224 298T190 165Q156 25 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 114 189T154 366Q154 405 128 405Q107 405 92 377T68 316T57 280Q55 278 41 278H27Q21 284 21 287Z"/>
+<path id="mj-I-210E" d="M137 683Q138 683 209 688T282 694Q294 694 294 685Q294 674 258 534Q220 386 220 383Q220 381 227 388Q288 442 357 442Q411 442 444 415T478 336Q478 285 440 178T402 50Q403 36 407 31T422 26Q450 26 474 56T513 138Q516 149 519 151T535 153Q555 153 555 145Q555 144 551 130Q535 71 500 33Q466 -10 419 -10H414Q367 -10 346 17T325 74Q325 90 361 192T398 345Q398 404 354 404H349Q266 404 205 306L198 293L164 158Q132 28 127 16Q114 -11 83 -11Q69 -11 59 -2T48 16Q48 30 121 320L195 616Q195 629 188 632T149 637H128Q122 643 122 645T124 664Q129 683 137 683Z"/>
+<path id="mj-I-1D443" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"/>
+<path id="mj-N-2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"/>
+<path id="mj-I-1D438" d="M492 213Q472 213 472 226Q472 230 477 250T482 285Q482 316 461 323T364 330H312Q311 328 277 192T243 52Q243 48 254 48T334 46Q428 46 458 48T518 61Q567 77 599 117T670 248Q680 270 683 272Q690 274 698 274Q718 274 718 261Q613 7 608 2Q605 0 322 0H133Q31 0 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H757Q764 676 764 669Q764 664 751 557T737 447Q735 440 717 440H705Q698 445 698 453L701 476Q704 500 704 528Q704 558 697 578T678 609T643 625T596 632T532 634H485Q397 633 392 631Q388 629 386 622Q385 619 355 499T324 377Q347 376 372 376H398Q464 376 489 391T534 472Q538 488 540 490T557 493Q562 493 565 493T570 492T572 491T574 487T577 483L544 351Q511 218 508 216Q505 213 492 213Z"/>
+<path id="mj-BI-1D749" d="M55 289H43Q23 289 23 303Q23 308 33 322Q116 434 199 443Q200 444 386 444Q571 444 577 442Q588 441 599 432T610 402Q610 359 572 340Q561 335 547 334T452 333H353V331Q352 330 342 261T320 119T306 40Q300 18 281 3Q257 -13 233 -13Q210 -13 196 0T181 35Q181 44 182 48Q183 53 229 187T279 331Q279 333 228 333H209Q163 333 136 328T88 301L77 290L55 289Z"/>
+<path id="mj-N-33" d="M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z"/>
+<path id="mj-N-2217" d="M229 286Q216 420 216 436Q216 454 240 464Q241 464 245 464T251 465Q263 464 273 456T283 436Q283 419 277 356T270 286L328 328Q384 369 389 372T399 375Q412 375 423 365T435 338Q435 325 425 315Q420 312 357 282T289 250L355 219L425 184Q434 175 434 161Q434 146 425 136T401 125Q393 125 383 131T328 171L270 213Q283 79 283 63Q283 53 276 44T250 35Q231 35 224 44T216 63Q216 80 222 143T229 213L171 171Q115 130 110 127Q106 124 100 124Q87 124 76 134T64 161Q64 166 64 169T67 175T72 181T81 188T94 195T113 204T138 215T170 230T210 250L74 315Q65 324 65 338Q65 353 74 363T98 374Q106 374 116 368T171 328L229 286Z"/>
+<path id="mj-I-1D450" d="M34 159Q34 268 120 355T306 442Q362 442 394 418T427 355Q427 326 408 306T360 285Q341 285 330 295T319 325T330 359T352 380T366 386H367Q367 388 361 392T340 400T306 404Q276 404 249 390Q228 381 206 359Q162 315 142 235T121 119Q121 73 147 50Q169 26 205 26H209Q321 26 394 111Q403 121 406 121Q410 121 419 112T429 98T420 83T391 55T346 25T282 0T202 -11Q127 -11 81 37T34 159Z"/>
+<path id="mj-I-1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"/>
+</defs>
 
-  <rect class="bg" width="1500" height="960" rx="20"/>
-  <text class="title" x="750" y="50" text-anchor="middle">PlaSiC Surface and Sea-Ice–Ocean Coupling</text>
-  <text class="subtitle" x="750" y="79" text-anchor="middle">One shared grid; the physics_step() call order is the coupling order, and slow components receive window-mean forcing at coupling instants</text>
-
-  <!-- Atmosphere -->
-  <rect class="panel atm" x="420" y="100" width="660" height="120" rx="18"/>
-  <text class="head" x="750" y="140" text-anchor="middle">Atmosphere</text>
-  <rect x="726" y="151" width="48" height="3" rx="1.5" fill="#3b82f6"/>
-  <text class="body" x="750" y="178" text-anchor="middle">Lowest model level: T, q, u, v and surface pressure p&#8347;</text>
-  <text class="body" x="750" y="203" text-anchor="middle">Surface fluxes build T, q and momentum tendencies; new boundaries act from the next step</text>
-
-  <!-- Land -->
-  <rect class="panel land" x="40" y="400" width="340" height="250" rx="18"/>
-  <text class="head" x="210" y="438" text-anchor="middle">Land</text>
-  <rect x="186" y="449" width="48" height="3" rx="1.5" fill="#16a34a"/>
-  <rect class="pill-land" x="154" y="460" width="112" height="25" rx="12.5"/>
-  <text class="code code-land" x="210" y="477" text-anchor="middle">land_step()</text>
-  <line class="divider" x1="64" y1="497" x2="356" y2="497"/>
-  <text class="body" x="210" y="525" text-anchor="middle">State: Ts, soil temperature, soil water, snow</text>
-  <text class="body" x="210" y="551" text-anchor="middle">Budgets: surface energy, snow and soil water</text>
-  <text class="body" x="210" y="577" text-anchor="middle">Returns: Ts, qs, &#945;, z&#8320;, surface wetness</text>
-  <rect class="note-box-land" x="64" y="597" width="292" height="38" rx="10"/>
-  <text class="note note-land" x="210" y="621" text-anchor="middle">Excess bucket water leaves the system (no runoff)</text>
-
-  <!-- Sea interface -->
-  <rect class="panel sea" x="440" y="380" width="420" height="280" rx="18"/>
-  <text class="head" x="650" y="418" text-anchor="middle">Sea Interface</text>
-  <rect x="626" y="429" width="48" height="3" rx="1.5" fill="#0891b2"/>
-  <rect class="pill-sea" x="594" y="440" width="112" height="25" rx="12.5"/>
-  <text class="code code-sea" x="650" y="457" text-anchor="middle">sea_step()</text>
-  <line class="divider" x1="464" y1="477" x2="836" y2="477"/>
-  <text class="body" x="650" y="505" text-anchor="middle">Every step: accumulate fluxes at ocean points</text>
-  <text class="body" x="650" y="531" text-anchor="middle">Coupling instant: window mean &#8594; ice_step()</text>
-  <text class="body" x="650" y="557" text-anchor="middle">Return: Ts, SST, MLD, ice and snow</text>
-  <text class="body" x="650" y="583" text-anchor="middle">Build the next-step boundary qs, &#945;, z&#8320;</text>
-  <rect class="note-box-sea" x="464" y="601" width="372" height="44" rx="10"/>
-  <text class="note note-sea" x="650" y="620" text-anchor="middle">No runoff input: P&#8722;E is precipitation minus evaporation</text>
-  <text class="note note-sea" x="650" y="638" text-anchor="middle">SH/LH and their derivatives; SW/LW also accumulated</text>
-
-  <!-- Sea ice -->
-  <rect class="panel ice" x="1100" y="380" width="340" height="280" rx="18"/>
-  <text class="head" x="1270" y="418" text-anchor="middle">Thermodynamic Sea Ice</text>
-  <rect x="1246" y="429" width="48" height="3" rx="1.5" fill="#7c3aed"/>
-  <rect class="pill-ice" x="1214" y="440" width="112" height="25" rx="12.5"/>
-  <text class="code code-ice" x="1270" y="457" text-anchor="middle">ice_step()</text>
-  <line class="divider" x1="1124" y1="477" x2="1416" y2="477"/>
-  <text class="body" x="1270" y="505" text-anchor="middle">Ice surface temperature and conduction</text>
-  <text class="body" x="1270" y="531" text-anchor="middle">Ice thickness, ice cover, snow on ice</text>
-  <text class="body" x="1270" y="557" text-anchor="middle">Freezing, ice melt, snow melt, snow-to-ice</text>
-  <text class="body" x="1270" y="583" text-anchor="middle">Carries two levels of coupling:</text>
-  <rect class="note-box-ice" x="1124" y="601" width="292" height="44" rx="10"/>
-  <text class="note note-ice" x="1270" y="620" text-anchor="middle">Atmosphere &#8596; sea ice (via sea interface)</text>
-  <text class="note note-ice" x="1270" y="638" text-anchor="middle">Sea ice &#8596; mixed-layer ocean</text>
-
-  <!-- Mixed-layer ocean -->
-  <rect class="panel ocean" x="1100" y="720" width="340" height="140" rx="18"/>
-  <text class="head" x="1270" y="758" text-anchor="middle">Mixed-Layer Ocean</text>
-  <rect x="1246" y="769" width="48" height="3" rx="1.5" fill="#4f46e5"/>
-  <rect class="pill-ocean" x="1214" y="780" width="112" height="25" rx="12.5"/>
-  <text class="code code-ocean" x="1270" y="797" text-anchor="middle">ocean_step()</text>
-  <line class="divider" x1="1124" y1="817" x2="1416" y2="817"/>
-  <text class="body" x="1270" y="844" text-anchor="middle">Updates SST and the ocean-side ice heat flux</text>
-  <text class="body" x="1270" y="870" text-anchor="middle">Returns SST, MLD and ocean heat flux</text>
-
-  <!-- Atmosphere to land -->
-  <path class="forcing" d="M440 220 C405 280 370 340 310 398"/>
-  <path class="feedback" d="M360 400 C410 340 445 280 490 220"/>
-  <rect class="card" x="40" y="250" width="270" height="124" rx="12"/>
-  <text class="card-title" x="175" y="278" text-anchor="middle">Atmosphere &#8596; Land</text>
-  <text class="card-line down" x="60" y="306">&#8595; sensible &#183; latent &#183; net radiation</text>
-  <text class="card-line down" x="60" y="328">&#8595; rain &#183; snow &#183; evaporation</text>
-  <text class="card-line up" x="60" y="352">&#8593; Ts &#183; qs &#183; &#945; &#183; z&#8320; &#183; wetness</text>
-
-  <!-- Atmosphere to sea interface -->
-  <path class="forcing" d="M540 220 L540 378"/>
-  <path class="feedback" d="M840 380 L840 220"/>
-  <rect class="card" x="560" y="250" width="260" height="124" rx="12"/>
-  <text class="card-title" x="690" y="278" text-anchor="middle">Atmosphere &#8596; Sea Interface</text>
-  <text class="card-line down" x="578" y="306">&#8595; total heat: SH + LH + SW + LW</text>
-  <text class="card-line down" x="578" y="328">&#8595; P&#8722;E &#183; snow &#183; &#964;x/&#964;y &#183; u*&#179;</text>
-  <text class="card-line up" x="578" y="352">&#8593; Ts &#183; qs &#183; &#945; &#183; z&#8320; (ice-blended)</text>
-
-  <!-- Sea interface and sea ice -->
-  <path class="exchange" d="M860 418 L1096 418"/>
-  <path class="exchange" d="M1096 632 L864 632"/>
-  <rect class="card" x="866" y="452" width="228" height="148" rx="12"/>
-  <text class="card-title" x="980" y="480" text-anchor="middle">Interface &#8596; Sea Ice</text>
-  <text class="card-line internal" x="884" y="506">&#8594; window-mean heat &#183; P&#8722;E</text>
-  <text class="card-line internal" x="884" y="528">&#8594; snow &#183; &#964;x/&#964;y &#183; u*&#179;</text>
-  <text class="card-line internal" x="884" y="552">&#8592; Ts &#183; SST &#183; MLD</text>
-  <text class="card-line internal" x="884" y="574">&#8592; ice cover &#183; thickness &#183; snow</text>
-
-  <!-- Sea ice and ocean -->
-  <path class="exchange" d="M1180 660 L1180 718"/>
-  <path class="exchange" d="M1330 718 L1330 660"/>
-  <rect class="card" x="800" y="672" width="280" height="134" rx="12"/>
-  <text class="card-title" x="940" y="700" text-anchor="middle">Sea Ice &#8596; Ocean</text>
-  <text class="card-line internal" x="818" y="726">&#8595; ice cover &#183; thickness &#183; conduction</text>
-  <text class="card-line internal" x="818" y="748">&#8595; freshwater &#183; &#964;x/&#964;y &#183; u*&#179;</text>
-  <text class="card-line internal" x="818" y="772">&#8593; SST &#183; MLD &#183; ocean heat flux</text>
-
-  <!-- Legend -->
-  <line x1="50" y1="918" x2="94" y2="918" stroke="#d97706" stroke-width="3.5"/>
-  <text class="legend" x="106" y="923">Atmospheric surface forcing</text>
-  <line x1="430" y1="918" x2="474" y2="918" stroke="#2563eb" stroke-width="3.5"/>
-  <text class="legend" x="486" y="923">Boundary returned to the atmosphere</text>
-  <line x1="900" y1="918" x2="944" y2="918" stroke="#7c3aed" stroke-width="3.5"/>
-  <text class="legend" x="956" y="923">Two-way coupling of the slow components</text>
+<rect width="1000" height="1093" rx="16" fill="#ffffff"/>
+<rect x="18" y="6" width="964" height="103" rx="18" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.6"/>
+<text x="418.32" y="50" font-size="28" font-weight="700" fill="#0f172a" xml:space="preserve">Atmosphere</text>
+<text x="237.86" y="85" font-size="22" fill="#334155" xml:space="preserve">lowest model level </text>
+<g transform="translate(423.72 85) scale(0.0264)" fill="#334155"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D447"></use></g></g></g></g>
+<text x="442.3" y="85" font-size="22" fill="#334155" xml:space="preserve">, </text>
+<g transform="translate(454.53 85) scale(0.0264)" fill="#334155"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D45E"></use></g></g></g></g>
+<text x="466.67" y="85" font-size="22" fill="#334155" xml:space="preserve">, </text>
+<g transform="translate(478.9 85) scale(0.0264)" fill="#334155"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D462"></use></g></g></g></g>
+<text x="494" y="85" font-size="22" fill="#334155" xml:space="preserve">, </text>
+<g transform="translate(506.22 85) scale(0.0264)" fill="#334155"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D463"></use></g></g></g></g>
+<text x="519.03" y="85" font-size="22" fill="#334155" xml:space="preserve"> and surface pressure </text>
+<g transform="translate(737.92 85) scale(0.0264)" fill="#334155"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D45D"></use></g><g transform="translate(536,-150) scale(0.707)"><use xlink:href="#mj-I-1D460"></use></g></g></g></g></g>
+<rect x="18" y="304" width="374" height="182" rx="18" fill="#f0fdf4" stroke="#a7f3d0" stroke-width="1.6"/>
+<text x="171.56" y="348" font-size="28" font-weight="700" fill="#0f172a" xml:space="preserve">Land</text>
+<rect x="126.8" y="366.8" width="156.4" height="29" rx="6" fill="#edf6f5" stroke="#cfe0e3" stroke-width="1.2"/>
+<text class="code" x="205" y="388" text-anchor="middle" font-size="20" fill="#0f172a">land_step()</text>
+<g transform="translate(103.78 431) scale(0.0264)" fill="#334155"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D447"></use></g><g transform="translate(617,-150) scale(0.707)"><use xlink:href="#mj-I-1D460"></use></g></g></g></g></g>
+<text x="130.14" y="431" font-size="22" fill="#334155" xml:space="preserve">, soil temperature,</text>
+<text x="127.36" y="462" font-size="22" fill="#334155" xml:space="preserve">soil water, snow</text>
+<rect x="432" y="304" width="550" height="182" rx="18" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1.6"/>
+<text x="565.37" y="348" font-size="28" font-weight="700" fill="#0f172a" xml:space="preserve">Sea-surface interface</text>
+<rect x="635" y="366.8" width="144" height="29" rx="6" fill="#edf6f5" stroke="#cfe0e3" stroke-width="1.2"/>
+<text class="code" x="707" y="388" text-anchor="middle" font-size="20" fill="#0f172a">sea_step()</text>
+<text x="484.43" y="431" font-size="22" fill="#334155" xml:space="preserve">every step: accumulate fluxes at ocean points</text>
+<text x="520.52" y="462" font-size="22" fill="#334155" xml:space="preserve">coupling instant: window means → ice</text>
+<path d="M192 112 V301" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" marker-end="url(#aDown)"/>
+<path d="M218 301 V112" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" marker-end="url(#aUp)"/>
+<text x="42.35" y="151.5" font-size="22" fill="#c2410c" xml:space="preserve">sensible heat</text>
+<text x="69.25" y="182.5" font-size="22" fill="#c2410c" xml:space="preserve">latent heat</text>
+<text x="50.91" y="213.5" font-size="22" fill="#c2410c" xml:space="preserve">net radiation</text>
+<text x="71.73" y="244.5" font-size="22" fill="#c2410c" xml:space="preserve">rain, snow</text>
+<text x="57.03" y="275.5" font-size="22" fill="#c2410c" xml:space="preserve">evaporation</text>
+<g transform="translate(238 198) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D447"></use></g><g transform="translate(617,-150) scale(0.707)"><use xlink:href="#mj-I-1D460"></use></g></g></g></g></g>
+<text x="264.36" y="198" font-size="22" fill="#1d4ed8" xml:space="preserve">, </text>
+<g transform="translate(276.59 198) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D45E"></use></g><g transform="translate(479,-150) scale(0.707)"><use xlink:href="#mj-I-1D460"></use></g></g></g></g></g>
+<text x="299.31" y="198" font-size="22" fill="#1d4ed8" xml:space="preserve">, </text>
+<g transform="translate(311.53 198) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D6FC"></use></g></g></g></g>
+<g transform="translate(238 229) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D467"></use></g><g transform="translate(498,-150) scale(0.707)"><use xlink:href="#mj-N-30"></use></g></g></g></g></g>
+<text x="261.8" y="229" font-size="22" fill="#1d4ed8" xml:space="preserve">, </text>
+<g transform="translate(274.03 229) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D45F"></use></g><g transform="translate(484,-150) scale(0.707)"><use xlink:href="#mj-I-210E"></use></g></g></g></g></g>
+<path d="M694 112 V301" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" marker-end="url(#aDown)"/>
+<path d="M720 301 V112" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" marker-end="url(#aUp)"/>
+<text x="543.14" y="182.5" font-size="22" fill="#c2410c" xml:space="preserve">total heat flux</text>
+<g transform="translate(510.03 213.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D443"></use></g><g transform="translate(973.2,0)"><use xlink:href="#mj-N-2212"></use></g><g transform="translate(1973.4,0)"><use xlink:href="#mj-I-1D438"></use></g></g></g></g>
+<text x="582.29" y="213.5" font-size="22" fill="#c2410c" xml:space="preserve">, snowfall</text>
+<text x="554.26" y="244.5" font-size="22" fill="#c2410c" xml:space="preserve">stress </text>
+<g transform="translate(619.04 244.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-BI-1D749"></use></g></g></g></g>
+<text x="635.15" y="244.5" font-size="22" fill="#c2410c" xml:space="preserve">, </text>
+<g transform="translate(647.37 244.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D462"></use></g><g transform="translate(605,363) scale(0.707)"><use xlink:href="#mj-N-33"></use></g><g transform="translate(605,-247) scale(0.707)"><use xlink:href="#mj-N-2217"></use></g></g></g></g></g>
+<g transform="translate(740 182.5) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D447"></use></g><g transform="translate(617,-150) scale(0.707)"><use xlink:href="#mj-I-1D460"></use></g></g></g></g></g>
+<text x="766.36" y="182.5" font-size="22" fill="#1d4ed8" xml:space="preserve">, </text>
+<g transform="translate(778.59 182.5) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D45E"></use></g><g transform="translate(479,-150) scale(0.707)"><use xlink:href="#mj-I-1D460"></use></g></g></g></g></g>
+<text x="801.31" y="182.5" font-size="22" fill="#1d4ed8" xml:space="preserve">, </text>
+<g transform="translate(813.53 182.5) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D6FC"></use></g></g></g></g>
+<text x="830.43" y="182.5" font-size="22" fill="#1d4ed8" xml:space="preserve">, </text>
+<g transform="translate(842.65 182.5) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D467"></use></g><g transform="translate(498,-150) scale(0.707)"><use xlink:href="#mj-N-30"></use></g></g></g></g></g>
+<text x="866.45" y="182.5" font-size="22" fill="#1d4ed8" xml:space="preserve">, </text>
+<g transform="translate(878.68 182.5) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D45F"></use></g><g transform="translate(484,-150) scale(0.707)"><use xlink:href="#mj-I-210E"></use></g></g></g></g></g>
+<text x="740" y="213.5" font-size="22" fill="#1d4ed8" xml:space="preserve">blended by ice</text>
+<text x="740" y="244.5" font-size="22" fill="#1d4ed8" xml:space="preserve">cover </text>
+<g transform="translate(799.91 244.5) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D450"></use></g><g transform="translate(466,-150) scale(0.707)"><use xlink:href="#mj-I-1D456"></use></g></g></g></g></g>
+<rect x="432" y="619" width="550" height="182" rx="18" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.6"/>
+<text x="548.26" y="663" font-size="28" font-weight="700" fill="#0f172a" xml:space="preserve">Thermodynamic sea ice</text>
+<rect x="635" y="681.8" width="144" height="29" rx="6" fill="#edf6f5" stroke="#cfe0e3" stroke-width="1.2"/>
+<text class="code" x="707" y="703" text-anchor="middle" font-size="20" fill="#0f172a">ice_step()</text>
+<text x="532.51" y="746" font-size="22" fill="#334155" xml:space="preserve">ice temperature, thickness, cover </text>
+<g transform="translate(861.43 746) scale(0.0264)" fill="#334155"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D450"></use></g><g transform="translate(466,-150) scale(0.707)"><use xlink:href="#mj-I-1D456"></use></g></g></g></g></g>
+<text x="627.5" y="777" font-size="22" fill="#334155" xml:space="preserve">and snow on ice</text>
+<path d="M694 489 V616" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" marker-end="url(#aDown)"/>
+<path d="M720 616 V489" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" marker-end="url(#aUp)"/>
+<text x="504.03" y="528.5" font-size="22" fill="#c2410c" xml:space="preserve">window means of</text>
+<text x="478.21" y="559.5" font-size="22" fill="#c2410c" xml:space="preserve">heat, </text>
+<g transform="translate(533.25 559.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D443"></use></g><g transform="translate(973.2,0)"><use xlink:href="#mj-N-2212"></use></g><g transform="translate(1973.4,0)"><use xlink:href="#mj-I-1D438"></use></g></g></g></g>
+<text x="605.52" y="559.5" font-size="22" fill="#c2410c" xml:space="preserve">, snow,</text>
+<g transform="translate(619.04 590.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-BI-1D749"></use></g></g></g></g>
+<text x="635.15" y="590.5" font-size="22" fill="#c2410c" xml:space="preserve">, </text>
+<g transform="translate(647.37 590.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D462"></use></g><g transform="translate(605,363) scale(0.707)"><use xlink:href="#mj-N-33"></use></g><g transform="translate(605,-247) scale(0.707)"><use xlink:href="#mj-N-2217"></use></g></g></g></g></g>
+<g transform="translate(740 528.5) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D447"></use></g><g transform="translate(617,-150) scale(0.707)"><use xlink:href="#mj-I-1D460"></use></g></g></g></g></g>
+<text x="766.36" y="528.5" font-size="22" fill="#1d4ed8" xml:space="preserve">, SST, MLD,</text>
+<g transform="translate(740 559.5) scale(0.0264)" fill="#1d4ed8"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D450"></use></g><g transform="translate(466,-150) scale(0.707)"><use xlink:href="#mj-I-1D456"></use></g></g></g></g></g>
+<text x="760.06" y="559.5" font-size="22" fill="#1d4ed8" xml:space="preserve">, ice thickness,</text>
+<text x="740" y="590.5" font-size="22" fill="#1d4ed8" xml:space="preserve">snow on ice</text>
+<rect x="432" y="934" width="550" height="151" rx="18" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.6"/>
+<text x="585.61" y="978" font-size="28" font-weight="700" fill="#0f172a" xml:space="preserve">Mixed-layer ocean</text>
+<rect x="622.6" y="996.8" width="168.8" height="29" rx="6" fill="#edf6f5" stroke="#cfe0e3" stroke-width="1.2"/>
+<text class="code" x="707" y="1018" text-anchor="middle" font-size="20" fill="#0f172a">ocean_step()</text>
+<text x="550.48" y="1061" font-size="22" fill="#334155" xml:space="preserve">mixed-layer heat budget → SST</text>
+<path d="M694 804 V931" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" marker-end="url(#aDown)"/>
+<path d="M720 931 V804" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" marker-end="url(#aUp)"/>
+<g transform="translate(509.66 843.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D450"></use></g><g transform="translate(466,-150) scale(0.707)"><use xlink:href="#mj-I-1D456"></use></g></g></g></g></g>
+<text x="529.72" y="843.5" font-size="22" fill="#c2410c" xml:space="preserve">, ice thickness,</text>
+<text x="478.21" y="874.5" font-size="22" fill="#c2410c" xml:space="preserve">heat, </text>
+<g transform="translate(533.25 874.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-I-1D443"></use></g><g transform="translate(973.2,0)"><use xlink:href="#mj-N-2212"></use></g><g transform="translate(1973.4,0)"><use xlink:href="#mj-I-1D438"></use></g></g></g></g>
+<text x="605.52" y="874.5" font-size="22" fill="#c2410c" xml:space="preserve">, snow,</text>
+<g transform="translate(619.04 905.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><use xlink:href="#mj-BI-1D749"></use></g></g></g></g>
+<text x="635.15" y="905.5" font-size="22" fill="#c2410c" xml:space="preserve">, </text>
+<g transform="translate(647.37 905.5) scale(0.0264)" fill="#c2410c"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D462"></use></g><g transform="translate(605,363) scale(0.707)"><use xlink:href="#mj-N-33"></use></g><g transform="translate(605,-247) scale(0.707)"><use xlink:href="#mj-N-2217"></use></g></g></g></g></g>
+<text x="740" y="859" font-size="22" fill="#1d4ed8" xml:space="preserve">SST, MLD,</text>
+<text x="740" y="890" font-size="22" fill="#1d4ed8" xml:space="preserve">ocean heat flux</text>
+<path d="M205 489 V653.25" fill="none" stroke="#64748b" stroke-width="2.6" stroke-dasharray="7 6" stroke-linecap="round"/>
+<circle cx="205" cy="669.25" r="15" fill="#ffffff" stroke="#64748b" stroke-width="2.2"/>
+<path d="M199 663.25 L211 675.25 M211 663.25 L199 675.25" stroke="#64748b" stroke-width="2.6" stroke-linecap="round"/>
+<text x="98.67" y="719.25" font-size="22" font-weight="700" fill="#64748b" xml:space="preserve">no runoff to the sea:</text>
+<text x="105.34" y="750.25" font-size="22" fill="#64748b" xml:space="preserve">excess bucket water</text>
+<text x="121.84" y="781.25" font-size="22" fill="#64748b" xml:space="preserve">leaves the model</text>
+<rect x="40" y="957.5" width="330" height="104" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.4"/>
+<path d="M66 993.5 H110" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" marker-end="url(#aDown)"/>
+<text x="126" y="1001.5" font-size="22" fill="#c2410c" xml:space="preserve">forcing passed down</text>
+<path d="M66 1027.5 H110" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" marker-end="url(#aUp)"/>
+<text x="126" y="1035.5" font-size="22" fill="#1d4ed8" xml:space="preserve">state returned up</text>
 </svg>

@@ -712,35 +712,3 @@
   .md-typeset p > img { box-shadow: none !important; }
   .md-typeset table:not([class]) tbody tr { background: transparent !important; }
 }
-
-/* ---------------------------------------------------------------------------
-   Portrait coupling figures (4.1): show the wide diagrams rotated 90° clockwise
-   on screen only. Transforming an image does not change its layout box, so the
-   height that the rotation overflows on each side is paid back with block
-   margins, expressed as a percentage of the figure width:
-       one-side overflow = (1 - image-height / image-width) / 2 × width
-   Because the image is exactly as wide as its containing block, that percentage
-   always matches the rendered figure, whatever the screen width. The PDF build
-   renders with print media and therefore keeps the original landscape layout.
-   --------------------------------------------------------------------------- */
-
-@media screen {
-  .md-typeset p > img.fig-rotate-cw {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin-inline: auto;
-    transform: rotate(90deg);
-    transform-origin: center;
-  }
-
-  /* coupling-architecture.svg (1500 × 960): (1 - 960/1500) / 2 = 18% */
-  .md-typeset p > img.fig-rotate-cw--architecture {
-    margin-block: calc(18% + 0.6rem);
-  }
-
-  /* coupling-timestep.svg (1320 × 680): (1 - 680/1320) / 2 ≈ 24.2424% */
-  .md-typeset p > img.fig-rotate-cw--timestep {
-    margin-block: calc(24.2424% + 0.6rem);
-  }
-}
