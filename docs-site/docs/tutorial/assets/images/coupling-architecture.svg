@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1093" viewBox="0 0 1000 1093" role="img" aria-labelledby="title desc">
 <title id="title">Coupling variables and directions between the atmosphere, land, sea ice and ocean</title>
-<desc id="desc">The atmosphere (lowest model level T, q, u, v and surface pressure p_s) exchanges with two branches that never share a grid point. Land: land_step() receives sensible and latent heat, net radiation, rain, snow and evaporation, and returns T_s, q_s, albedo, z_0 and r_h; excess bucket water leaves the system (no runoff). Ocean points: sea_step() sums the total heat flux, P-E, snowfall, surface stress and u_*^3 every step and returns T_s, q_s, albedo, z_0 and r_h blended by the ice cover c_i. At coupling instants it passes the window means to ice_step(), which returns T_s, SST, MLD, ice cover, ice thickness and snow on ice. The sea ice passes ice cover, thickness, heat, P-E, snow, stress and u_*^3 to ocean_step(), which returns SST, MLD and the ocean heat flux.</desc>
+<desc id="desc">The atmosphere (lowest model level T, q, u, v and surface pressure p_s) exchanges with two branches that never share a grid point. Land: land_step() receives sensible and latent heat, net radiation, rain, snow and evaporation, and returns T_s, q_s, albedo, z_0 and r_h; excess bucket water leaves the system (no runoff). Ocean points: sea_step() sums the total heat flux, P-E, snowfall, surface stress and u_*^3 every step and returns T_s, q_s, albedo, z_0 and r_h blended by the ice cover c_i. At each coupling instant, sea_step() passes the window-mean fluxes to the sea ice module (ice_step()), which returns T_s, SST, MLD, ice cover, ice thickness and snow on ice. The sea ice passes ice cover, thickness, heat, P-E, snow, stress and u_*^3 to ocean_step(), which returns SST, MLD and the ocean heat flux.</desc>
 <defs>
 <marker id="aDown" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 Z" fill="#ea580c"/></marker>
 <marker id="aUp" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L14,7 L0,14 Z" fill="#2563eb"/></marker>
@@ -54,8 +54,8 @@ text{font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif}
 <text x="565.37" y="348" font-size="28" font-weight="700" fill="#0f172a" xml:space="preserve">Sea-surface interface</text>
 <rect x="635" y="366.8" width="144" height="29" rx="6" fill="#edf6f5" stroke="#cfe0e3" stroke-width="1.2"/>
 <text class="code" x="707" y="388" text-anchor="middle" font-size="20" fill="#0f172a">sea_step()</text>
-<text x="484.43" y="431" font-size="22" fill="#334155" xml:space="preserve">every step: accumulate fluxes at ocean points</text>
-<text x="520.52" y="462" font-size="22" fill="#334155" xml:space="preserve">coupling instant: window means → ice</text>
+<text x="707" y="420" text-anchor="middle" font-size="22" fill="#334155">every step: accumulate fluxes at ocean points</text>
+<text text-anchor="middle" font-size="22" fill="#334155"><tspan x="707" y="447">At each coupling instant, pass the window-mean</tspan> <tspan x="707" y="474">fluxes to the sea ice module.</tspan></text>
 <path d="M192 112 V301" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" marker-end="url(#aDown)"/>
 <path d="M218 301 V112" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" marker-end="url(#aUp)"/>
 <text x="42.35" y="151.5" font-size="22" fill="#c2410c" xml:space="preserve">sensible heat</text>
