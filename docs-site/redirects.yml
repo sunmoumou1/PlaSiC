@@ -19,7 +19,7 @@ math/radiation-parameterization.md: tutorial/3-parameterizations/3.4-radiation-p
 math/moist-convection-and-precipitation.md: tutorial/3-parameterizations/3.5-moist-convection-and-precipitation.md
 model/time-step-and-coupling.md: tutorial/4-model-and-coupling/4.1-how-the-spheres-are-coupled.md
 math/land-surface-physics.md: tutorial/4-model-and-coupling/4.2-land-surface-module.md
-math/sea-module-physics.md: tutorial/4-model-and-coupling/4.4-sea-ice-module.md
+math/sea-module-physics.md: tutorial/4-model-and-coupling/4.3-sea-ice-module.md
 app/architecture.md: tutorial/8-desktop-app/8.1-plasic-app-architecture-guide.md
 appendix/lu-decomposition.md: tutorial/9-appendix/9.1-matrix-inversion.md
 appendix/globe-projection.md: tutorial/8-desktop-app/8.2-from-lat-lon-grid-to-interactive-3d-globe.md
@@ -53,8 +53,8 @@ appendix/pyside6-quickstart.md: tutorial/9-appendix/9.4-pyside6-quickstart.md
 3 参数化/3.4 湿对流与降水参数化.md: tutorial/3-parameterizations/3.5-moist-convection-and-precipitation.md
 4 模式程序与耦合/4.1 圈层如何耦合.md: tutorial/4-model-and-coupling/4.1-how-the-spheres-are-coupled.md
 4 模式程序与耦合/4.2 陆面模块.md: tutorial/4-model-and-coupling/4.2-land-surface-module.md
-4 模式程序与耦合/4.3 海洋与海冰模块.md: tutorial/4-model-and-coupling/4.4-sea-ice-module.md
-4 模式程序与耦合/4.4 三维海洋：控制方程、原理与数值方法.md: tutorial/4-model-and-coupling/4.6-three-dimensional-ocean.md
+4 模式程序与耦合/4.3 海洋与海冰模块.md: tutorial/4-model-and-coupling/4.3-sea-ice-module.md
+4 模式程序与耦合/4.4 三维海洋：控制方程、原理与数值方法.md: tutorial/4-model-and-coupling/4.5-three-dimensional-ocean.md
 5 历史实验/historical-experiment.md: tutorial/6-experiments/6.2-historical-experiment-1850-2014.md
 6 桌面应用/6.1 PlaSiC App 架构导览.md: tutorial/8-desktop-app/8.1-plasic-app-architecture-guide.md
 7 附录/7.1 LU 分解、回代与矩阵求逆.md: tutorial/9-appendix/9.1-matrix-inversion.md
@@ -170,9 +170,9 @@ appendix/pyside6-quickstart.md: tutorial/9-appendix/9.4-pyside6-quickstart.md
 #    Sea Ice note was split into 4.3 Sea Interface and 4.4 Thermodynamic Sea
 #    Ice; the former 4.4-4.5 notes became 4.5-4.6 and were renamed.
 # ---------------------------------------------------------------------------
-4-model-and-coupling/4.3 海洋与海冰模块.md: tutorial/4-model-and-coupling/4.4-sea-ice-module.md
-4-model-and-coupling/4.4-slab-ocean.md: tutorial/4-model-and-coupling/4.5-slab-ocean.md
-4-model-and-coupling/4.5-three-dimensional-ocean.md: tutorial/4-model-and-coupling/4.6-three-dimensional-ocean.md
+4-model-and-coupling/4.3 海洋与海冰模块.md: tutorial/4-model-and-coupling/4.3-sea-ice-module.md
+4-model-and-coupling/4.4-slab-ocean.md: tutorial/4-model-and-coupling/4.4-slab-ocean.md
+4-model-and-coupling/4.5-three-dimensional-ocean.md: tutorial/4-model-and-coupling/4.5-three-dimensional-ocean.md
 
 # ---------------------------------------------------------------------------
 # 19. The last four notes with Chinese filenames were renamed to English
@@ -258,6 +258,10 @@ tutorial/2-dynamical-core/2.9-spectral-dissipation.md: tutorial/2-dynamical-core
 
 # ---------------------------------------------------------------------------
 # 26. The 4.3 Sea Interface note was removed. Its URL, and the legacy URLs that
-#     led to it (sections 1, 3 and 18), now lead to 4.4 Thermodynamic Sea Ice.
+#     led to it (sections 1, 3 and 18), lead to Thermodynamic Sea Ice, and
+#     4.4-4.6 moved up to 4.3-4.5.
 # ---------------------------------------------------------------------------
-tutorial/4-model-and-coupling/4.3-sea-interface.md: tutorial/4-model-and-coupling/4.4-sea-ice-module.md
+tutorial/4-model-and-coupling/4.3-sea-interface.md: tutorial/4-model-and-coupling/4.3-sea-ice-module.md
+tutorial/4-model-and-coupling/4.4-sea-ice-module.md: tutorial/4-model-and-coupling/4.3-sea-ice-module.md
+tutorial/4-model-and-coupling/4.5-slab-ocean.md: tutorial/4-model-and-coupling/4.4-slab-ocean.md
+tutorial/4-model-and-coupling/4.6-three-dimensional-ocean.md: tutorial/4-model-and-coupling/4.5-three-dimensional-ocean.md
