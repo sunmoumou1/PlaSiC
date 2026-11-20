@@ -30,6 +30,12 @@ typedef struct plasic_runtime_options
     /* Warm-start clock rebase; negative means "not requested". */
     int32_t reset_nstep;
     int32_t dynamics_only;
+    /*
+     * Atmosphere-sea ice coupling interval in atmospheric steps (>= 1).
+     * Sea-surface fluxes are accumulated every step; sea ice and the ocean
+     * run once per interval and integrate the whole interval.
+     */
+    int32_t sea_coupling_interval;
 } plasic_runtime_options;
 
 int plasic_runtime_initialize(const plasic_runtime_options *options);

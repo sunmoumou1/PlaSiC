@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 
+/* sea_coupling_interval: atmospheric steps per sea-ice/ocean step (>= 1). */
 int plasic_physics_initialize(
-    const char *restart_path, const char *surface_data_directory);
+    const char *restart_path, const char *surface_data_directory,
+    int32_t sea_coupling_interval);
 const char *plasic_physics_error(void);
 int plasic_physics_step(void);
 /* Write component records while restartmod_io already owns an output file. */

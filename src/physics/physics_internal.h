@@ -410,7 +410,8 @@ void physics_ocean3d_unpack_local(
     const float *local, float *extended, int32_t levels);
 
 int physics_initialize(
-    const char *restart_path, const char *surface_data_directory);
+    const char *restart_path, const char *surface_data_directory,
+    int32_t sea_coupling_interval);
 void physics_finalize(void);
 int physics_step(void);
 int physics_write_restart(void);

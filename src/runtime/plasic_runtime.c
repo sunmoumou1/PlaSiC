@@ -142,6 +142,12 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         runtime_set_error("--steps must be a positive integer");
         return PLASIC_RUNTIME_BAD_ARGUMENT;
     }
+    if (options->sea_coupling_interval < 1)
+    {
+        runtime_set_error(
+            "--sea-coupling-interval must be a positive integer");
+        return PLASIC_RUNTIME_BAD_ARGUMENT;
+    }
     if (options->restart_input != NULL &&
         (options->start_year != 0 || options->start_yday != 1 ||
          options->start_hour != 0 || options->start_minute != 0))
@@ -313,7 +319,8 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
             sqrtf(2.0f) / (plasic_gascon * plasic_tgr));
 
     status = plasic_physics_initialize(
-        options->restart_input, options->surface_data_directory);
+        options->restart_input, options->surface_data_directory,
+        options->sea_coupling_interval);
     if (status != PLASIC_RUNTIME_OK)
     {
         if (status == PLASIC_RUNTIME_IO_FAILED)

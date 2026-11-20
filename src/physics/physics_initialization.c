@@ -532,6 +532,10 @@ static void initialize_sea_ice_ocean_defaults(void)
     ice.maximum_thickness = 9.0f;
     ice.compactness_threshold = 0.5f;
     ice.minimum_ice_cover = 0.5f;
+    /*
+     * One atmospheric step.  sea_step() resets it to the length of the
+     * coupling window before every ice_step().
+     */
     ice.timestep = plasic_solar_day / (float)plasic_ntspd;
 
     ocean.output_interval = 32;
@@ -895,7 +899,8 @@ static void initialize_sea_ice_ocean(int from_restart)
 }
 
 int physics_initialize(
-    const char *restart_path, const char *surface_data_directory)
+    const char *restart_path, const char *surface_data_directory,
+    int32_t sea_coupling_interval)
 {
     int status;
 
@@ -911,6 +916,8 @@ int physics_initialize(
     initialize_radiation();
     initialize_land_defaults();
     initialize_sea_ice_ocean_defaults();
+    /* A run option, not a restart record: each run may choose its own. */
+    sea.coupling_interval = sea_coupling_interval;
     status = load_physics_restart(restart_path);
     if (status != PLASIC_RUNTIME_OK)
     {

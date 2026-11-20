@@ -199,6 +199,8 @@ int plasic_config_load(
         load_integer(root, "steps", &options->steps) &&
         load_integer(root, "frame_interval", &options->frame_interval) &&
         load_integer(root, "progress_interval", &options->progress_interval) &&
+        load_integer(
+            root, "sea_coupling_interval", &options->sea_coupling_interval) &&
         load_integer(root, "start_year", &options->start_year) &&
         load_integer(root, "start_yday", &options->start_yday) &&
         load_integer(root, "start_hour", &options->start_hour) &&

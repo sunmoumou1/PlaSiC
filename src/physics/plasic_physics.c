@@ -31,9 +31,11 @@ const char *plasic_physics_error(void)
 }
 
 int plasic_physics_initialize(
-    const char *restart_path, const char *surface_data_directory)
+    const char *restart_path, const char *surface_data_directory,
+    int32_t sea_coupling_interval)
 {
-    return physics_initialize(restart_path, surface_data_directory);
+    return physics_initialize(
+        restart_path, surface_data_directory, sea_coupling_interval);
 }
 
 void plasic_physics_finalize(void)

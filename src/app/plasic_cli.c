@@ -43,7 +43,7 @@ static void print_usage(FILE *stream, const char *program)
             "          [--start-year YEAR] [--start-yday DAY]\n"
             "          [--start-hour HOUR] [--start-minute MINUTE]\n"
             "          [--reset-nstep N]\n"
-            "          [--dynamics-only]\n\n"
+            "          [--sea-coupling-interval N] [--dynamics-only]\n\n"
             "Standalone C PlaSiC (T%d, %d latitude rows, %d levels).\n"
             "--steps is mandatory. A cold start (no --restart) begins at\n"
             "year --start-year, day-of-year --start-yday, --start-hour:--start-minute\n"
@@ -51,7 +51,10 @@ static void print_usage(FILE *stream, const char *program)
             "calendar from the restart file; --reset-nstep rebases nstep.\n"
             "For every resolution, omitting --restart performs a cold start\n"
             "from NetCDF surface data under --data-dir. Restart files are\n"
-            "used only when explicitly selected by CLI or JSON config.\n",
+            "used only when explicitly selected by CLI or JSON config.\n"
+            "--sea-coupling-interval N runs sea ice and the ocean once every\n"
+            "N atmospheric steps (default 1); sea-surface fluxes are still\n"
+            "averaged over every step of the interval.\n",
             program, PLASIC_NTRU, PLASIC_NLAT, PLASIC_NLEV);
 }
 
@@ -180,7 +183,10 @@ int plasic_cli_run(int argc, char **argv)
         /* Negative reset_nstep means "keep the nstep stored in the restart". */
         .reset_nstep = -1,
 
-        .dynamics_only = 0};
+        .dynamics_only = 0,
+
+        /* Sea ice and the ocean run every atmospheric step by default. */
+        .sea_coupling_interval = 1};
 
     plasic_config_storage config_storage = {0};
 
@@ -368,6 +374,20 @@ int plasic_cli_run(int argc, char **argv)
             {
                 fprintf(
                     stderr, "Invalid --progress-interval value: %s\n",
+                    argv[argument]);
+                return EXIT_FAILURE;
+            }
+        }
+
+        else if (strcmp(argv[argument], "--sea-coupling-interval") == 0 &&
+                 argument + 1 < argc)
+        {
+            if (!parse_positive_integer(
+                    argv[++argument], &options.sea_coupling_interval) ||
+                options.sea_coupling_interval < 1)
+            {
+                fprintf(
+                    stderr, "Invalid --sea-coupling-interval value: %s\n",
                     argv[argument]);
                 return EXIT_FAILURE;
             }

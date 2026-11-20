@@ -1110,6 +1110,14 @@ static void ice_step(void)
     {
         const float inverse_count =
             1.0f / (float)ice.ocean_accumulation_count;
+
+        /*
+         * The ocean, including the deep ocean, integrates all the sea-ice
+         * steps it is about to average.  With the fixed
+         * ocean_coupling_interval = 1 this is exactly the current ice step.
+         */
+        ocean.timestep = (float)ice.ocean_accumulation_count * ice.timestep;
+        deep_ocean.timestep = ocean.timestep;
         for (horizontal = 0; horizontal < PLASIC_NHOR; ++horizontal)
         {
             if (ice.land_mask[horizontal] < 0.5f)
@@ -1188,6 +1196,13 @@ static void sea_step(void)
 
     if (coupling_due != 0)
     {
+        /*
+         * Sea ice integrates the whole coupling window in one step.  The
+         * window is the number of atmospheric steps whose fluxes were just
+         * averaged: normally sea.coupling_interval, but the first window
+         * after a start or restart can be shorter or longer.
+         */
+        ice.timestep = (float)sea.accumulation_count * plasic_deltsec;
         ice_step();
         sea_finish_coupling(
             PLASIC_NHOR, &sea.accumulation_count, plasic_dls,

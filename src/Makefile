@@ -141,6 +141,12 @@ STEPS ?= 100
 #   make run STEPS=20000 PROGRESS_INTERVAL=100
 PROGRESS_INTERVAL ?= 1
 
+# 大气–海冰耦合间隔（单位：大气步）。海面通量每一步都计入平均；海冰和海洋
+# 每 SEA_COUPLING_INTERVAL 步运行一次，一步积分整个间隔。默认 1 即每步耦合。
+# 例如每两个大气步耦合一次：
+#   make run SEA_COUPLING_INTERVAL=2
+SEA_COUPLING_INTERVAL ?= 1
+
 # RESTART 指定初始 restart 文件路径，可在命令行覆盖：
 #   make run RESTART=path/to/restart
 #
@@ -580,6 +586,7 @@ help:
 	@echo "  NLAT=64 NLEV=16      Set horizontal and vertical resolution"
 	@echo "  NPRO=4                Set the number of MPI processes"
 	@echo "  STEPS=100             Set the number of run steps"
+	@echo "  SEA_COUPLING_INTERVAL=2  Run sea ice and ocean every 2 steps"
 	@echo "  SHTNS_PREFIX=/path    Use a custom SHTns installation"
 
 
@@ -721,6 +728,9 @@ strict: clean all
 #   --progress $(RUN_DIR)/progress.txt
 #     持续追加 JSON 进度记录，便于在运行过程中监控模型状态。
 #
+#   --sea-coupling-interval $(SEA_COUPLING_INTERVAL)
+#     海冰与海洋每隔多少个大气步运行一次，默认 1。
+#
 #   --output $(RUN_DIR)/status
 #     将最终状态或重启状态写入 status 文件。
 #
@@ -732,6 +742,7 @@ run: all
 		$(RUN_CO2_FLAG) \
 		--progress $(RUN_DIR)/progress.txt \
 		--progress-interval $(PROGRESS_INTERVAL) \
+		--sea-coupling-interval $(SEA_COUPLING_INTERVAL) \
 		--output $(RUN_DIR)/status
 
 # Build and run the standard transient historical experiment. A recursive make
@@ -771,6 +782,7 @@ historical-run: all
 		--monthly-output "$(HISTORICAL_OUTPUT_DIR)/monthly" \
 		--progress "$(HISTORICAL_OUTPUT_DIR)/progress.txt" \
 		--progress-interval $(HISTORICAL_PROGRESS_INTERVAL) \
+		--sea-coupling-interval $(SEA_COUPLING_INTERVAL) \
 		--output "$(HISTORICAL_OUTPUT_DIR)/final.restart"
 
 # Surface-data integrity: validate the complete 45-file archive, grid-specific
