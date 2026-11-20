@@ -408,6 +408,13 @@ def run_invocation(
     if runtime.get("dynamics_only"):
         model_arguments.append("--dynamics-only")
 
+    # 大气–海冰耦合间隔只在不等于默认值 1 时传入。C 端缺省同样是 1，
+    # 这样尚不认识该选项的旧 plasic.x 仍能运行默认配置。
+    if runtime.get("sea_coupling_interval", 1) != 1:
+        model_arguments.extend(
+            ["--sea-coupling-interval", str(runtime["sea_coupling_interval"])]
+        )
+
     # prepare() 已经把用户选择的 restart 文件链接/复制到运行目录中，
     # 这里优先使用本次运行目录里的 initial.restart。
     if initial_restart is not None:

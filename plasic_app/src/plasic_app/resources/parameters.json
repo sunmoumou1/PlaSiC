@@ -221,6 +221,24 @@
       "warning": "For diagnostics only. Do not enable for normal climate simulations."
     },
     {
+      "name": "sea_coupling_interval",
+      "label": "Sea ice coupling interval",
+      "type": "integer",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 1000000,
+      "unit": "steps",
+      "section": "Ocean and Sea Ice",
+      "phase": "runtime",
+      "component": "sea",
+      "advanced": true,
+      "depends_on": {
+        "dynamics_only": false
+      },
+      "description": "Run sea ice and the ocean once every N atmospheric steps; each sea-ice step covers the whole interval. Sea-surface fluxes are still averaged over every step.",
+      "warning": "Intervals above 1 change the sea-ice response and save little time. Keep 1 for production runs."
+    },
+    {
       "name": "frame_interval",
       "label": "Live frame interval",
       "type": "integer",

@@ -298,6 +298,11 @@ class RunConfig:
 
     progress_interval: int = 1
 
+    # 大气–海冰耦合间隔：每隔多少个大气步运行一次海冰和海洋；默认 1 即每步耦合。
+    # Atmosphere-sea ice coupling interval: sea ice and the ocean run once
+    # every this many atmospheric steps; the default 1 couples every step.
+    sea_coupling_interval: int = 1
+
     def validate(self) -> list[str]:
         """
         校验单次运行配置。
@@ -336,6 +341,9 @@ class RunConfig:
 
         if self.progress_interval < 1:
             errors.append("Progress interval must be at least 1")
+
+        if self.sea_coupling_interval < 1:
+            errors.append("Sea ice coupling interval must be at least 1")
 
         # 只有 cold start 需要 surface data；restart 分支允许完全省略。
         if not self.data_dir and not self.restart:
@@ -510,6 +518,7 @@ class ExperimentConfig:
             "frame_interval": self.run.frame_interval,
             "progress_interval": self.run.progress_interval,
             "dynamics_only": self.run.dynamics_only,
+            "sea_coupling_interval": self.run.sea_coupling_interval,
         }
 
         if self.run.data_dir:
