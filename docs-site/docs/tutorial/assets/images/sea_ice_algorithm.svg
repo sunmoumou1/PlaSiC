@@ -128,9 +128,9 @@ text{font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif}
 <g transform="translate(378.55 205.15) scale(0.024)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><g><use xlink:href="#mj-I-1D450"></use></g><g transform="translate(466,-150) scale(0.707)"><use xlink:href="#mj-I-1D456"></use></g></g></g></g></g></g>
 <text x="363.15" y="229.89" font-size="18" fill="#475569">binary</text>
 <text x="352.16" y="254.63" font-size="18" fill="#475569">ice mask</text>
-<text x="294.03" y="303.99" text-anchor="end" font-size="19" fill="#475569">forcing: surface heat flux</text>
-<g transform="translate(299.31 303.99) scale(0.0228)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><g><use xlink:href="#mj-I-1D444"></use></g><g transform="translate(824,-150) scale(0.707)"><use xlink:href="#mj-I-1D44E"></use></g></g></g></g></g></g>
-<text x="327.77" y="303.99" font-size="19" fill="#475569">, snowfall</text>
+<text x="370.58" y="303.99" text-anchor="end" font-size="19" fill="#475569">forcing: snowfall, surface heat flux</text>
+<g transform="translate(375.86 303.99) scale(0.0228)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><g><use xlink:href="#mj-I-1D444"></use></g><g transform="translate(824,-150) scale(0.707)"><use xlink:href="#mj-I-1D44E"></use></g></g></g></g></g></g>
+<text x="404.32" y="303.99" font-size="19" fill="#475569">,</text>
 <text x="324.21" y="332.46" text-anchor="end" font-size="19" fill="#475569">and the ocean correction</text>
 <g transform="translate(329.49 332.46) scale(0.0228)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><g><use xlink:href="#mj-I-1D444"></use></g><g transform="translate(824,-150) scale(0.707)"><use xlink:href="#mj-I-1D45C"></use><g transform="translate(485,0)"><use xlink:href="#mj-N-2192"></use></g><g transform="translate(1485,0)"><use xlink:href="#mj-I-1D456"></use></g></g></g></g></g></g></g>
 <circle cx="563" cy="43" r="17" fill="#2563eb"/>
