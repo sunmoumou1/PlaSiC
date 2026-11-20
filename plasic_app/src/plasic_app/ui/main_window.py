@@ -220,15 +220,18 @@ class MainWindow(QMainWindow):
         app_logo = QLabel()
         app_logo.setObjectName("AppLogo")
         app_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # 统一缩放 Logo 到 40×40，并保持原始宽高比与平滑插值。
-        app_logo.setPixmap(
-            logo.scaled(
-                40,
-                40,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation,
-            )
+        # 统一缩放 Logo 到 40×40（逻辑像素），并保持原始宽高比与平滑插值。
+        # 按屏幕的 devicePixelRatio 生成更高分辨率的位图并标注像素比，
+        # 否则 Retina 屏会把 40 px 位图再放大 2 倍，Logo 显得发虚。
+        dpr = self.devicePixelRatioF()
+        header_logo = logo.scaled(
+            round(40 * dpr),
+            round(40 * dpr),
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
         )
+        header_logo.setDevicePixelRatio(dpr)
+        app_logo.setPixmap(header_logo)
         header_layout.addWidget(app_logo)
         # 标题区用一个内嵌的垂直布局承载主标题和副标题。
         title_layout = QVBoxLayout()
