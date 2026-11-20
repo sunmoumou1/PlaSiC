@@ -288,7 +288,7 @@ eight chapters and six appendices.<br><br>
 | [1 User guide](https://sunmoumou1.github.io/PlaSiC/tutorial/1-user-guide/1.1-Running-PlaSiC-first/) | Build, run, restart, and the global state variables |
 | [2 Dynamical core](https://sunmoumou1.github.io/PlaSiC/tutorial/2-dynamical-core/2.1-governing-equations/) | Governing equations, the ten-step algorithm, spectral transforms, σ levels, the semi-implicit solver, leapfrog and filtering |
 | [3 Parameterizations](https://sunmoumou1.github.io/PlaSiC/tutorial/3-parameterizations/3.1-why-parameterization/) | Surface fluxes, diffusion, radiation, moist convection and precipitation |
-| [4 Model and coupling](https://sunmoumou1.github.io/PlaSiC/tutorial/4-model-and-coupling/4.1-how-the-spheres-are-coupled/) | How the spheres are coupled: land, sea interface, sea ice, slab ocean, 3-D ocean |
+| [4 Model and coupling](https://sunmoumou1.github.io/PlaSiC/tutorial/4-model-and-coupling/4.1-how-the-spheres-are-coupled/) | How the spheres are coupled: land, sea ice, slab ocean, 3-D ocean |
 | [5 Time control](https://sunmoumou1.github.io/PlaSiC/tutorial/5-time-control/5.1-calendar/) | Calendar and solar orbital geometry |
 | [6 Experiments](https://sunmoumou1.github.io/PlaSiC/tutorial/6-experiments/6.1-speed-and-memory-benchmark/) | Benchmarks, historical and CO₂ experiments, restart format, cold-start fields |
 | [7 Parallel](https://sunmoumou1.github.io/PlaSiC/tutorial/7-parallel/7.1-mpi-parallel-basics/) | MPI parallel basics |

@@ -186,7 +186,6 @@ nav:
 - 4 Model and Coupling:
   - 4.1 How the Spheres Are Coupled: tutorial/4-model-and-coupling/4.1-how-the-spheres-are-coupled.md
   - 4.2 Land Surface Module: tutorial/4-model-and-coupling/4.2-land-surface-module.md
-  - 4.3 Sea Interface: tutorial/4-model-and-coupling/4.3-sea-interface.md
   - 4.4 Thermodynamic Sea Ice: tutorial/4-model-and-coupling/4.4-sea-ice-module.md
   - 4.5 Slab Ocean: tutorial/4-model-and-coupling/4.5-slab-ocean.md
   - 4.6 Three-Dimensional Ocean: tutorial/4-model-and-coupling/4.6-three-dimensional-ocean.md
