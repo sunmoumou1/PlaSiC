@@ -100,12 +100,22 @@ void plasic_runtime_finalize(void)
     (void)mp_stop();
 }
 
+int runtime_sync_error(int32_t status)
+{
+    if (mp_sync_error(&status, runtime_error_message, sizeof(runtime_error_message)) != 0)
+    {
+        runtime_set_error("could not synchronize runtime error");
+        return PLASIC_RUNTIME_NUMERICAL_FAILURE;
+    }
+    return status;
+}
+
 static int apply_monthly_forcing(void)
 {
     const int year = plasic_ndatim[0];
     const int month = plasic_ndatim[1];
     const int status = runtime_co2_forcing_apply(year, month);
-    return status == PLASIC_RUNTIME_OK ? runtime_ozone_forcing_apply(year, month) : status;
+    return status == PLASIC_RUNTIME_OK ? runtime_ozone_forcing_apply() : status;
 }
 
 int plasic_runtime_initialize(const plasic_runtime_options *options)
@@ -209,14 +219,17 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
      * values from the previous run.
      */
     runtime_fields = (runtime_workspace *)calloc(1, sizeof(*runtime_fields));
-        // calloc: dynamically allocates a specified amount of memory and initializes all of its bytes to zero.
+    status = PLASIC_RUNTIME_OK;
     if (runtime_fields == NULL)
     {
         runtime_set_error("could not allocate runtime fields");
-        return PLASIC_RUNTIME_INITIALIZATION_FAILED;
+        status = PLASIC_RUNTIME_INITIALIZATION_FAILED;
     }
-
-    status = runtime_initialize_dynamics();
+    else
+    {
+        status = runtime_initialize_dynamics();
+    }
+    status = runtime_sync_error(status);
     if (status != PLASIC_RUNTIME_OK)
     {
         plasic_runtime_finalize();
@@ -254,13 +267,19 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
                 options->start_minute,
                 calmod_calendar_name(cold_calendar),
                 calmod_status_text(calendar_status));
+            status = PLASIC_RUNTIME_BAD_ARGUMENT;
+        }
+        status = runtime_sync_error(status);
+        if (status != PLASIC_RUNTIME_OK)
+        {
             plasic_runtime_finalize();
-            return PLASIC_RUNTIME_BAD_ARGUMENT;
+            return status;
         }
     }
 
     status = runtime_load_atmosphere_restart(
         options->restart_input, options->surface_data_directory);
+    status = runtime_sync_error(status);
     if (status != PLASIC_RUNTIME_OK)
     {
         plasic_runtime_finalize();
@@ -313,7 +332,7 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         }
     }
 
-    status = runtime_prepare_orography_grid();
+    status = runtime_sync_error(runtime_prepare_orography_grid());
     if (status != PLASIC_RUNTIME_OK)
     {
         plasic_runtime_finalize();
@@ -333,14 +352,7 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         options->sea_coupling_interval);
     if (status != PLASIC_RUNTIME_OK)
     {
-        if (status == PLASIC_RUNTIME_IO_FAILED)
-        {
-            runtime_set_error("%s", plasic_physics_error());
-        }
-        else
-        {
-            runtime_set_error("could not initialize atmospheric physics state");
-        }
+        runtime_set_error("%s", plasic_physics_error());
         plasic_runtime_finalize();
         return status;
     }

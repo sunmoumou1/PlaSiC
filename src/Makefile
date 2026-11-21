@@ -570,7 +570,7 @@ PROGRAM = $(BUILD_DIR)/plasic.x
 #
 # 即使源码目录中恰好存在名为 all、clean、run 等文件，
 # make 仍然会执行对应规则，而不会错误地认为目标已经是最新状态。
-.PHONY: all clean help strict run historical historical-run test test-data test-runtime test-ozone
+.PHONY: all clean help strict run historical historical-run test test-data test-runtime test-serial-model test-ozone test-ozone-mpi
 
 
 # ----------------------------------------------------------------------------
@@ -583,7 +583,9 @@ help:
 	@echo "PlaSiC build targets:"
 	@echo "  make                  Build the model"
 	@echo "  make run              Build and run a short integration"
-	@echo "  make test             Run data and runtime tests"
+	@echo "  make test             Run default serial tests (Python, NumPy and SciPy)"
+	@echo "  make test-runtime     Run the multi-resolution serial acceptance matrix"
+	@echo "  make test-ozone-mpi   Run two-rank initialization and forcing tests"
 	@echo "  make strict           Build with warnings treated as errors"
 	@echo "  make clean            Remove build and run products"
 	@echo ""
@@ -792,38 +794,35 @@ historical-run: all
 		--sea-coupling-interval $(SEA_COUPLING_INTERVAL) \
 		--output "$(HISTORICAL_OUTPUT_DIR)/final.restart"
 
-# Surface-data integrity: validate the complete 45-file archive, grid-specific
-# filenames, dimensions, time axes, and finite field values.
+# Check the packaged cold-start surface files.
 test-data:
 	cd .. && $(PYTHON) -m unittest discover -s tests -p 'test_*.py'
 
 # End-to-end acceptance matrix. Separate BUILD_DIR values avoid collisions
 # between the grid/layer configurations used for positive and negative tests.
-test-runtime:
-	$(MAKE) all NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/T21_L10
-	$(MAKE) all NLAT=32 NLEV=12 BUILD_DIR=$(BUILD_ROOT)/tests/T21_L12
-	$(MAKE) all NLAT=48 NLEV=12 BUILD_DIR=$(BUILD_ROOT)/tests/T31_L12
-	$(MAKE) all NLAT=64 NLEV=16 BUILD_DIR=$(BUILD_ROOT)/tests/T42_L16
+test-runtime: test-serial-model
+	$(MAKE) all MPI=0 NPRO=1 NLAT=32 NLEV=12 BUILD_DIR=$(BUILD_ROOT)/tests/serial/T21_L12
+	$(MAKE) all MPI=0 NPRO=1 NLAT=48 NLEV=12 BUILD_DIR=$(BUILD_ROOT)/tests/serial/T31_L12
+	$(MAKE) all MPI=0 NPRO=1 NLAT=64 NLEV=16 BUILD_DIR=$(BUILD_ROOT)/tests/serial/T42_L16
 	cd .. && $(PYTHON) tests/test_runtime_integration.py \
-		--t21 "$(ABS_BUILD_ROOT)/tests/T21_L10/plasic.x" \
-		--t21-l12 "$(ABS_BUILD_ROOT)/tests/T21_L12/plasic.x" \
-		--t31 "$(ABS_BUILD_ROOT)/tests/T31_L12/plasic.x" \
-		--t42 "$(ABS_BUILD_ROOT)/tests/T42_L16/plasic.x" \
+		--t21 "$(ABS_BUILD_ROOT)/tests/ozone/plasic.x" \
+		--t21-l12 "$(ABS_BUILD_ROOT)/tests/serial/T21_L12/plasic.x" \
+		--t31 "$(ABS_BUILD_ROOT)/tests/serial/T31_L12/plasic.x" \
+		--t42 "$(ABS_BUILD_ROOT)/tests/serial/T42_L16/plasic.x" \
 		--surface src/data/surface \
 		--earth-t21 src/data/earth_t21_l10.restart \
 		--earth-t42 src/data/earth_t42_l16.restart
 
-# Requires NumPy, SciPy, ncdump and ncgen. MPI builds also exercise a
-# non-root rank's forcing error at initialization and at the month boundary.
-ifeq ($(MPI),1)
-  OZONE_MPI_TEST_FLAGS = --mpi-model "$(ABS_BUILD_ROOT)/tests/ozone-mpi/plasic.x" --mpirun "$(MPIRUN)"
-endif
-test-ozone:
+# NetCDF command-line checks run when the corresponding utilities are available.
+test-serial-model:
 	$(MAKE) all MPI=0 NPRO=1 NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/ozone
-ifeq ($(MPI),1)
+
+test-ozone: test-serial-model
+	cd .. && $(PYTHON) tests/ozone_forcing.py "$(ABS_BUILD_ROOT)/tests/ozone/plasic.x"
+
+test-ozone-mpi:
 	$(MAKE) all MPI=1 NPRO=2 NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/ozone-mpi
-endif
-	cd .. && $(PYTHON) tests/ozone_forcing.py "$(ABS_BUILD_ROOT)/tests/ozone/plasic.x" $(OZONE_MPI_TEST_FLAGS)
+	cd .. && $(PYTHON) tests/ozone_forcing.py --mpi-model "$(ABS_BUILD_ROOT)/tests/ozone-mpi/plasic.x" --mpirun "$(MPIRUN)" -ktest_mpi
 
 test: test-data test-runtime test-ozone
 

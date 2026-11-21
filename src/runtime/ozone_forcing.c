@@ -12,13 +12,13 @@ static struct
     int variable;
     size_t months;
     int64_t first_month;
-    int64_t active_month;
+    int64_t cached_record[2];
     double mass_factor;
     double fill_value;
     double missing_value;
-    double *slab;
+    double *slabs;
     char source[4096];
-} forcing = {.file = -1, .active_month = -1};
+} forcing = {.file = -1, .cached_record = {-1, -1}};
 
 static const size_t local_values = (size_t)PLASIC_NHOR * PLASIC_NLEV;
 
@@ -26,10 +26,10 @@ void runtime_ozone_forcing_close(void)
 {
     if (forcing.file >= 0)
         (void)nc_close(forcing.file);
-    free(forcing.slab);
-    forcing.slab = NULL;
+    free(forcing.slabs);
+    forcing.slabs = NULL;
     forcing.file = -1;
-    forcing.active_month = -1;
+    forcing.cached_record[0] = forcing.cached_record[1] = -1;
     forcing.source[0] = '\0';
 }
 
@@ -215,17 +215,6 @@ static int read_header(void)
     return 1;
 }
 
-/* A failed read on one rank must stop all ranks before they enter dynamics. */
-static int collective_read_status(int32_t status)
-{
-    if (mp_sync_error(&status, runtime_error_message, sizeof(runtime_error_message)) != 0)
-    {
-        runtime_set_error("could not synchronize ozone forcing status");
-        return PLASIC_RUNTIME_NUMERICAL_FAILURE;
-    }
-    return status;
-}
-
 int runtime_ozone_forcing_open(const char *path)
 {
     int status = PLASIC_RUNTIME_IO_FAILED;
@@ -248,8 +237,8 @@ int runtime_ozone_forcing_open(const char *path)
     }
     else if (read_header())
     {
-        forcing.slab = malloc(local_values * sizeof(*forcing.slab));
-        if (forcing.slab == NULL)
+        forcing.slabs = malloc(2 * local_values * sizeof(*forcing.slabs));
+        if (forcing.slabs == NULL)
         {
             runtime_set_error("could not allocate ozone forcing slab");
             status = PLASIC_RUNTIME_INITIALIZATION_FAILED;
@@ -257,25 +246,23 @@ int runtime_ozone_forcing_open(const char *path)
         else
             status = PLASIC_RUNTIME_OK;
     }
-    status = collective_read_status(status);
+    status = runtime_sync_error(status);
     if (status != PLASIC_RUNTIME_OK)
         runtime_ozone_forcing_close();
     return status;
 }
 
-static int read_month(int64_t record, int year, int month)
+static int read_month(int64_t record, double *slab)
 {
     const size_t start[] = {(size_t)record, 0, (size_t)mp_local_offset(PLASIC_NLPP), 0};
     const size_t count[] = {1, PLASIC_NLEV, PLASIC_NLPP, PLASIC_NLON};
     int status;
 
-    if (record < 0 || (uint64_t)record >= forcing.months)
-    {
-        runtime_set_error("ozone forcing '%s' does not cover model date %d-%02d",
-                          forcing.source, year, month);
-        return PLASIC_RUNTIME_BAD_ARGUMENT;
-    }
-    status = nc_get_vara_double(forcing.file, forcing.variable, start, count, forcing.slab);
+    const int64_t date = forcing.first_month + record;
+    const int year = (int)(date / 12);
+    const int month = (int)(date % 12) + 1;
+
+    status = nc_get_vara_double(forcing.file, forcing.variable, start, count, slab);
     if (status != NC_NOERR)
     {
         runtime_set_error("could not read ozone forcing for %d-%02d (%s) in '%s'",
@@ -284,7 +271,7 @@ static int read_month(int64_t record, int year, int month)
     }
     for (size_t i = 0; i < local_values; ++i)
     {
-        const double value = forcing.slab[i];
+        const double value = slab[i];
         const double mass_fraction = value * forcing.mass_factor;
         if (!isfinite(value) || value == forcing.fill_value ||
             value == forcing.missing_value || mass_fraction < 0.0 || mass_fraction > 1.0)
@@ -293,23 +280,57 @@ static int read_month(int64_t record, int year, int month)
                               year, month, forcing.source);
             return PLASIC_RUNTIME_IO_FAILED;
         }
-        forcing.slab[i] = mass_fraction;
+        slab[i] = mass_fraction;
     }
     return PLASIC_RUNTIME_OK;
 }
 
-int runtime_ozone_forcing_apply(int year, int month)
+/* Consecutive records occupy different slots, including across December. */
+static int cached_month(int64_t record, const double **values)
 {
-    const int64_t date = (int64_t)year * 12 + month - 1;
-    int status;
-
-    if (forcing.file < 0 || forcing.active_month == date)
-        return PLASIC_RUNTIME_OK;
-    status = collective_read_status(read_month(date - forcing.first_month, year, month));
-    if (status == PLASIC_RUNTIME_OK)
+    const int slot = (int)(record % 2);
+    double *slab = forcing.slabs + (size_t)slot * local_values;
+    if (forcing.cached_record[slot] != record)
     {
-        plasic_physics_set_ozone_field(forcing.slab);
-        forcing.active_month = date;
+        forcing.cached_record[slot] = -1;
+        const int status = runtime_sync_error(read_month(record, slab));
+        if (status != PLASIC_RUNTIME_OK)
+            return status;
+        forcing.cached_record[slot] = record;
     }
-    return status;
+    *values = slab;
+    return PLASIC_RUNTIME_OK;
+}
+
+int runtime_ozone_forcing_apply(void)
+{
+    const int year = plasic_ndatim[0], month = plasic_ndatim[1];
+    const int64_t record = (int64_t)year * 12 + month - 1 - forcing.first_month;
+    const double *current, *neighbor;
+    int32_t month_a, month_b;
+    float weight;
+
+    if (forcing.file < 0)
+        return PLASIC_RUNTIME_OK;
+    if (record < 0 || record >= (int64_t)forcing.months)
+    {
+        runtime_set_error("ozone forcing '%s' does not cover model date %d-%02d",
+                          forcing.source, year, month);
+        return PLASIC_RUNTIME_BAD_ARGUMENT;
+    }
+
+    int status = cached_month(record, &current);
+    if (status != PLASIC_RUNTIME_OK)
+        return status;
+    momint(plasic_calendar, plasic_nstep, &month_a, &month_b, &weight);
+    const int64_t adjacent = record + (month_b - month_a);
+    neighbor = current;
+    if (weight > 0 && adjacent >= 0 && adjacent < (int64_t)forcing.months)
+    {
+        status = cached_month(adjacent, &neighbor);
+        if (status != PLASIC_RUNTIME_OK)
+            return status;
+    }
+    plasic_physics_interpolate_ozone(current, neighbor, weight);
+    return PLASIC_RUNTIME_OK;
 }

@@ -91,11 +91,16 @@ int plasic_physics_set_co2_bands(const float *bands, int32_t band_count)
     return PLASIC_RUNTIME_OK;
 }
 
-void plasic_physics_set_ozone_field(const double *values)
+void plasic_physics_interpolate_ozone(const double *current, const double *neighbor, float weight)
 {
     for (size_t i = 0; i < (size_t)PLASIC_NHOR * PLASIC_NLEV; ++i)
-        radiation.ozone[i] = (float)values[i];
+        radiation.ozone[i] = (float)(current[i] + weight * (neighbor[i] - current[i]));
     radiation.use_synthetic_ozone = 0;
+}
+
+void plasic_physics_set_ozone_field(const double *values)
+{
+    plasic_physics_interpolate_ozone(values, values, 0.0f);
 }
 
 const float *plasic_physics_co2_field(void)

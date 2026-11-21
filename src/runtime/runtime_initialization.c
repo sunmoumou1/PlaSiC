@@ -132,8 +132,10 @@ static int initialize_cold_start_atmosphere(
             "cold start cannot read NetCDF surface field 'orography' "
             "from '%s' (status %d)",
             surface_data_directory, status);
-        return PLASIC_RUNTIME_IO_FAILED;
     }
+    status = runtime_sync_error(status == SURFACE_DATA_OK ? PLASIC_RUNTIME_OK : PLASIC_RUNTIME_IO_FAILED);
+    if (status != PLASIC_RUNTIME_OK)
+        return status;
 
     status = sht_grid_to_scalar(
         1, runtime_fields->cold_start_orography_grid, plasic_so);

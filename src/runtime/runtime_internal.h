@@ -102,6 +102,7 @@ extern double integration_start_time;
 extern char runtime_error_message[512];
 
 void runtime_set_error(const char *format, ...);
+int runtime_sync_error(int32_t status);
 int runtime_broadcast_status(int status);
 
 int runtime_load_atmosphere_restart(
