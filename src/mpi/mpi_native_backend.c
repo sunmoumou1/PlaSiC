@@ -154,6 +154,24 @@ int32_t mpi_native_broadcast_real(float *buffer, int32_t count)
                               ROOT_RANK, active_world);
 }
 
+int32_t mpi_native_sync_error(
+    int32_t *status, char *message, int32_t bytes, int32_t rank)
+{
+    int32_t reporter = *status == 0 ? INT32_MAX : rank;
+    int rc = MPI_Allreduce(MPI_IN_PLACE, &reporter, 1, MPI_INT32_T,
+                           MPI_MIN, active_world);
+    if (rc != MPI_SUCCESS || reporter == INT32_MAX)
+    {
+        return (int32_t)rc;
+    }
+    rc = MPI_Bcast(status, 1, MPI_INT32_T, reporter, active_world);
+    if (rc == MPI_SUCCESS)
+    {
+        rc = MPI_Bcast(message, bytes, MPI_CHAR, reporter, active_world);
+    }
+    return (int32_t)rc;
+}
+
 /*
  * 按层收集格点场的公共实现。
  * 每一层中，每个进程贡献自己连续的 local_rows 个 float，MPI 按 rank 顺序把它们

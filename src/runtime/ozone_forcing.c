@@ -3,6 +3,7 @@
 #include "runtime_internal.h"
 
 #include <netcdf.h>
+#include <float.h>
 
 /* Each rank reads its own latitude slab. The file stays open across months. */
 static struct
@@ -111,14 +112,20 @@ static int check_coordinate(const char *name, int dimension, size_t count)
     return 1;
 }
 
-static int read_missing_value(const char *name, double *value)
+static int read_missing_value(const char *name, nc_type stored_type, double *value)
 {
     size_t length;
     const int status = nc_inq_attlen(forcing.file, forcing.variable, name, &length);
     *value = NAN;
-    return status == NC_ENOTATT ||
-           (status == NC_NOERR && length == 1 &&
-            nc_get_att_double(forcing.file, forcing.variable, name, value) == NC_NOERR);
+    if (status == NC_ENOTATT)
+        return 1;
+    if (status != NC_NOERR || length != 1 ||
+        nc_get_att_double(forcing.file, forcing.variable, name, value) != NC_NOERR)
+        return 0;
+    /* Compare a marker against values as stored, before any unit conversion. */
+    if (stored_type == NC_FLOAT && fabs(*value) <= FLT_MAX)
+        *value = (double)(float)*value;
+    return 1;
 }
 
 static int read_units(void)
@@ -199,8 +206,8 @@ static int read_header(void)
                           forcing.source);
         return 0;
     }
-    if (!read_missing_value("_FillValue", &forcing.fill_value) ||
-        !read_missing_value("missing_value", &forcing.missing_value))
+    if (!read_missing_value("_FillValue", type, &forcing.fill_value) ||
+        !read_missing_value("missing_value", type, &forcing.missing_value))
     {
         runtime_set_error("invalid ozone forcing missing-value attributes in '%s'", forcing.source);
         return 0;
@@ -209,67 +216,59 @@ static int read_header(void)
 }
 
 /* A failed read on one rank must stop all ranks before they enter dynamics. */
-static int collective_read_status(int ok, const char *operation)
+static int collective_read_status(int32_t status)
 {
-    float failures = ok ? 0.0f : 1.0f;
-    if (mp_allreduce_real(&failures, 1) != 0)
+    if (mp_sync_error(&status, runtime_error_message, sizeof(runtime_error_message)) != 0)
     {
-        runtime_set_error("could not synchronize ozone forcing %s", operation);
+        runtime_set_error("could not synchronize ozone forcing status");
         return PLASIC_RUNTIME_NUMERICAL_FAILURE;
     }
-    if (failures != 0.0f)
-    {
-        if (ok)
-            runtime_set_error("ozone forcing %s failed on another rank for '%s'", operation, forcing.source);
-        return PLASIC_RUNTIME_IO_FAILED;
-    }
-    return PLASIC_RUNTIME_OK;
+    return status;
 }
 
 int runtime_ozone_forcing_open(const char *path)
 {
-    int ok = 0;
-    int status;
+    int status = PLASIC_RUNTIME_IO_FAILED;
 
     runtime_ozone_forcing_close();
-    if (path == NULL)
+    if (path == NULL || path[0] == '\0')
         return PLASIC_RUNTIME_OK;
-    if (path[0] == '\0' || strlen(path) >= sizeof(forcing.source))
+    if (strlen(path) >= sizeof(forcing.source))
     {
-        runtime_set_error("a non-empty ozone forcing NetCDF path is required");
+        runtime_set_error("ozone forcing NetCDF path is too long");
         return PLASIC_RUNTIME_BAD_ARGUMENT;
     }
 
     (void)snprintf(forcing.source, sizeof(forcing.source), "%s", path);
-    status = nc_open(path, NC_NOWRITE, &forcing.file);
-    if (status != NC_NOERR)
+    const int open_status = nc_open(path, NC_NOWRITE, &forcing.file);
+    if (open_status != NC_NOERR)
     {
         forcing.file = -1;
-        runtime_set_error("cannot open ozone forcing '%s': %s", path, nc_strerror(status));
+        runtime_set_error("cannot open ozone forcing '%s': %s", path, nc_strerror(open_status));
     }
     else if (read_header())
     {
         forcing.slab = malloc(local_values * sizeof(*forcing.slab));
-        ok = forcing.slab != NULL;
-        if (!ok)
+        if (forcing.slab == NULL)
+        {
             runtime_set_error("could not allocate ozone forcing slab");
+            status = PLASIC_RUNTIME_INITIALIZATION_FAILED;
+        }
+        else
+            status = PLASIC_RUNTIME_OK;
     }
-    status = collective_read_status(ok, "initialization");
+    status = collective_read_status(status);
     if (status != PLASIC_RUNTIME_OK)
         runtime_ozone_forcing_close();
     return status;
 }
 
-int runtime_ozone_forcing_apply(int year, int month)
+static int read_month(int64_t record, int year, int month)
 {
-    const int64_t date = (int64_t)year * 12 + month - 1;
-    const int64_t record = date - forcing.first_month;
     const size_t start[] = {(size_t)record, 0, (size_t)mp_local_offset(PLASIC_NLPP), 0};
     const size_t count[] = {1, PLASIC_NLEV, PLASIC_NLPP, PLASIC_NLON};
-    int ok, status;
+    int status;
 
-    if (forcing.file < 0 || forcing.active_month == date)
-        return PLASIC_RUNTIME_OK;
     if (record < 0 || (uint64_t)record >= forcing.months)
     {
         runtime_set_error("ozone forcing '%s' does not cover model date %d-%02d",
@@ -277,11 +276,13 @@ int runtime_ozone_forcing_apply(int year, int month)
         return PLASIC_RUNTIME_BAD_ARGUMENT;
     }
     status = nc_get_vara_double(forcing.file, forcing.variable, start, count, forcing.slab);
-    ok = status == NC_NOERR;
-    if (!ok)
-        runtime_set_error("could not read ozone forcing for %d-%02d in '%s': %s",
-                          year, month, forcing.source, nc_strerror(status));
-    for (size_t i = 0; ok && i < local_values; ++i)
+    if (status != NC_NOERR)
+    {
+        runtime_set_error("could not read ozone forcing for %d-%02d (%s) in '%s'",
+                          year, month, nc_strerror(status), forcing.source);
+        return PLASIC_RUNTIME_IO_FAILED;
+    }
+    for (size_t i = 0; i < local_values; ++i)
     {
         const double value = forcing.slab[i];
         const double mass_fraction = value * forcing.mass_factor;
@@ -290,12 +291,21 @@ int runtime_ozone_forcing_apply(int year, int month)
         {
             runtime_set_error("invalid or missing ozone forcing value at %d-%02d in '%s'",
                               year, month, forcing.source);
-            ok = 0;
+            return PLASIC_RUNTIME_IO_FAILED;
         }
-        else
-            forcing.slab[i] = mass_fraction;
+        forcing.slab[i] = mass_fraction;
     }
-    status = collective_read_status(ok, "monthly field read");
+    return PLASIC_RUNTIME_OK;
+}
+
+int runtime_ozone_forcing_apply(int year, int month)
+{
+    const int64_t date = (int64_t)year * 12 + month - 1;
+    int status;
+
+    if (forcing.file < 0 || forcing.active_month == date)
+        return PLASIC_RUNTIME_OK;
+    status = collective_read_status(read_month(date - forcing.first_month, year, month));
     if (status == PLASIC_RUNTIME_OK)
     {
         plasic_physics_set_ozone_field(forcing.slab);

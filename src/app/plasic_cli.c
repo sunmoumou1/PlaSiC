@@ -566,20 +566,6 @@ int plasic_cli_run(int argc, char **argv)
     }
 
     /*
-     * Determine whether this run is a cold start
-     */
-    if (options.restart_input == NULL)
-    {
-        if (plasic_mypid == 0)
-        {
-            fprintf(stderr,
-                    "No --restart given; performing a cold start from "
-                    "surface data in '%s'.\n",
-                    options.surface_data_directory);
-        }
-    }
-
-    /*
      * PlaSiC runtime initialization
      */
     status = plasic_runtime_initialize(&options);
@@ -589,8 +575,11 @@ int plasic_cli_run(int argc, char **argv)
      */
     if (status != PLASIC_RUNTIME_OK)
     {
-        fprintf(stderr, "PlaSiC initialization failed: %s\n",
-                plasic_runtime_error());
+        if (plasic_mypid == 0)
+        {
+            fprintf(stderr, "PlaSiC initialization failed: %s\n",
+                    plasic_runtime_error());
+        }
 
         /*
          * Call finalize even if initialization failed.
@@ -601,6 +590,13 @@ int plasic_cli_run(int argc, char **argv)
         plasic_runtime_finalize();
 
         return EXIT_FAILURE;
+    }
+
+    if (options.restart_input == NULL && plasic_mypid == 0)
+    {
+        fprintf(stderr, "No --restart given; performing a cold start from "
+                        "surface data in '%s'.\n",
+                options.surface_data_directory);
     }
 
     /*

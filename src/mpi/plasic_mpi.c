@@ -235,6 +235,19 @@ int32_t mp_allreduce_real(float *buffer, int32_t count)
 #endif
 }
 
+int32_t mp_sync_error(int32_t *status, char *message, int32_t bytes)
+{
+    if (status == NULL || message == NULL || bytes < 1)
+    {
+        return -1;
+    }
+#if PLASIC_USE_MPI
+    return mpi_native_sync_error(status, message, bytes, active_rank);
+#else
+    return 0;
+#endif
+}
+
 /*
  * 全收集格点场：把各进程的局部纬度带按 rank 顺序拼成全局场并发给所有进程。
  */

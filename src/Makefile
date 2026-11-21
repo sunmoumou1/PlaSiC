@@ -813,10 +813,17 @@ test-runtime:
 		--earth-t21 src/data/earth_t21_l10.restart \
 		--earth-t42 src/data/earth_t42_l16.restart
 
-# Monthly forcing and both radiation bands. Requires NumPy and SciPy.
+# Requires NumPy, SciPy, ncdump and ncgen. MPI builds also exercise a
+# non-root rank's forcing error at initialization and at the month boundary.
+ifeq ($(MPI),1)
+  OZONE_MPI_TEST_FLAGS = --mpi-model "$(ABS_BUILD_ROOT)/tests/ozone-mpi/plasic.x" --mpirun "$(MPIRUN)"
+endif
 test-ozone:
 	$(MAKE) all MPI=0 NPRO=1 NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/ozone
-	cd .. && $(PYTHON) tests/ozone_forcing.py "$(ABS_BUILD_ROOT)/tests/ozone/plasic.x"
+ifeq ($(MPI),1)
+	$(MAKE) all MPI=1 NPRO=2 NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/ozone-mpi
+endif
+	cd .. && $(PYTHON) tests/ozone_forcing.py "$(ABS_BUILD_ROOT)/tests/ozone/plasic.x" $(OZONE_MPI_TEST_FLAGS)
 
 test: test-data test-runtime test-ozone
 

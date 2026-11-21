@@ -62,6 +62,7 @@ int monthly_netcdf_create(
     float fill_value = 1.0e20f;
 
     if (file == NULL || spec == NULL || directory == NULL ||
+        co2_forcing_source == NULL || ozone_forcing_source == NULL ||
         calendar == NULL || calendar[0] == '\0' ||
         (latitude_count > 0 && latitudes == NULL) ||
         (longitude_count > 0 && longitudes == NULL) ||
