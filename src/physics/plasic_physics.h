@@ -1,6 +1,7 @@
 #ifndef PLASIC_PHYSICS_H
 #define PLASIC_PHYSICS_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 /* sea_coupling_interval: atmospheric steps per sea-ice/ocean step (>= 1). */
@@ -19,6 +20,8 @@ int plasic_physics_frame_field(
     int32_t variable_id, const float **values, int32_t *layers);
 int plasic_physics_set_co2_bands(const float *bands, int32_t band_count);
 const float *plasic_physics_co2_field(void);
+/* Install this rank's slice of a [lat][lon] mass fraction level (kg/kg). */
+void plasic_physics_set_ozone_level(size_t lev, const float *global);
 /*
  * Return the centre depth (metres) of every three-dimensional deep-ocean
  * level and write the level count to *count.  The pointer remains owned by

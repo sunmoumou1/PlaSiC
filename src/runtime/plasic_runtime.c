@@ -1,5 +1,6 @@
 #include "runtime_internal.h"
 #include "co2_forcing.h"
+#include "ozone_forcing.h"
 #include "monthly_netcdf.h"
 
 runtime_workspace *runtime_fields;
@@ -90,6 +91,7 @@ void plasic_runtime_finalize(void)
     frames_enabled = 0;
 
     runtime_monthly_netcdf_abort();
+    runtime_ozone_forcing_close();
     runtime_co2_forcing_close();
     plasic_physics_finalize();
     sht_finalize();
@@ -348,6 +350,17 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         return status;
     }
 
+    status = runtime_ozone_forcing_open(options->ozone_forcing_input);
+    if (status == PLASIC_RUNTIME_OK)
+    {
+        status = runtime_ozone_forcing_apply(plasic_ndatim[0], plasic_ndatim[1]);
+    }
+    if (status != PLASIC_RUNTIME_OK)
+    {
+        plasic_runtime_finalize();
+        return status;
+    }
+
     status = runtime_monthly_netcdf_open(
         options->monthly_output_directory);
     if (status != PLASIC_RUNTIME_OK)
@@ -386,6 +399,10 @@ int plasic_runtime_run(const plasic_runtime_options *options)
 
         status = runtime_co2_forcing_apply(
             plasic_ndatim[0], plasic_ndatim[1]);
+        if (status == PLASIC_RUNTIME_OK)
+        {
+            status = runtime_ozone_forcing_apply(plasic_ndatim[0], plasic_ndatim[1]);
+        }
         if (status != PLASIC_RUNTIME_OK)
         {
             return status;

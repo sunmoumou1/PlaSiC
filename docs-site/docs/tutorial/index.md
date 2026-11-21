@@ -66,10 +66,11 @@ Among these, **SpeedyWeather.jl** is the closest modern peer in terms of scope, 
 
 ## Planned features and roadmap
 
-PlaSiC is an actively developed model. The following features are not yet implemented, but are planned for future releases:
+[External ozone forcing](3-parameterizations/3.4-radiation-parameterization.md#prescribing-external-ozone)
+is available for historical experiments alongside CO₂. The synthetic ozone
+profile remains the default. Other planned features include:
 
 - **Aerosol-related physical processes.** 
-- **External ozone forcing.** Ozone will be changed from an internally prescribed distribution to a field that can be read from external data, so that historical experiments can be driven by both ozone and carbon dioxide forcing simultaneously.
 - **Particle tracking and visualization.** A particle tracking algorithm will be added, together with visualization support, so that the transport of air parcels and tracers can be followed through the simulated circulation.
 - **Weather simulation experiments.** A forecast-mode experiment will be added in which the model is initialized from an observed weather state and integrated forward. The growth of forecast error as a function of lead time, from day 0 to day 10, can then be quantified.
 

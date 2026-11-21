@@ -182,6 +182,9 @@ HISTORICAL_PROGRESS_INTERVAL ?= 320
 INITIAL_CONDITION ?=
 CO2_FORCING ?= data/forcing/CO2/mole-fraction-of-carbon-dioxide-in-air_input4MIPs_GHGConcentrations_CMIP_UoM-CMIP-1-2-0_gn-15x360deg_000001-201412.csv
 CO2_PPM ?=
+# Optional native-grid monthly O3 (kg/kg); absent = synthetic ozone.
+OZONE_FORCING ?=
+OZONE_FLAG = $(if $(strip $(OZONE_FORCING)),--ozone-forcing "$(OZONE_FORCING)")
 HISTORICAL_OUTPUT_DIR ?= $(RUN_ROOT)/historical_T21_L10_MPI_P$(HISTORICAL_NPRO)_$(HISTORICAL_START_YEAR)-$(HISTORICAL_END_YEAR)
 
 
@@ -510,6 +513,7 @@ KERNEL_SOURCES = \
 RUNTIME_SOURCES = \
 	runtime/plasic_runtime.c \
 	runtime/co2_forcing.c \
+	runtime/ozone_forcing.c \
 	runtime/monthly_netcdf.c \
 	runtime/runtime_initialization.c \
 	runtime/runtime_dynamics.c \
@@ -564,7 +568,7 @@ PROGRAM = $(BUILD_DIR)/plasic.x
 #
 # 即使源码目录中恰好存在名为 all、clean、run 等文件，
 # make 仍然会执行对应规则，而不会错误地认为目标已经是最新状态。
-.PHONY: all clean help strict run historical historical-run test test-data test-runtime
+.PHONY: all clean help strict run historical historical-run test test-data test-runtime test-ozone
 
 
 # ----------------------------------------------------------------------------
@@ -739,7 +743,7 @@ strict: clean all
 run: all
 	@mkdir -p $(RUN_DIR)
 	$(RUNNER) $(PROGRAM) $(RESTART_FLAG) --steps $(STEPS) \
-		$(RUN_CO2_FLAG) \
+		$(RUN_CO2_FLAG) $(OZONE_FLAG) \
 		--progress $(RUN_DIR)/progress.txt \
 		--progress-interval $(PROGRESS_INTERVAL) \
 		--sea-coupling-interval $(SEA_COUPLING_INTERVAL) \
@@ -776,7 +780,7 @@ historical-run: all
 	@mkdir -p "$(HISTORICAL_OUTPUT_DIR)/monthly"
 	$(RUNNER) $(PROGRAM) \
 		--restart "$(INITIAL_CONDITION)" \
-		--co2-forcing "$(CO2_FORCING)" \
+		--co2-forcing "$(CO2_FORCING)" $(OZONE_FLAG) \
 		--reset-nstep $(HISTORICAL_RESET_NSTEP) \
 		--steps $(HISTORICAL_STEPS) \
 		--monthly-output "$(HISTORICAL_OUTPUT_DIR)/monthly" \
@@ -806,7 +810,12 @@ test-runtime:
 		--earth-t21 src/data/earth_t21_l10.restart \
 		--earth-t42 src/data/earth_t42_l16.restart
 
-test: test-data test-runtime
+# Standalone optical-forcing acceptance test (Python: numpy, netCDF4).
+test-ozone:
+	$(MAKE) all MPI=0 NPRO=1 NLAT=32 NLEV=10 BUILD_DIR="$(ABS_BUILD_ROOT)/tests/ozone_T21_L10"
+	$(PYTHON) ../tests/ozone_forcing_integration.py "$(ABS_BUILD_ROOT)/tests/ozone_T21_L10/plasic.x"
+
+test: test-data test-runtime test-ozone
 
 
 # -----------------------------------------------------------------------------

@@ -91,6 +91,14 @@ int plasic_physics_set_co2_bands(const float *bands, int32_t band_count)
     return PLASIC_RUNTIME_OK;
 }
 
+void plasic_physics_set_ozone_level(size_t lev, const float *global)
+{
+    const size_t offset = (size_t)mp_local_offset(PLASIC_NHOR);
+    memcpy(radiation.ozone + lev * PLASIC_NHOR, global + offset,
+           PLASIC_NHOR * sizeof(*global));
+    radiation.use_synthetic_ozone = 0;
+}
+
 const float *plasic_physics_co2_field(void)
 {
     return radiation.carbon_dioxide;

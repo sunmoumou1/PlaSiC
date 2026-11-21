@@ -191,6 +191,11 @@ pipeline takes roughly 7–8 hours on a modern laptop.
 make -C src historical INITIAL_CONDITION=data/earth_t21_l10.restart
 ```
 
+This example and the published results use synthetic ozone. To prescribe a
+monthly three-dimensional ozone field alongside the CO₂ series, add
+`OZONE_FORCING=/path/to/ozone.nc`. No observed ozone archive is bundled.
+See the [input contract and working example](docs-site/docs/tutorial/3-parameterizations/3.4-radiation-parameterization.md#prescribing-external-ozone).
+
 → [Chapter 6.2, Historical experiment](https://sunmoumou1.github.io/PlaSiC/tutorial/6-experiments/6.2-historical-experiment-1850-2014/)
 
 <p align="center">
@@ -334,9 +339,8 @@ python3 -m venv .venv
 Planned for future releases (✅ = delivered, ⬜ = planned):
 
 - ⬜ **Aerosol-related physical processes.**
-- ⬜ **External ozone forcing** — ozone will be read from external data rather than
-  prescribed internally, so historical experiments can be driven by CO₂ and ozone
-  together.
+- ✅ **External ozone forcing** — optional native-grid monthly NetCDF ozone can
+  drive shortwave and longwave radiation alongside historical CO₂.
 - ⬜ **Particle tracking and visualization** — follow air parcels and tracers through
   the simulated circulation, with visualization support.
 - ✅ **Weather simulation experiments** — initialize from an observed weather state

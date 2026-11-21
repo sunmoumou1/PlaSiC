@@ -59,7 +59,7 @@ typedef struct monthly_netcdf_file
 int monthly_netcdf_create(
     monthly_netcdf_file *file, const monthly_netcdf_spec *spec,
     const char *directory, const char *co2_forcing_source,
-    const char *calendar,
+    const char *ozone_forcing_source, const char *calendar,
     const float *latitudes, int32_t latitude_count,
     const float *longitudes, int32_t longitude_count,
     const float *levels, int32_t level_count,
