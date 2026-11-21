@@ -61,6 +61,20 @@ the project better for the next person who uses it.
       </td>
       <td align="center">—</td>
     </tr>
+    <tr>
+      <td align="center">
+        <a href="https://github.com/zsy1207"><img src="https://avatars.githubusercontent.com/u/75406373?s=112&amp;v=4" width="56" height="56" alt="Shiyang Zhou's GitHub avatar"></a><br>
+        <strong>Shiyang Zhou</strong><br>
+        <sub><a href="https://github.com/zsy1207">@zsy1207</a></sub>
+      </td>
+      <td>
+        <strong>Sea ice</strong><br>
+        Found that sea-ice compactness was reset every time step, which kept
+        ice cover from expanding, and proposed a fix.<br>
+        <sub><a href="https://github.com/sunmoumou1/PlaSiC/pull/6">Sea-ice compactness · #6</a> · <a href="https://github.com/sunmoumou1/PlaSiC/issues/5">Issue #5</a></sub>
+      </td>
+      <td align="center"><a href="https://shiyangzhou.com/">Visit website ↗</a></td>
+    </tr>
   </tbody>
 </table>
 
