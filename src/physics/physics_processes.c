@@ -548,6 +548,11 @@ static int ocean3d_exchange_halo(float *field, int32_t levels)
 {
     const int32_t nlon = PLASIC_NLON;
     const int32_t rows = PLASIC_NLPP;
+    /* Each level contributes one row to the MPI element count. */
+    if (levels < 1 || levels > INT32_MAX / nlon)
+    {
+        return -1;
+    }
     const int32_t elements = nlon * levels;
     const size_t bytes = (size_t)elements * sizeof(float);
     float *send_north = (float *)malloc(bytes);
