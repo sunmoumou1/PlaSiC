@@ -132,7 +132,7 @@ static int read_missing_value(const char *name, nc_type stored_type, double *val
     return 1;
 }
 
-/* Ignore blanks, "**" and "^", so "kg kg**-1" and "kg kg^-1" read as "kgkg-1". */
+/* Parse a ratio or a product with the inverse of the same unit. */
 static double units_factor(const char *units)
 {
     char compact[32];
@@ -140,18 +140,39 @@ static double units_factor(const char *units)
 
     for (; *units != '\0'; ++units)
     {
-        if (isspace((unsigned char)*units) || *units == '*' || *units == '^')
+        if (isspace((unsigned char)*units))
             continue;
         if (length + 1 >= sizeof(compact))
             return 0.0;
         compact[length++] = *units;
     }
     compact[length] = '\0';
-    if (strcmp(compact, "kgkg-1") == 0 || strcmp(compact, "kg/kg") == 0)
-        return 1.0;
-    if (strcmp(compact, "molmol-1") == 0 || strcmp(compact, "mol/mol") == 0)
-        return 47.9982 / 28.9644; /* O3 / dry-air molar masses */
-    return 0.0;
+    const char *unit;
+    double factor;
+    if (strncmp(compact, "kg", 2) == 0)
+    {
+        unit = "kg";
+        factor = 1.0;
+    }
+    else if (strncmp(compact, "mol", 3) == 0)
+    {
+        unit = "mol";
+        factor = 47.9982 / 28.9644;
+    }
+    else
+        return 0.0;
+
+    const size_t unit_length = strlen(unit);
+    const char *rest = compact + unit_length;
+    if (*rest == '/')
+        return strcmp(rest + 1, unit) == 0 ? factor : 0.0;
+    if (*rest == '*')
+        ++rest;
+    if (strncmp(rest, unit, unit_length) != 0)
+        return 0.0;
+    rest += unit_length;
+    return strcmp(rest, "-1") == 0 || strcmp(rest, "^-1") == 0 ||
+           strcmp(rest, "**-1") == 0 ? factor : 0.0;
 }
 
 static int read_units(void)
@@ -238,7 +259,7 @@ static int read_header(void)
     return 1;
 }
 
-int runtime_ozone_forcing_open(const char *path)
+static int open_local_file(const char *path)
 {
     int status = PLASIC_RUNTIME_IO_FAILED;
 
@@ -269,7 +290,42 @@ int runtime_ozone_forcing_open(const char *path)
         else
             status = PLASIC_RUNTIME_OK;
     }
-    status = runtime_sync_error(status);
+    return status;
+}
+
+/* All ranks must take the same branches when loading and caching records. */
+static int check_shared_time_axis(void)
+{
+    int32_t local[3] = {0, 0, 0};
+    if (forcing.file >= 0)
+    {
+        local[0] = (int32_t)(forcing.first_month / 12);
+        local[1] = (int32_t)(forcing.first_month % 12) + 1;
+        local[2] = (int32_t)forcing.months;
+    }
+    int32_t root[3];
+    memcpy(root, local, sizeof(root));
+    int status = PLASIC_RUNTIME_OK;
+    if (mp_broadcast_integer(root, 3) != 0)
+    {
+        runtime_set_error("could not broadcast ozone forcing time axis");
+        status = PLASIC_RUNTIME_IO_FAILED;
+    }
+    else if (memcmp(local, root, sizeof(root)) != 0)
+    {
+        runtime_set_error("ozone forcing time axis differs on rank %d: %d-%02d (%d records), "
+                          "rank 0 has %d-%02d (%d records)",
+                          mp_rank(), local[0], local[1], local[2], root[0], root[1], root[2]);
+        status = PLASIC_RUNTIME_BAD_ARGUMENT;
+    }
+    return runtime_sync_error(status);
+}
+
+int runtime_ozone_forcing_open(const char *path)
+{
+    int status = runtime_sync_error(open_local_file(path));
+    if (status == PLASIC_RUNTIME_OK)
+        status = check_shared_time_axis();
     if (status != PLASIC_RUNTIME_OK)
         runtime_ozone_forcing_close();
     return status;
@@ -367,11 +423,6 @@ int runtime_ozone_forcing_validate(int32_t steps)
 
     if (forcing.file < 0)
         return PLASIC_RUNTIME_OK;
-    if (steps < 1 || last_step > INT32_MAX)
-    {
-        runtime_set_error("invalid run length for ozone forcing validation");
-        return PLASIC_RUNTIME_BAD_ARGUMENT;
-    }
     first = step_records(plasic_nstep, &first_neighbor, &weight);
     last = step_records((int32_t)last_step, &last_neighbor, &weight);
     if (!covered(first) || !covered(last))

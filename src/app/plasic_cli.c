@@ -568,27 +568,13 @@ int plasic_cli_run(int argc, char **argv)
     /*
      * PlaSiC runtime initialization
      */
-    status = plasic_runtime_initialize(&options);
+    status = plasic_runtime_initialize_with_diagnostics(&options, stderr);
 
     /*
      * Runtime initialization failed.
      */
     if (status != PLASIC_RUNTIME_OK)
     {
-        if (plasic_mypid == 0)
-        {
-            fprintf(stderr, "PlaSiC initialization failed: %s\n",
-                    plasic_runtime_error());
-        }
-
-        /*
-         * Call finalize even if initialization failed.
-         *
-         * This lets the runtime release some resources
-         * that were successfully created during initialization.
-         */
-        plasic_runtime_finalize();
-
         return EXIT_FAILURE;
     }
 

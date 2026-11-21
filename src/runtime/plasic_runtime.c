@@ -118,7 +118,20 @@ static int apply_monthly_forcing(void)
     return status == PLASIC_RUNTIME_OK ? runtime_ozone_forcing_apply() : status;
 }
 
-int plasic_runtime_initialize(const plasic_runtime_options *options)
+/* The final restart clock includes the increment after the last step. */
+static int validate_run_length(int32_t steps)
+{
+    int status = PLASIC_RUNTIME_OK;
+    if (steps <= 0 || (int64_t)plasic_nstep + steps > INT32_MAX)
+    {
+        runtime_set_error("cannot advance %d steps from nstep=%d within the model clock range",
+                          steps, plasic_nstep);
+        status = PLASIC_RUNTIME_BAD_ARGUMENT;
+    }
+    return runtime_sync_error(status);
+}
+
+static int initialize(const plasic_runtime_options *options)
 {
     /*
      * Single entry point for the overall initialization of a PlaSiC run. 
@@ -201,7 +214,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
                 "parallel initialization failed: expected %d processes, "
                 "got %d (backend status %d)",
                 PLASIC_NPRO, process_count, mpi_error);
-            plasic_runtime_finalize();
             return PLASIC_RUNTIME_UNSUPPORTED_CONFIGURATION;
         }
     }
@@ -232,7 +244,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     status = runtime_sync_error(status);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -272,7 +283,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         status = runtime_sync_error(status);
         if (status != PLASIC_RUNTIME_OK)
         {
-            plasic_runtime_finalize();
             return status;
         }
     }
@@ -282,7 +292,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     status = runtime_sync_error(status);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -332,10 +341,13 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         }
     }
 
+    status = validate_run_length(options->steps);
+    if (status != PLASIC_RUNTIME_OK)
+        return status;
+
     status = runtime_sync_error(runtime_prepare_orography_grid());
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -353,7 +365,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     if (status != PLASIC_RUNTIME_OK)
     {
         runtime_set_error("%s", plasic_physics_error());
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -373,7 +384,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     }
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -381,18 +391,31 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         options->monthly_output_directory);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
-    status = runtime_open_live_outputs(options);
+    return runtime_open_live_outputs(options);
+}
+
+int plasic_runtime_initialize_with_diagnostics(const plasic_runtime_options *options, FILE *stream)
+{
+    const int status = initialize(options);
     if (status != PLASIC_RUNTIME_OK)
     {
+        /* The shutdown barrier keeps peers alive until root has reported the error. */
+        if (stream != NULL && mp_is_root())
+        {
+            fprintf(stream, "PlaSiC initialization failed: %s\n", plasic_runtime_error());
+            fflush(stream);
+        }
         plasic_runtime_finalize();
-        return status;
     }
+    return status;
+}
 
-    return PLASIC_RUNTIME_OK;
+int plasic_runtime_initialize(const plasic_runtime_options *options)
+{
+    return plasic_runtime_initialize_with_diagnostics(options, NULL);
 }
 
 // The most important function is the one below.
@@ -409,6 +432,10 @@ int plasic_runtime_run(const plasic_runtime_options *options)
      * Advance step by step; options->steps is always >= 1 because the CLI and
      * the JSON loader reject a missing or zero step count.
      */
+    status = validate_run_length(options->steps);
+    if (status != PLASIC_RUNTIME_OK)
+        return status;
+
     for (step = 0; step < options->steps; ++step)
     {
         step2cal(plasic_calendar, plasic_nstep, plasic_ndatim);

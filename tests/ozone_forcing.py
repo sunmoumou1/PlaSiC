@@ -190,6 +190,33 @@ class MonthlyOzone(unittest.TestCase):
                 self.assertIn(f"o3(time={record}, lev=9, lat=31, lon=63) = -1", result.stderr)
                 self.assertIn("PlaSiC initialization failed", result.stderr)
 
+    def rank_one_options(self, option, value):
+        launcher = self.directory / "rank_options.py"
+        launcher.write_text(
+            "import os, sys\n"
+            "rank = os.environ.get('OMPI_COMM_WORLD_RANK', os.environ.get('PMI_RANK', os.environ.get('PMIX_RANK')))\n"
+            "args = sys.argv[3:]\n"
+            "if rank == '1': args += sys.argv[1:3]\n"
+            "os.execv(args[0], args)\n"
+        )
+        return (sys.executable, launcher, option, value)
+
+    def test_mpi_local_ozone_time_axis(self):
+        if MPI_MODEL is None:
+            self.skipTest("requires a two-rank T21 L10 plasic.x")
+        write_forcing(self.ozone, 1e-7, months=(1, 2))
+        local = self.directory / "local.nc"
+        options = ("--co2-ppm", "300", "--ozone-forcing", self.ozone)
+        for months in ((1,), (2, 3), (1, 2), ()):
+            with self.subTest(months=months):
+                if months:
+                    write_forcing(local, 1e-7, months=months)
+                wrapper = self.rank_one_options("--ozone-forcing", local if months else "")
+                error = None if months == (1, 2) else "ozone forcing time axis differs on rank 1"
+                result = self.run_model(*options, mpi=True, wrapper=wrapper, error=error)
+                if error:
+                    self.assertEqual(result.stderr.count("PlaSiC initialization failed"), 1)
+
     def test_mpi_nonroot_surface_error(self):
         if MPI_MODEL is None:
             self.skipTest("requires a two-rank T21 L10 plasic.x")
@@ -197,20 +224,12 @@ class MonthlyOzone(unittest.TestCase):
         surface = self.directory / "surface"
         (surface / "T21").mkdir(parents=True)
         orography = "N032_surf_orography.nc"
-        launcher = self.directory / "local_surface.py"
-        launcher.write_text(
-            "import os, sys\n"
-            "rank = os.environ.get('OMPI_COMM_WORLD_RANK', os.environ.get('PMI_RANK', os.environ.get('PMIX_RANK')))\n"
-            "args = sys.argv[2:]\n"
-            "if rank == '1': args += ['--data-dir', sys.argv[1]]\n"
-            "os.execv(args[0], args)\n"
-        )
         for field in ("orography", "land_sea_mask"):
             with self.subTest(field=field):
                 if field == "land_sea_mask":
                     (surface / "T21" / orography).symlink_to(SURFACE / "T21" / orography)
                 result = self.run_model("--co2-ppm", "300", mpi=True,
-                                        wrapper=(sys.executable, launcher, surface),
+                                        wrapper=self.rank_one_options("--data-dir", surface),
                                         error=f"surface field '{field}'")
                 self.assertEqual(result.stderr.count("PlaSiC initialization failed"), 1, result.stderr)
                 self.assertIn(str(surface), result.stderr)
@@ -233,6 +252,24 @@ class MonthlyOzone(unittest.TestCase):
         self.run_model(*self.co2, *options, *reset, error="1850-01")
         write_forcing(self.ozone, 1e-7, months=(1,))
         self.run_model(*self.co2, *options, *reset)
+
+    def test_final_restart_clock_limit(self):
+        self.run_model("--co2-ppm", "300", "--calendar", "360day", "--steps", "1")
+        output = self.directory / "status"
+        initial = output.rename(self.directory / "initial.restart")
+        self.config.write_text(json.dumps(dict(steps=1, restart=str(initial), output=str(output))))
+        limit = 2**31 - 1
+        year, yday = divmod(limit // 32, 360)
+        write_forcing(self.ozone, 1e-7, months=(1 + yday // 30,), years=year)
+        for forcing in ((), ("--ozone-forcing", self.ozone)):
+            with self.subTest(forcing=forcing):
+                options = ("--co2-ppm", "300", "--dynamics-only", *forcing, "--reset-nstep")
+                self.run_model(*options, str(limit - 1))
+                records = dict(read_raw_records(output))
+                self.assertEqual(int.from_bytes(records["nstep"], "little", signed=True), limit)
+                output.unlink()
+                self.run_model(*options, str(limit), error="model clock range")
+                self.assertFalse(output.exists())
 
     @unittest.skipUnless(shutil.which("ncdump"), "requires ncdump")
     def test_monthly_provenance(self):
@@ -277,7 +314,7 @@ class MonthlyOzone(unittest.TestCase):
 
     def test_unit_spellings(self):
         values = np.full((2, 10, 32, 64), 1e-7)
-        for reference, spellings in (("kg kg-1", ("kg kg**-1", "kg kg^-1", "kg/kg", " kg  kg-1 ")),
+        for reference, spellings in (("kg kg-1", ("kg kg**-1", "kg kg^-1", "kg/kg", " kg  kg-1 ", "kg*kg^-1")),
                                      ("mol mol-1", ("mol mol**-1", "mol/mol"))):
             write_forcing(self.ozone, values, units=reference)
             expected = self.fluxes("--ozone-forcing", self.ozone)
@@ -293,8 +330,10 @@ class MonthlyOzone(unittest.TestCase):
         self.run_model(*options, error="1850-02")
         write_forcing(self.ozone, 1e-6, months=(1, 3))
         self.run_model(*options, error="consecutive")
-        write_forcing(self.ozone, 1e-6, units="ppmv")
-        self.run_model(*options, error="units")
+        for units in ("ppmv", "kg / kg**", "mol/mol^", "kg^kg-1", "kg kg***-1"):
+            with self.subTest(units=units):
+                write_forcing(self.ozone, 1e-6, units=units)
+                self.run_model(*options, error="units")
         for invalid in (float("nan"), -2e-9, 0.123):
             with self.subTest(invalid=invalid):
                 write_forcing(self.ozone, invalid)
