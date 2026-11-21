@@ -98,11 +98,6 @@ void plasic_physics_interpolate_ozone(const double *current, const double *neigh
     radiation.use_synthetic_ozone = 0;
 }
 
-void plasic_physics_set_ozone_field(const double *values)
-{
-    plasic_physics_interpolate_ozone(values, values, 0.0f);
-}
-
 const float *plasic_physics_co2_field(void)
 {
     return radiation.carbon_dioxide;

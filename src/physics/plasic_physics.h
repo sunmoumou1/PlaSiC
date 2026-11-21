@@ -19,9 +19,11 @@ int plasic_physics_frame_field(
     int32_t variable_id, const float **values, int32_t *layers);
 int plasic_physics_set_co2_bands(const float *bands, int32_t band_count);
 const float *plasic_physics_co2_field(void);
+/*
+ * Set radiation ozone to current + weight * (neighbor - current). Both are
+ * local [lev][lat][lon] slabs of ozone mass fractions (kg/kg).
+ */
 void plasic_physics_interpolate_ozone(const double *current, const double *neighbor, float weight);
-/* Copy one local [lev][lat][lon] slab of ozone mass fractions (kg/kg). */
-void plasic_physics_set_ozone_field(const double *values);
 /*
  * Return the centre depth (metres) of every three-dimensional deep-ocean
  * level and write the level count to *count.  The pointer remains owned by

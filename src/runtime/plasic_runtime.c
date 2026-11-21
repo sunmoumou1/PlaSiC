@@ -365,6 +365,10 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     }
     if (status == PLASIC_RUNTIME_OK)
     {
+        status = runtime_ozone_forcing_validate(options->steps);
+    }
+    if (status == PLASIC_RUNTIME_OK)
+    {
         status = apply_monthly_forcing();
     }
     if (status != PLASIC_RUNTIME_OK)

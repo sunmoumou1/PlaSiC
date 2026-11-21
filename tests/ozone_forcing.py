@@ -173,7 +173,8 @@ class MonthlyOzone(unittest.TestCase):
         if MPI_MODEL is None:
             self.skipTest("requires a two-rank T21 L10 plasic.x")
         options = ["--co2-ppm", "300", "--ozone-forcing", self.ozone]
-        # Start at the January anchor. February is first needed on step two.
+        # Start at the January anchor. February is first needed on step two,
+        # so only the startup scan of the whole run reads it before stepping.
         config = json.loads(self.config.read_text())
         config.update(start_yday=16, start_hour=0, start_minute=0)
         self.config.write_text(json.dumps(config))
@@ -185,6 +186,9 @@ class MonthlyOzone(unittest.TestCase):
                 error = f"invalid or missing ozone forcing value at 1850-{month}"
                 result = self.run_model(*options, mpi=True, error=error)
                 self.assertEqual(result.stderr.count(error), 1, result.stderr)
+                # Rank 1 reports the global latitude index of its slab.
+                self.assertIn(f"o3(time={record}, lev=9, lat=31, lon=63) = -1", result.stderr)
+                self.assertIn("PlaSiC initialization failed", result.stderr)
 
     def test_mpi_nonroot_surface_error(self):
         if MPI_MODEL is None:
@@ -248,6 +252,40 @@ class MonthlyOzone(unittest.TestCase):
                 self.assertIn(f':ozone_forcing_source = "{source}"', header)
                 self.assertIn(f':co2_forcing_source = "{self.co2[1]}"', header)
 
+    def test_startup_validation(self):
+        # The three-step run reaches February on its last step. A gap or a bad
+        # February value must stop the run before the first step.
+        options = ["--co2-ppm", "300", "--ozone-forcing", self.ozone]
+        write_forcing(self.ozone, 1e-7, months=(1,))
+        result = self.run_model(*options, error="but the run needs 1850-01 to 1850-02")
+        self.assertIn("PlaSiC initialization failed", result.stderr)
+        values = np.full((2, 10, 32, 64), 1e-7)
+        values[1, 3, 20, 7] = np.nan
+        write_forcing(self.ozone, values)
+        result = self.run_model(*options, error="o3(time=1, lev=3, lat=20, lon=7) = nan")
+        self.assertIn("PlaSiC initialization failed", result.stderr)
+
+    def test_small_negative_values(self):
+        # Regridding noise down to -1e-9 kg/kg reads as zero ozone.
+        values = np.full((2, 10, 32, 64), 1e-7)
+        values[:, 0, 5, 9] = 0.0
+        write_forcing(self.ozone, values)
+        zero = self.fluxes("--ozone-forcing", self.ozone)
+        values[:, 0, 5, 9] = -1e-12
+        write_forcing(self.ozone, values)
+        np.testing.assert_array_equal(zero, self.fluxes("--ozone-forcing", self.ozone))
+
+    def test_unit_spellings(self):
+        values = np.full((2, 10, 32, 64), 1e-7)
+        for reference, spellings in (("kg kg-1", ("kg kg**-1", "kg kg^-1", "kg/kg", " kg  kg-1 ")),
+                                     ("mol mol-1", ("mol mol**-1", "mol/mol"))):
+            write_forcing(self.ozone, values, units=reference)
+            expected = self.fluxes("--ozone-forcing", self.ozone)
+            for units in spellings:
+                with self.subTest(units=units):
+                    write_forcing(self.ozone, values, units=units)
+                    np.testing.assert_array_equal(expected, self.fluxes("--ozone-forcing", self.ozone))
+
     def test_invalid_inputs(self):
         options = ["--co2-ppm", "300", "--ozone-forcing", self.ozone]
         self.run_model(*options, error="cannot open ozone forcing")
@@ -257,7 +295,7 @@ class MonthlyOzone(unittest.TestCase):
         self.run_model(*options, error="consecutive")
         write_forcing(self.ozone, 1e-6, units="ppmv")
         self.run_model(*options, error="units")
-        for invalid in (float("nan"), -1e-50, 0.123):
+        for invalid in (float("nan"), -2e-9, 0.123):
             with self.subTest(invalid=invalid):
                 write_forcing(self.ozone, invalid)
                 self.run_model(*options, error="invalid or missing")
