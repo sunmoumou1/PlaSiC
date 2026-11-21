@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* PlaSiC 固定以 rank 0 作为根进程，因此调用者从不传 root。 */
-/* PlaSiC always uses rank 0 as the root, so callers never pass a root. */
+/* 模型数据以 rank 0 为根；错误消息由报告该错误的进程广播。 */
+/* Model data use rank 0 as root. Error messages come from the reporting rank. */
 enum
 {
     ROOT_RANK = 0
