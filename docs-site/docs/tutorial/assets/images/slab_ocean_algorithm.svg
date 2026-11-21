@@ -210,14 +210,9 @@ text{font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif}
 <text x="90.45" y="1374.71" font-size="18" fill="#64748b">= top-layer thickness.</text>
 <g transform="translate(266.03 1374.71) scale(0.0216)" fill="#64748b"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D444"></use></g><g transform="translate(824,-150) scale(0.707)"><g><use xlink:href="#mj-I-1D451"></use></g><g transform="translate(520,0)"><use xlink:href="#mj-I-1D452"></use></g><g transform="translate(986,0)"><use xlink:href="#mj-I-1D452"></use></g><g transform="translate(1452,0)"><use xlink:href="#mj-I-1D45D"></use></g></g></g><g transform="translate(2534.2,0)"><use xlink:href="#mj-N-3E"></use></g><g transform="translate(3589.9,0)"><use xlink:href="#mj-N-30"></use></g></g></g></g>
 <text x="359.38" y="1374.71" font-size="18" fill="#64748b">warms the slab.</text>
-<rect x="523" y="1179.14" width="465" height="219.78" rx="12" fill="#ffffff" stroke="#c7d2fe" stroke-width="1.4"/>
+<rect x="523" y="1179.14" width="465" height="121" rx="12" fill="#ffffff" stroke="#c7d2fe" stroke-width="1.4"/>
 <text x="678.27" y="1211.54" font-size="20" font-weight="700" fill="#4f46e5">NO — slab build</text>
 <g transform="translate(706.42 1263.23) scale(0.024)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D444"></use></g><g transform="translate(824,-150) scale(0.707)"><g><use xlink:href="#mj-I-1D451"></use></g><g transform="translate(520,0)"><use xlink:href="#mj-I-1D452"></use></g><g transform="translate(986,0)"><use xlink:href="#mj-I-1D452"></use></g><g transform="translate(1452,0)"><use xlink:href="#mj-I-1D45D"></use></g></g></g><g transform="translate(2534.2,0)"><use xlink:href="#mj-N-3D"></use></g><g transform="translate(3589.9,0)"><use xlink:href="#mj-N-30"></use></g></g></g></g>
-<text x="636.56" y="1297.53" font-size="20" fill="#334155">No prescribed Q-flux input.</text>
-<text x="615.05" y="1327.82" font-size="20" fill="#334155">A</text>
-<g transform="translate(633.95 1327.82) scale(0.024)" fill="#0f172a"><g transform="scale(1,-1)"><g><g><g><use xlink:href="#mj-I-1D444"></use></g><g transform="translate(824,-150) scale(0.707)"><g><use xlink:href="#mj-I-1D451"></use></g><g transform="translate(520,0)"><use xlink:href="#mj-I-1D452"></use></g><g transform="translate(986,0)"><use xlink:href="#mj-I-1D452"></use></g><g transform="translate(1452,0)"><use xlink:href="#mj-I-1D45D"></use></g></g></g></g></g></g>
-<text x="693.66" y="1327.82" font-size="20" fill="#334155">read from a 3-D restart</text>
-<text x="676.56" y="1358.11" font-size="20" fill="#334155">is zeroed on load.</text>
 <path d="M515 1053.14 L679.16 1107.14 L515 1161.14 L350.84 1107.14 Z" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
 <text x="442.15" y="1100.96" font-size="19" font-weight="700" fill="#78350f">Is the 3-D ocean</text>
 <text x="489.15" y="1124.82" font-size="19" font-weight="700" fill="#78350f">built?</text>
