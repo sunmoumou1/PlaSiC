@@ -289,6 +289,8 @@ class RunConfig:
         "gn-15x360deg_000001-201412.csv"
     )
 
+    ozone_forcing: str = ""
+
     restart: str = ""
 
     data_dir: str = "data/surface"
@@ -523,6 +525,11 @@ class ExperimentConfig:
             "dynamics_only": self.run.dynamics_only,
             "sea_coupling_interval": self.run.sea_coupling_interval,
         }
+
+        if self.run.ozone_forcing:
+            config["ozone_forcing"] = str(
+                self._resolve_model_path(self.run.ozone_forcing, c_root)
+            )
 
         if self.run.data_dir:
             config["data_dir"] = str(

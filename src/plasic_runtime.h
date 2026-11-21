@@ -36,6 +36,8 @@ typedef struct plasic_runtime_options
      * run once per interval and integrate the whole interval.
      */
     int32_t sea_coupling_interval;
+    /* Optional monthly ozone NetCDF on the model grid. */
+    const char *ozone_forcing_input;
 } plasic_runtime_options;
 
 int plasic_runtime_initialize(const plasic_runtime_options *options);

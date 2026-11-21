@@ -192,6 +192,16 @@
       "description": "CSV containing one externally prescribed CO2 value for each month and 15-degree latitude band."
     },
     {
+      "name": "ozone_forcing",
+      "label": "Monthly ozone forcing",
+      "type": "path",
+      "default": "",
+      "section": "Atmospheric Physics",
+      "phase": "runtime",
+      "component": "radiation",
+      "description": "Monthly ozone NetCDF on the model grid. Leave empty to use the synthetic ozone profile."
+    },
+    {
       "name": "restart",
       "label": "Initial restart",
       "type": "path",

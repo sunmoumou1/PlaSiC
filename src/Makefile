@@ -182,6 +182,7 @@ HISTORICAL_PROGRESS_INTERVAL ?= 320
 INITIAL_CONDITION ?=
 CO2_FORCING ?= data/forcing/CO2/mole-fraction-of-carbon-dioxide-in-air_input4MIPs_GHGConcentrations_CMIP_UoM-CMIP-1-2-0_gn-15x360deg_000001-201412.csv
 CO2_PPM ?=
+OZONE_FORCING ?=
 HISTORICAL_OUTPUT_DIR ?= $(RUN_ROOT)/historical_T21_L10_MPI_P$(HISTORICAL_NPRO)_$(HISTORICAL_START_YEAR)-$(HISTORICAL_END_YEAR)
 
 
@@ -363,6 +364,10 @@ else
   RESTART_FLAG =
 endif
 
+ifneq ($(strip $(OZONE_FORCING)),)
+  RUN_OZONE_FLAG = --ozone-forcing "$(OZONE_FORCING)"
+endif
+
 # Normal runs use the external forcing by default. Setting CO2_PPM switches
 # only `make run` to a spatially and temporally fixed concentration.
 ifneq ($(strip $(CO2_PPM)),)
@@ -510,6 +515,7 @@ KERNEL_SOURCES = \
 RUNTIME_SOURCES = \
 	runtime/plasic_runtime.c \
 	runtime/co2_forcing.c \
+	runtime/ozone_forcing.c \
 	runtime/monthly_netcdf.c \
 	runtime/runtime_initialization.c \
 	runtime/runtime_dynamics.c \
@@ -564,7 +570,7 @@ PROGRAM = $(BUILD_DIR)/plasic.x
 #
 # 即使源码目录中恰好存在名为 all、clean、run 等文件，
 # make 仍然会执行对应规则，而不会错误地认为目标已经是最新状态。
-.PHONY: all clean help strict run historical historical-run test test-data test-runtime
+.PHONY: all clean help strict run historical historical-run test test-data test-runtime test-ozone
 
 
 # ----------------------------------------------------------------------------
@@ -585,6 +591,7 @@ help:
 	@echo "  MPI=0                 Build without MPI"
 	@echo "  NLAT=64 NLEV=16      Set horizontal and vertical resolution"
 	@echo "  NPRO=4                Set the number of MPI processes"
+	@echo "  OZONE_FORCING=/path   Use a monthly ozone NetCDF in run or historical"
 	@echo "  STEPS=100             Set the number of run steps"
 	@echo "  SEA_COUPLING_INTERVAL=2  Run sea ice and ocean every 2 steps"
 	@echo "  SHTNS_PREFIX=/path    Use a custom SHTns installation"
@@ -739,7 +746,7 @@ strict: clean all
 run: all
 	@mkdir -p $(RUN_DIR)
 	$(RUNNER) $(PROGRAM) $(RESTART_FLAG) --steps $(STEPS) \
-		$(RUN_CO2_FLAG) \
+		$(RUN_CO2_FLAG) $(RUN_OZONE_FLAG) \
 		--progress $(RUN_DIR)/progress.txt \
 		--progress-interval $(PROGRESS_INTERVAL) \
 		--sea-coupling-interval $(SEA_COUPLING_INTERVAL) \
@@ -766,7 +773,7 @@ historical:
 		NLAT=$(HISTORICAL_NLAT) NLEV=$(HISTORICAL_NLEV) \
 		NPRO=$(HISTORICAL_NPRO) \
 		INITIAL_CONDITION="$(INITIAL_CONDITION)" \
-		CO2_FORCING="$(CO2_FORCING)" \
+		CO2_FORCING="$(CO2_FORCING)" OZONE_FORCING="$(OZONE_FORCING)" \
 		HISTORICAL_START_YEAR=$(HISTORICAL_START_YEAR) \
 		HISTORICAL_END_YEAR=$(HISTORICAL_END_YEAR) \
 		HISTORICAL_PROGRESS_INTERVAL=$(HISTORICAL_PROGRESS_INTERVAL) \
@@ -776,7 +783,7 @@ historical-run: all
 	@mkdir -p "$(HISTORICAL_OUTPUT_DIR)/monthly"
 	$(RUNNER) $(PROGRAM) \
 		--restart "$(INITIAL_CONDITION)" \
-		--co2-forcing "$(CO2_FORCING)" \
+		--co2-forcing "$(CO2_FORCING)" $(RUN_OZONE_FLAG) \
 		--reset-nstep $(HISTORICAL_RESET_NSTEP) \
 		--steps $(HISTORICAL_STEPS) \
 		--monthly-output "$(HISTORICAL_OUTPUT_DIR)/monthly" \
@@ -806,7 +813,12 @@ test-runtime:
 		--earth-t21 src/data/earth_t21_l10.restart \
 		--earth-t42 src/data/earth_t42_l16.restart
 
-test: test-data test-runtime
+# Monthly forcing and both radiation bands. Requires NumPy and SciPy.
+test-ozone:
+	$(MAKE) all MPI=0 NPRO=1 NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/ozone
+	cd .. && $(PYTHON) tests/ozone_forcing.py "$(ABS_BUILD_ROOT)/tests/ozone/plasic.x"
+
+test: test-data test-runtime test-ozone
 
 
 # -----------------------------------------------------------------------------

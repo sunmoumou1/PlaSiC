@@ -194,6 +194,7 @@ int plasic_config_load(
         LOAD_STRING("progress", progress_output, 1) &&
         LOAD_STRING("frames", frame_output, 1) &&
         LOAD_STRING("co2_forcing", co2_forcing_input, 1) &&
+        LOAD_STRING("ozone_forcing", ozone_forcing_input, 1) &&
         LOAD_STRING("monthly_output", monthly_output_directory, 1) &&
         load_float(root, "co2_ppm", &options->co2_ppm) &&
         load_integer(root, "steps", &options->steps) &&

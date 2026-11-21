@@ -1,5 +1,6 @@
 #include "runtime_internal.h"
 #include "co2_forcing.h"
+#include "ozone_forcing.h"
 #include "monthly_netcdf.h"
 
 runtime_workspace *runtime_fields;
@@ -91,11 +92,20 @@ void plasic_runtime_finalize(void)
 
     runtime_monthly_netcdf_abort();
     runtime_co2_forcing_close();
+    runtime_ozone_forcing_close();
     plasic_physics_finalize();
     sht_finalize();
     free(runtime_fields);
     runtime_fields = NULL;
     (void)mp_stop();
+}
+
+static int apply_monthly_forcing(void)
+{
+    const int year = plasic_ndatim[0];
+    const int month = plasic_ndatim[1];
+    const int status = runtime_co2_forcing_apply(year, month);
+    return status == PLASIC_RUNTIME_OK ? runtime_ozone_forcing_apply(year, month) : status;
 }
 
 int plasic_runtime_initialize(const plasic_runtime_options *options)
@@ -339,8 +349,11 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         options->co2_forcing_input, options->co2_ppm);
     if (status == PLASIC_RUNTIME_OK)
     {
-        status = runtime_co2_forcing_apply(
-            plasic_ndatim[0], plasic_ndatim[1]);
+        status = runtime_ozone_forcing_open(options->ozone_forcing_input);
+    }
+    if (status == PLASIC_RUNTIME_OK)
+    {
+        status = apply_monthly_forcing();
     }
     if (status != PLASIC_RUNTIME_OK)
     {
@@ -384,8 +397,7 @@ int plasic_runtime_run(const plasic_runtime_options *options)
     {
         step2cal(plasic_calendar, plasic_nstep, plasic_ndatim);
 
-        status = runtime_co2_forcing_apply(
-            plasic_ndatim[0], plasic_ndatim[1]);
+        status = apply_monthly_forcing();
         if (status != PLASIC_RUNTIME_OK)
         {
             return status;

@@ -91,6 +91,13 @@ int plasic_physics_set_co2_bands(const float *bands, int32_t band_count)
     return PLASIC_RUNTIME_OK;
 }
 
+void plasic_physics_set_ozone_field(const double *values)
+{
+    for (size_t i = 0; i < (size_t)PLASIC_NHOR * PLASIC_NLEV; ++i)
+        radiation.ozone[i] = (float)values[i];
+    radiation.use_synthetic_ozone = 0;
+}
+
 const float *plasic_physics_co2_field(void)
 {
     return radiation.carbon_dioxide;

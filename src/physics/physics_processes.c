@@ -61,7 +61,7 @@ static int radiation_step(void)
         distance_factor, plasic_sid, plasic_cola,
         radiation.cosine_zenith,
         &radiation.sun_distance_factor);
-    if (radiation.ozone_mode == 1)
+    if (radiation.use_synthetic_ozone == 1)
     {
         status = rad_synthetic_ozone(
             PLASIC_NLON, PLASIC_NLPP, PLASIC_NLEV, calendar_day,

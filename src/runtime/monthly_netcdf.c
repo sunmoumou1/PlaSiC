@@ -30,6 +30,7 @@
 #include "runtime_internal.h"
 
 #include "co2_forcing.h"
+#include "ozone_forcing.h"
 #include "monthly_netcdf.h"
 #include "tools/monthly_netcdf_writer.h"
 
@@ -420,7 +421,7 @@ static int ensure_variable_files(void)
              * the coordinates and metadata passed in. */
             writer_status = monthly_netcdf_create(
                 &variable->file, &spec, monthly_directory,
-                runtime_co2_forcing_source(),
+                runtime_co2_forcing_source(), runtime_ozone_forcing_source(),
                 calmod_cf_calendar_name(plasic_calendar),
                 monthly_latitudes, PLASIC_NLAT,
                 monthly_longitudes, PLASIC_NLON,
@@ -428,7 +429,7 @@ static int ensure_variable_files(void)
             // signature: int monthly_netcdf_create(
             //     monthly_netcdf_file *file, const monthly_netcdf_spec *spec,
             //     const char *directory, const char *co2_forcing_source,
-            //     const char *calendar,
+            //     const char *ozone_forcing_source, const char *calendar,
             //     const float *latitudes, int32_t latitude_count,
             //     const float *longitudes, int32_t longitude_count,
             //     const float *levels, int32_t level_count,
