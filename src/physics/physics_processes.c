@@ -467,8 +467,11 @@ static int land_step(void)
     return PLASIC_RUNTIME_OK;
 }
 
+static int ocean3d_exchange_halo(float *field, int32_t levels);
+
 static void ocean3d_fill_config(deep_ocean_kernel_config *config)
 {
+    config->exchange_halo = ocean3d_exchange_halo;
     config->nlev = deep_ocean.nlev;
     config->nlon = PLASIC_NLON;
     config->nlat_local = PLASIC_NLPP;
@@ -959,9 +962,14 @@ static void ice_step(void)
         }
     }
 
-    /* Keep the initial concentration as the compactness state. */
-    memcpy(ice.diagnosed_ice_cover, ice.ice_cover,
-           sizeof(ice.diagnosed_ice_cover));
+    /*
+     * ice.compactness is the prognostic compactness c_i^*: it is carried
+     * from step to step (restart record xicecc) and only updated by
+     * ice_compactness() below.  ice.ice_cover is the thresholded 0/1
+     * mask derived from it and must not be copied back here, otherwise
+     * sub-threshold growth is lost every step and the ice edge can only
+     * retreat.
+     */
 
     if (ice.prognostic_skin_temperature == 1)
     {
@@ -1015,7 +1023,7 @@ static void ice_step(void)
         ice.negative_ice_flux, ice.ice_thickness);
     ice_compactness(
         PLASIC_NHOR, work->horizontal_b, ice.ice_thickness,
-        ice.diagnosed_ice_cover);
+        ice.compactness);
 
     if (ice.prognostic_ice == 0)
     {
@@ -1044,7 +1052,7 @@ static void ice_step(void)
     }
     else
     {
-        memcpy(ice.ice_cover, ice.diagnosed_ice_cover,
+        memcpy(ice.ice_cover, ice.compactness,
                sizeof(ice.ice_cover));
         if (ocean.flux_correction == 0)
         {

@@ -201,19 +201,24 @@ make -C src historical INITIAL_CONDITION=data/earth_t21_l10.restart
 
 ### 2. Idealized CO₂ (`1pctCO2` and `abrupt-4xCO2`)
 
-Run with a coupled ocean from the same equilibrated initial state. In
+Run with a coupled ocean from the same initial state as a 150-year fixed-CO₂
+control, whose linear drift is removed from the anomalies. In
 `1pctCO2`, spatially uniform CO₂ rises by 1% yr⁻¹, compounded monthly, for 140
 years and reaches approximately 4× its initial concentration; the model warms
-by **+5.37 K in year 140**. The transient climate
-response is **TCR = 3.29 K**, defined as the 20-year mean temperature anomaly
+by **+4.70 K in year 140**. The transient climate
+response is **TCR = 2.04 K**, defined as the 20-year mean temperature anomaly
 over protocol years 61–80 (calendar years 1910–1929). In `abrupt-4xCO2`, CO₂ is
 stepped immediately to about 1,137 ppm (4×) and held for 150 years; the model
-warms by **+5.91 K in year 150**. A Gregory regression over the 149 annual means
-from 1851–1999 gives an effective 4× forcing of **9.27 W m⁻²**, a feedback
-parameter of **λ = −0.829 W m⁻² K⁻¹**, and an effective equilibrium climate
-sensitivity of **ECS = 5.59 K** (R² = 0.884). PlaSiC's TCR is above the CMIP6
-sample range of 1.305–3.058 K (31 models), while its effective ECS is just below
-the 1.831–5.616 K range (30 models).
+warms by **+5.48 K in year 150**. A Gregory regression over the 149 annual means
+from 1851–1999 gives an effective 4× forcing of **8.09 W m⁻²**, a feedback
+parameter of **λ = −0.806 W m⁻² K⁻¹**, and an effective equilibrium climate
+sensitivity of **ECS = 5.01 K** (R² = 0.905). PlaSiC's TCR lies inside the
+CMIP6 sample range of 1.305–3.058 K (31 models), close to the sample mean
+of 2.02 K, and its effective ECS lies in the upper part of the 1.831–5.616 K
+range (30 models). These values were recomputed in November 2026 after fixes to
+the sea-ice compactness ([Chapter 4.3, §6](https://sunmoumou1.github.io/PlaSiC/tutorial/4-model-and-coupling/4.3-sea-ice-module/#6-compactness-and-the-ice-mask))
+and to the ghost-row exchange of the three-dimensional ocean ([Chapter 4.5, §4.5](https://sunmoumou1.github.io/PlaSiC/tutorial/4-model-and-coupling/4.5-three-dimensional-ocean/#45-ghost-rows-at-process-boundaries));
+the earlier runs lost all Arctic sea ice and gave TCR = 3.29 K and ECS = 5.59 K.
 
 → [Chapter 6.3, Idealized CO₂ experiments](https://sunmoumou1.github.io/PlaSiC/tutorial/6-experiments/6.3-idealized-co2-experiments-tcr-ecs/)
 
@@ -226,8 +231,8 @@ the 1.831–5.616 K range (30 models).
 ### 3. Weather forecast (ERA5-initialized 10-day forecasts)
 
 PlaSiC is initialized from ERA5 reanalysis and integrated freely for 10 days at
-T85/L25 (128 × 256 Gaussian grid, 25 σ levels, 15-minute dynamics, 96 steps per
-day), then verified against ERA5 at matching valid times with the WeatherBench 2
+T85/L25 (128 × 256 Gaussian grid, 25 σ levels, 10-minute dynamics, 144 steps
+per day), then verified against ERA5 at matching valid times with the WeatherBench 2
 headline variables and metrics. Three 2020 cases are archived: a winter
 mid-latitude flow, a summer circulation and Typhoon Maysak. Each case is run
 from two initial states — a **direct** analysis, written to the two leapfrog levels
@@ -241,7 +246,7 @@ five days against a climatology baseline. One case is shown below:
 → [Chapter 6.6, ERA5-initialized 10-day forecasts](https://sunmoumou1.github.io/PlaSiC/tutorial/6-experiments/6.6-era5-initialized-10day-forecasts/)
 
 <p align="center">
-  <img src="docs-site/docs/tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="880" alt="Western North Pacific 10-day forecast of Typhoon Maysak: for nine diagnostics the ERA5 analysis is shown above the nudged PlaSiC forecast at lead times from the analysis time to +240 h">
+  <img src="docs-site/docs/tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="880" alt="Western North Pacific 10-day forecast of Typhoon Maysak: for eight diagnostics the ERA5 analysis is shown above the nudged PlaSiC forecast at lead times from the analysis time to +240 h">
 </p>
 
 <p align="center"><sub><b>Typhoon Maysak in a 10-day forecast.</b> Western North Pacific zoom (100–180 °E, 0–60 °N) of the typhoon2020 case; each diagnostic occupies two rows — ERA5 above, the nudged PlaSiC forecast below — at lead times from the analysis to +240 h.</sub></p>
@@ -254,9 +259,9 @@ with the full three-dimensional ocean and full physics:
 | Truncation | Grid | Levels | Steps per day | Simulated years per day | 100 simulated years |
 |---|---|---|---|---|---|
 | T21 | 64 × 32 | 10 | 32 | **2,650** | ≈ 0.9 hours |
-| T31 | 96 × 48 | 13 | 40 | 620 | ≈ 3.9 hours |
-| T42 | 128 × 64 | 16 | 48 | 196 | ≈ 12 hours |
-| T85 | 256 × 128 | 25 | 96 | 9.5 | ≈ 10.5 days |
+| T31 | 96 × 48 | 13 | 48 | 518 | ≈ 4.6 hours |
+| T42 | 128 × 64 | 16 | 72 | 131 | ≈ 18 hours |
+| T85 | 256 × 128 | 25 | 144 | 6.3 | ≈ 16 days |
 
 Values use the best configuration (4 MPI processes) in each case. Memory is modest:
 a T42 process needs about 100 MiB when running alone, or 38 MiB per rank at 4

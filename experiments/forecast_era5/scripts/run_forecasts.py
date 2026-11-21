@@ -136,7 +136,12 @@ def blend_surface_restart(model_restart: Path, target: dict[str, np.ndarray],
         valid = np.isfinite(target_array) & (np.abs(target_array) < 1.0e10)
         blended = np.where(valid, target_array + gamma * (model - target_array), model)
         replacements[name] = restart_io.encode_float(blended)
-    restart_io.write_raw_records(output, restart_io.replace_records(records, replacements))
+    # The relaxed compactness defines the ice mask; rebuild the mask and the
+    # sea-point albedo/roughness from it so the next cycle starts consistent.
+    # 中文说明：由松弛后的紧密度重新导出冰掩膜和海点反照率/粗糙度。
+    restart_io.write_raw_records(
+        output, build_ic.refresh_sea_surface(restart_io.replace_records(records, replacements))
+    )
 
 
 def frames_match(path: Path, expected_count: int, expected_interval: int) -> bool:

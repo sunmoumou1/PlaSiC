@@ -46,13 +46,16 @@ RESOLUTION_GRIDS = {
 
 
 # ---------------------------------------------------------------------------
-# 每个模拟日需要执行的动力学时间步数
+# 每个模拟日需要执行的动力学时间步数（与 C 模型 default_step_minutes() 一致：
+# 每天至少 NLAT 步，即 45/30/20/10 分钟）。
+# Dynamical steps per simulated day, matching default_step_minutes() in the C
+# model (at least NLAT steps per day: 45, 30, 20 and 10 minutes).
 # ---------------------------------------------------------------------------
 STEPS_PER_DAY = {
     "T21": 32,
-    "T31": 40,
-    "T42": 48,
-    "T85": 96,
+    "T31": 48,
+    "T42": 72,
+    "T85": 144,
 }
 
 

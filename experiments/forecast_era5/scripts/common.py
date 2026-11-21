@@ -107,12 +107,16 @@ NRSP = (NTRU + 1) * (NTRU + 2)
 # sync for resolutions whose model day contains whole-hour intervals.
 # 中文说明：模式根据 NLAT 选择基本时间步；这里复现同一规则，并要求每天的
 # 步数可以整除 24，使松弛窗口、帧间隔和日期到步数的换算保持一致。
-if NLAT <= 32:
-    MINUTES_PER_STEP = 45
-elif NLAT <= 48:
-    MINUTES_PER_STEP = 36
-else:
-    MINUTES_PER_STEP = (30 * 64) // NLAT
+# Mirrors default_step_minutes() in src/runtime/runtime_initialization.c: the
+# largest standard step (45 minutes or a divisor of 60) not exceeding
+# 1440/NLAT minutes, i.e. at least NLAT steps per day (10 minutes, 144 steps
+# per day, at T85).
+# 中文说明：与 runtime_initialization.c 的 default_step_minutes() 一致，取不超过
+# 1440/NLAT 分钟的最大标准步长（45 分钟或 60 的约数），即每天至少 NLAT 步
+# （T85 为 10 分钟、每天 144 步）。
+MINUTES_PER_STEP = next(
+    (d for d in (45, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1) if d <= (24 * 60) // NLAT), 1
+)
 NTSPD = _env_int("PLASIC_STEPS_PER_DAY", int(round(86400 / (MINUTES_PER_STEP * 60))))
 if NTSPD % 2:
     NTSPD += 1

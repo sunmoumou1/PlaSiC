@@ -317,7 +317,8 @@ typedef struct ice_state
     float snow_change[PLASIC_NHOR];
     float residual_melt_energy[PLASIC_NHOR];
     float snow_to_ice[PLASIC_NHOR];
-    float diagnosed_ice_cover[PLASIC_NHOR];
+    /* prognostic compactness c_i^* (restart xicecc); ice_cover is its 0/1 mask */
+    float compactness[PLASIC_NHOR];
     float atmospheric_heat[PLASIC_NHOR];
     float modified_atmospheric_heat[PLASIC_NHOR];
     float conductive_flux[PLASIC_NHOR];

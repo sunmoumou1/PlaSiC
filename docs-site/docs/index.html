@@ -1249,26 +1249,26 @@ body.theme-sensitivity .nav .tick{background:rgba(45,98,128,.25)}
 .fc-band-head{position:relative;height:1.25rem;margin:0 0 .18rem}
 .fc-band-head span{position:absolute;top:0;transform:translateX(-50%);font-family:var(--font-mono);font-size:clamp(.56rem,.7vw,.68rem);letter-spacing:.1em;text-transform:uppercase;color:#64829a;white-space:nowrap}
 .fc-band{position:relative;overflow:hidden;border:1px solid rgba(45,98,128,.18);border-radius:14px;background:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
-/* The band crops one 5303 x 7767 source figure, so every offset below is a
+/* The band crops one 5298 x 7767 source figure, so every offset below is a
    source pixel: the map column keeps the rotated ERA5/PlaSiC row labels and
-   the latitude ticks (x 350..4815, the seven panels start at x 796) and the
-   colour scale keeps its bar, ticks, numbers and unit (x 4860..5275).
+   the latitude ticks (x 349..4811, the seven panels start at x 795) and the
+   colour scale keeps its bar, ticks, numbers and unit (x 4854..5269).
    A row is 382 px tall and the two rows of a diagnostic are 399 px apart;
    --y1/--y2 (set per tab) are their tops. The 17 px row gap and 781 px
    colour-scale crop use the same source scale so bar and maps stay level. */
-.fc-band-body{display:grid;grid-template-columns:minmax(0,1fr) calc(415 / 4880 * 100%)}
+.fc-band-body{display:grid;grid-template-columns:minmax(0,1fr) calc(415 / 4877 * 100%)}
 .fc-band-maps{display:flex;flex-direction:column;min-width:0}
 .fc-band-cbar{position:relative;overflow:hidden;align-self:start;aspect-ratio:415/781}
 .fc-row{position:relative;overflow:hidden}
 .fc-row img,.fc-band-cbar img{display:block;height:auto;max-width:none}
-.fc-row img{width:calc(5303 / 4465 * 100%)}
-.fc-row-era5{aspect-ratio:4465/382}
-.fc-row-era5 img{transform:translate(calc(350 / 5303 * -100%),calc(var(--y1,378) / 7767 * -100%))}
-.fc-row-plasic{aspect-ratio:4465/382;margin-top:calc(17 / 4465 * 100%)}
-.fc-row-plasic img{transform:translate(calc(350 / 5303 * -100%),calc(var(--y2,777) / 7767 * -100%))}
-.fc-row-lon{aspect-ratio:4465/236}
-.fc-row-lon img{transform:translate(calc(350 / 5303 * -100%),calc(7511 / 7767 * -100%))}
-.fc-band-cbar img{width:calc(5303 / 415 * 100%);transform:translate(calc(4860 / 5303 * -100%),calc(var(--y1,378) / 7767 * -100%))}
+.fc-row img{width:calc(5298 / 4462 * 100%)}
+.fc-row-era5{aspect-ratio:4462/382}
+.fc-row-era5 img{transform:translate(calc(349 / 5298 * -100%),calc(var(--y1,378) / 7767 * -100%))}
+.fc-row-plasic{aspect-ratio:4462/382;margin-top:calc(17 / 4462 * 100%)}
+.fc-row-plasic img{transform:translate(calc(349 / 5298 * -100%),calc(var(--y2,777) / 7767 * -100%))}
+.fc-row-lon{aspect-ratio:4462/236}
+.fc-row-lon img{transform:translate(calc(349 / 5298 * -100%),calc(7511 / 7767 * -100%))}
+.fc-band-cbar img{width:calc(5298 / 415 * 100%);transform:translate(calc(4854 / 5298 * -100%),calc(var(--y1,378) / 7767 * -100%))}
 .forecast-chart-card figcaption{padding:.45rem .15rem 0;font-size:clamp(.96rem,1.08vw,1.1rem);line-height:1.45;color:#57728b}
 .forecast-chart-card figcaption strong{color:#2c4a62;font-weight:500}
 .forecast-source{margin-top:.4rem;text-align:center;font-family:var(--font-mono);font-size:clamp(.62rem,.74vw,.74rem);letter-spacing:.05em;line-height:1.55;color:#6a8293}
@@ -2229,17 +2229,17 @@ body.theme-audience .bottom-fade{background:none}
               <div class="fc-band-body">
                 <div class="fc-band-maps">
                   <div class="fc-row fc-row-era5">
-                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="5303" height="7767" loading="lazy" decoding="async" alt="ERA5 analysis or verification maps at seven lead times">
+                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="5298" height="7767" loading="lazy" decoding="async" alt="ERA5 analysis or verification maps at seven lead times">
                   </div>
                   <div class="fc-row fc-row-plasic">
-                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="5303" height="7767" loading="lazy" decoding="async" alt="PlaSiC forecast maps at seven lead times">
+                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="5298" height="7767" loading="lazy" decoding="async" alt="PlaSiC forecast maps at seven lead times">
                   </div>
                   <div class="fc-row fc-row-lon">
-                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="5303" height="7767" loading="lazy" decoding="async" alt="Longitude axis labels, 110°E to 170°E every 30 degrees">
+                    <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="5298" height="7767" loading="lazy" decoding="async" alt="Longitude axis labels, 110°E to 170°E every 30 degrees">
                   </div>
                 </div>
                 <div class="fc-band-cbar">
-                  <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="5303" height="7767" loading="lazy" decoding="async" alt="Colour scale for the selected diagnostic">
+                  <img src="tutorial/assets/images/era5-forecast/zoom_typhoon2020.png" width="5298" height="7767" loading="lazy" decoding="async" alt="Colour scale for the selected diagnostic">
                 </div>
               </div>
             </div>
@@ -3073,39 +3073,39 @@ function drawHistoricalChart(){
    experiments/co2_4xCO2_1pctCO2/cmip6_reference_metrics.csv
    (CMIP6 diagnostics: mark-ringer/cmip6, CC BY-SA 4.0).
    ============================================================ */
-/* --- annual global-mean tas anomalies, control = 1850–1859 mean --- */
+/* --- annual global-mean tas anomalies relative to the control's 1850–1999 linear trend --- */
 var CO2_1PCT_TAS = [
-  0.027,0.293,0.450,0.495,0.500,0.519,0.613,0.857,0.779,0.865,
-  0.987,1.003,0.974,1.047,1.084,1.204,1.277,1.302,1.393,1.344,
-  1.319,1.552,1.574,1.623,1.696,1.877,1.822,1.965,1.828,1.943,
-  2.001,1.990,2.094,2.171,2.133,2.109,2.261,2.228,2.248,2.251,
-  2.377,2.423,2.481,2.516,2.594,2.676,2.736,2.590,2.677,2.709,
-  2.689,2.780,2.783,2.879,2.932,2.938,2.914,2.943,2.914,2.945,
-  3.063,3.082,3.144,3.035,3.112,3.107,3.197,3.256,3.162,3.353,
-  3.372,3.350,3.301,3.315,3.409,3.496,3.526,3.477,3.554,3.536,
-  3.650,3.758,3.669,3.660,3.728,3.783,3.819,3.785,3.862,3.890,
-  3.793,3.842,3.902,3.973,4.004,3.875,3.994,4.021,4.086,4.123,
-  4.132,4.155,4.321,4.287,4.383,4.424,4.380,4.424,4.445,4.468,
-  4.491,4.506,4.493,4.533,4.567,4.493,4.550,4.546,4.565,4.563,
-  4.568,4.695,4.699,4.777,4.811,4.849,4.947,4.914,4.883,5.001,
-  5.064,5.116,5.151,5.177,5.216,5.277,5.275,5.296,5.369,5.372
+  -0.179,-0.146,-0.091,-0.143,-0.071,-0.056,-0.074,0.116,0.073,0.161,
+  0.207,0.220,0.352,0.334,0.429,0.317,0.428,0.385,0.526,0.680,
+  0.602,0.753,0.682,0.706,0.670,0.580,0.702,0.732,0.831,0.794,
+  0.910,0.869,0.833,0.920,0.978,1.060,1.044,1.085,1.053,1.050,
+  1.022,1.159,1.334,1.328,1.312,1.194,1.425,1.319,1.341,1.529,
+  1.554,1.507,1.491,1.666,1.757,1.639,1.743,1.810,1.769,1.776,
+  1.814,1.794,1.904,1.931,1.883,1.949,2.109,1.918,1.943,2.094,
+  2.130,2.093,2.085,2.124,2.073,2.173,2.214,2.108,2.184,2.189,
+  2.207,2.379,2.432,2.470,2.423,2.460,2.507,2.545,2.413,2.535,
+  2.499,2.551,2.543,2.665,2.759,2.705,2.844,2.803,2.839,2.888,
+  2.905,3.051,3.144,3.170,3.163,3.228,3.250,3.331,3.359,3.521,
+  3.487,3.552,3.455,3.654,3.682,3.750,3.827,3.832,3.926,3.930,
+  4.005,4.010,4.106,4.054,4.288,4.266,4.215,4.191,4.302,4.440,
+  4.437,4.590,4.572,4.594,4.599,4.668,4.716,4.784,4.638,4.702
 ];
 var CO2_4X_TAS = [
-  0.902,1.749,2.478,2.831,3.134,3.521,3.765,4.071,4.267,4.390,
-  4.559,4.719,4.834,4.957,5.014,5.008,5.080,5.071,5.138,5.207,
-  5.298,5.349,5.465,5.476,5.504,5.528,5.548,5.708,5.592,5.583,
-  5.634,5.576,5.628,5.702,5.730,5.764,5.782,5.874,5.761,5.803,
-  5.797,5.799,5.933,5.876,5.717,5.774,5.882,5.771,5.776,5.740,
-  5.751,5.724,5.789,5.704,5.787,5.810,5.838,5.791,5.850,5.757,
-  5.822,5.800,5.824,5.705,5.623,5.685,5.730,5.820,5.825,5.759,
-  5.784,5.844,5.847,5.835,5.797,5.851,5.790,5.863,5.934,5.887,
-  5.988,5.962,5.961,6.007,6.003,6.044,6.015,5.947,5.911,5.976,
-  6.008,5.972,5.865,5.881,5.933,5.910,5.919,5.971,5.872,5.926,
-  5.970,5.850,5.842,5.953,5.882,5.877,5.939,5.918,5.864,5.893,
-  5.940,6.003,6.033,5.929,5.840,5.910,5.892,5.828,5.873,5.921,
-  5.924,5.991,5.857,5.890,5.918,5.857,5.969,5.940,5.976,5.976,
-  6.037,5.852,5.942,5.939,5.966,5.932,5.917,5.811,5.776,5.801,
-  5.769,5.878,5.801,5.861,5.906,5.890,5.904,5.992,5.957,5.910
+  0.678,1.454,2.008,2.175,2.580,2.693,3.044,3.192,3.353,3.523,
+  3.680,3.638,3.791,3.978,4.099,4.128,4.144,4.257,4.289,4.303,
+  4.390,4.522,4.599,4.522,4.635,4.566,4.612,4.685,4.714,4.697,
+  4.771,4.855,4.696,4.768,4.818,4.818,4.754,4.783,4.855,4.944,
+  4.802,4.861,4.820,4.757,4.791,4.785,4.726,4.872,4.793,4.823,
+  4.792,4.798,4.783,4.830,4.802,4.781,4.833,4.883,4.907,4.858,
+  4.911,4.923,5.053,5.024,5.067,5.044,5.162,5.005,4.982,5.089,
+  5.019,4.965,4.999,5.065,5.081,5.018,4.990,5.028,5.148,4.998,
+  5.187,5.026,5.186,5.209,5.171,5.160,5.220,5.286,5.352,5.256,
+  5.121,5.326,5.273,5.317,5.243,5.208,5.290,5.331,5.429,5.335,
+  5.437,5.390,5.297,5.194,5.236,5.251,5.167,5.369,5.311,5.372,
+  5.357,5.321,5.415,5.265,5.187,5.365,5.346,5.472,5.384,5.294,
+  5.207,5.304,5.342,5.377,5.307,5.403,5.372,5.392,5.303,5.307,
+  5.431,5.486,5.546,5.571,5.511,5.647,5.532,5.474,5.644,5.581,
+  5.549,5.513,5.554,5.648,5.549,5.606,5.535,5.520,5.604,5.475
 ];
 /* --- [model, TCR K, effective ECS K]; null = not listed in the reference --- */
 var CMIP6_SENSITIVITY = [
@@ -3143,10 +3143,10 @@ var CMIP6_SENSITIVITY = [
 ];
 /* --- PlaSiC single-member diagnostics --- */
 var PLASIC_SENSITIVITY = {
-  TCR_K: 3.2923689021925524,           // 20-year mean, protocol years 61–80
-  ECS_K: 5.590213436749542,            // Gregory regression, 149 annual means
-  warming_1pct_year140_K: 5.371647195118044,
-  warming_4x_year150_K: 5.909611792600003
+  TCR_K: 2.0355791978100966,           // 20-year mean, protocol years 61–80
+  ECS_K: 5.01435765926148,            // Gregory regression, 149 annual means
+  warming_1pct_year140_K: 4.702274904519641,
+  warming_4x_year150_K: 5.475280204843045
 };
 
 function sensitivityStats(values){
@@ -3222,7 +3222,7 @@ function drawSensitivityChart(redraw){
   var jitter = rand(11), pi, i;
 
   chartSvg("title",{},svg,"PlaSiC and CMIP6 climate sensitivity");
-  chartSvg("desc",{},svg,"Violin and dot plots comparing PlaSiC with the CMIP6 model sample. PlaSiC's transient climate response is 3.29 K and its effective equilibrium climate sensitivity is 5.59 K. CMIP6 diagnostics come from the mark-ringer/cmip6 GitHub repository under CC BY-SA 4.0.");
+  chartSvg("desc",{},svg,"Violin and dot plots comparing PlaSiC with the CMIP6 model sample. PlaSiC's transient climate response is 2.04 K and its effective equilibrium climate sensitivity is 5.01 K. CMIP6 diagnostics come from the mark-ringer/cmip6 GitHub repository under CC BY-SA 4.0.");
 
   for (pi=0;pi<panels.length;pi++){
     var p = panels[pi];
@@ -3320,8 +3320,8 @@ function drawSensitivityTimeseries(){
   chartSvg("path",{d:seriesPath(CO2_4X_TAS),fill:"none",stroke:"#bf504b","stroke-width":"2.6","stroke-linecap":"round","stroke-linejoin":"round",class:"sensitivity-line",style:"--fd:.35s"},svg);
   chartSvg("circle",{cx:x(CO2_1PCT_TAS.length-1),cy:y(CO2_1PCT_TAS[CO2_1PCT_TAS.length-1]),r:"3.5",fill:"#3f7fb5",class:"sensitivity-fade",style:"--fd:1.6s"},svg);
   chartSvg("circle",{cx:x(CO2_4X_TAS.length-1),cy:y(CO2_4X_TAS[CO2_4X_TAS.length-1]),r:"3.5",fill:"#bf504b",class:"sensitivity-fade",style:"--fd:1.7s"},svg);
-  chartSvg("text",{x:x(139)-6,y:y(5.372)+20,"text-anchor":"end",fill:"#2f6a9c","font-size":"15","font-weight":"600","font-family":chartFont,"paint-order":"stroke",stroke:"#f8fbfe","stroke-width":"4","stroke-linejoin":"round"},svg,"1pctCO2");
-  chartSvg("text",{x:x(149)-6,y:y(5.910)-8,"text-anchor":"end",fill:"#a8433f","font-size":"15","font-weight":"600","font-family":chartFont,"paint-order":"stroke",stroke:"#f8fbfe","stroke-width":"4","stroke-linejoin":"round"},svg,"abrupt 4×CO2");
+  chartSvg("text",{x:x(149)-6,y:y(4.702)+28,"text-anchor":"end",fill:"#2f6a9c","font-size":"15","font-weight":"600","font-family":chartFont,"paint-order":"stroke",stroke:"#f8fbfe","stroke-width":"4","stroke-linejoin":"round"},svg,"1pctCO2");
+  chartSvg("text",{x:x(149)-6,y:y(5.475)-8,"text-anchor":"end",fill:"#a8433f","font-size":"15","font-weight":"600","font-family":chartFont,"paint-order":"stroke",stroke:"#f8fbfe","stroke-width":"4","stroke-linejoin":"round"},svg,"abrupt 4×CO2");
   svg.setAttribute("data-ready","true");
 }
 
@@ -3339,7 +3339,7 @@ window.addEventListener("resize", function(){
 
 /* ============================================================
    FORECAST BANDS — zoom_typhoon2020.png is one tall comparison
-   figure (5303 x 7767): eight diagnostics, each two map rows
+   figure (5298 x 7767): eight diagnostics, each two map rows
    (ERA5 above, PlaSiC below) plus its own colour scale on the
    right. Each tab shows the band of one diagnostic; y1/y2 are
    the source-pixel offsets of the two map rows in that band

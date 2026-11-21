@@ -124,7 +124,7 @@ int physics_write_restart(void)
     WRITE_PHYSICS_ARRAY("xcpmea",
                         ice.freshwater_diagnostic_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xstoia", ice.snow_to_ice_accumulator, 1);
-    WRITE_PHYSICS_ARRAY("xicecc", ice.diagnosed_ice_cover, 1);
+    WRITE_PHYSICS_ARRAY("xicecc", ice.compactness, 1);
 
     /* OCEANMOD */
     WRITE_PHYSICS_INTEGER("nlev_oce", 1);

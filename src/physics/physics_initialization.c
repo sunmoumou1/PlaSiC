@@ -253,7 +253,7 @@ static int load_physics_restart(const char *path)
     LOAD_ARRAY("xscflxa", ice.snow_conversion_accumulator, 1);
     LOAD_ARRAY("xcpmea", ice.freshwater_diagnostic_accumulator, 1);
     LOAD_ARRAY("xstoia", ice.snow_to_ice_accumulator, 1);
-    LOAD_ARRAY("xicecc", ice.diagnosed_ice_cover, 1);
+    LOAD_ARRAY("xicecc", ice.compactness, 1);
 
     /*
      * OCEANMOD state.  The mixed-layer ocean is forced to a single layer and
@@ -279,6 +279,21 @@ static int load_physics_restart(const char *path)
     LOAD_ARRAY("yifluxa", ocean.ice_flux_accumulator, 1);
     LOAD_ARRAY("yfldoa", ocean.deep_ocean_flux_accumulator, 1);
     LOAD_ARRAY("yfldo", ocean.deep_ocean_flux, 1);
+    /*
+     * yfldo 是三维深海洋最后一步交给 slab 的热通量。slab 构建没有深海洋来
+     * 更新它；从三维海洋的重启文件启动时，旧值会冻结成一个永久热源（极地
+     * 个别点可达 2000 W/m²），所以 slab 构建把它清零。
+     *
+     * yfldo is the heat flux the three-dimensional deep ocean handed to the
+     * slab on its last step.  A slab build has no deep ocean to update it, so
+     * a value restored from a three-dimensional-ocean restart would stay
+     * frozen as a permanent heat source (up to 2000 W/m2 at single polar
+     * points); a slab build therefore starts from zero.
+     */
+    if (deep_ocean.enabled == 0)
+    {
+        memset(ocean.deep_ocean_flux, 0, sizeof(ocean.deep_ocean_flux));
+    }
 
     /*
      * Three-dimensional deep ocean.  Older restart files do not contain these
@@ -650,6 +665,11 @@ static int initialize_cold_start_physics(void)
             (size_t)initial_month * PLASIC_NHOR + (size_t)point];
         ice.ice_cover[point] = ice.climatological_ice_cover[
             (size_t)initial_month * PLASIC_NHOR + (size_t)point];
+        /*
+         * Seed the prognostic compactness c_i^* once from the initial
+         * cover; ice_step() carries it afterwards (restart record xicecc).
+         */
+        ice.compactness[point] = ice.ice_cover[point];
         land.interpolated_albedo[point] = land.albedo_climatology[
             (size_t)initial_month * PLASIC_NHOR + (size_t)point];
         ice.snow[point] = 0.0f;

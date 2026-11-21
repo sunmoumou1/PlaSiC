@@ -142,9 +142,9 @@ def field_color_scale(name: str) -> tuple[float, float, str, str]:
     if name == "t":
         return 210.0, 285.0, "RdYlBu_r", "K"
     if name == "u":
-        return -45.0, 45.0, "RdBu_r", "m s⁻¹"
+        return -45.0, 45.0, "RdBu_r", r"m s$^{-1}$"
     if name == "q":
-        return 0.0, 8.0, "YlGnBu", "g kg⁻¹"
+        return 0.0, 8.0, "YlGnBu", r"g kg$^{-1}$"
     raise KeyError(name)
 
 

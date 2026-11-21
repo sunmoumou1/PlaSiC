@@ -55,6 +55,53 @@ static int is_land(const float *land_mask, int32_t horizontal)
     return land_mask[horizontal] >= 0.5f;
 }
 
+/*
+ * 刷新 halo 扩展场前 `levels` 层的 ghost 行。并行时由物理层的交换钩子把
+ * 相邻进程的边缘行写进 ghost 行（极点处保留镜像）；单进程或交换失败时，
+ * 所有 ghost 行取相邻内部行的镜像（零梯度）。
+ *
+ * 以前这里对所有进程都只做镜像：进程边界处表层的 ghost 行被本进程的边缘行
+ * 覆盖，经向梯度被人为置零，表层的经向平流和扩散在进程边界处被切断。
+ * 4 进程的 T85 积分因此在 45°N/45°S 出现约 2 K 的海温断层。
+ *
+ * Refresh the ghost rows of the first `levels` levels of a halo-extended
+ * field.  In parallel the physics layer's exchange hook writes the
+ * neighbouring process's edge row into each ghost row (the global polar
+ * ghosts stay mirrored); with one process, or if the exchange fails, every
+ * ghost row mirrors its adjacent interior row (zero gradient).
+ *
+ * The step used to mirror every ghost row on every process.  At a process
+ * boundary that overwrote the top-layer ghost row with the process's own edge
+ * row, set the meridional gradient there to zero and cut the top layer's
+ * meridional advection and diffusion at the boundary; a four-process T85
+ * integration developed SST steps of about 2 K at 45N and 45S.
+ */
+static void refresh_ghost_rows(
+    const deep_ocean_kernel_config *config, float *field, int32_t levels)
+{
+    const int32_t nlon = config->nlon;
+    const int32_t nlat_local = config->nlat_local;
+    const int32_t nhor = extended_nhor(config);
+    int32_t level;
+    int32_t i;
+
+    if (config->exchange_halo != NULL &&
+        config->exchange_halo(field, levels) == 0)
+    {
+        return;
+    }
+    for (level = 0; level < levels; ++level)
+    {
+        for (i = 0; i < nlon; ++i)
+        {
+            field[field_index(i, level, nhor)] =
+                field[field_index(nlon + i, level, nhor)];
+            field[field_index((nlat_local + 1) * nlon + i, level, nhor)] =
+                field[field_index(nlat_local * nlon + i, level, nhor)];
+        }
+    }
+}
+
 void deep_ocean_build_levels(
     int32_t nlev, float *layer_thickness, float *layer_center_depth)
 {
@@ -120,6 +167,21 @@ void deep_ocean_seed_state(
     const int32_t nlat_local = config->nlat_local;
     const int32_t nhor = extended_nhor(config);
     const float abyssal_temperature = 275.15f; /* 2 degrees Celsius */
+    /*
+     * 比 2 °C 冷的水柱整柱取海表温度（深层温度取 min(2 °C, SST)）。若深层仍是
+     * 2 °C，冷而重的表层水压在暖而轻的水上；slab 每步又把表层重置到冰点，于是
+     * 对流不断把深层热量翻到表层，以 2000 W/m² 的上限加热 slab，初始海冰在
+     * 几天内融光，之后至少一年都无法结冰。等温的冷水柱靠参考盐度廓线保持稳定。
+     *
+     * Columns colder than 2 degC are seeded isothermal at the surface
+     * temperature (deep temperature min(2 degC, SST)). With 2 degC water below,
+     * cold dense surface water would sit on warm light water; the slab resets
+     * the top layer to its own (freezing) temperature every step, so
+     * convective adjustment would keep bringing deep heat up and feed the slab
+     * at the 2000 W/m2 flux limit, melting the initial sea ice within days and
+     * keeping polar seas ice-free for at least a year. An isothermal cold
+     * column is held stable by the reference salinity profile.
+     */
     float depth = 0.0f;
     int32_t level;
 
@@ -144,10 +206,9 @@ void deep_ocean_seed_state(
                 const int32_t extended = extended_row + i;
                 const size_t index = field_index(extended, level, nhor);
                 const float surface = surface_temperature[local];
+                const float deep = fminf(abyssal_temperature, surface);
 
-                temperature[index] =
-                    abyssal_temperature +
-                    (surface - abyssal_temperature) * profile;
+                temperature[index] = deep + (surface - deep) * profile;
                 salinity[index] = salt_profile;
                 u_velocity[index] = 0.0f;
                 v_velocity[index] = 0.0f;
@@ -771,7 +832,8 @@ void deep_ocean_step(
 
     /* 1. Surface boundary: the slab sets the interior top-layer temperature
      *    and the net freshwater flux dilutes or concentrates the surface
-     *    salinity.  Ghost rows mirror their adjacent interior row. */
+     *    salinity.  The new top-layer edge rows are then exchanged, so the
+     *    ghost rows hold the neighbouring process's top layer. */
     for (row = 0; row < config->nlat_local; ++row)
     {
         const int32_t extended_row = row + 1;
@@ -806,20 +868,8 @@ void deep_ocean_step(
             }
         }
     }
-    for (i = 0; i < nlon; ++i)
-    {
-        const size_t north_ghost = field_index(i, 0, nhor);
-        const size_t north_edge = field_index(nlon + i, 0, nhor);
-        const size_t south_edge =
-            field_index(config->nlat_local * nlon + i, 0, nhor);
-        const size_t south_ghost =
-            field_index((config->nlat_local + 1) * nlon + i, 0, nhor);
-
-        temperature[north_ghost] = temperature[north_edge];
-        salinity[north_ghost] = salinity[north_edge];
-        temperature[south_ghost] = temperature[south_edge];
-        salinity[south_ghost] = salinity[south_edge];
-    }
+    refresh_ghost_rows(config, temperature, 1);
+    refresh_ghost_rows(config, salinity, 1);
 
     /* 2. Equation of state and hydrostatic pressure on all extended rows. */
     for (row = 0; row < DEEP_OCEAN_EXT_NLAT(config->nlat_local); ++row)
@@ -856,6 +906,9 @@ void deep_ocean_step(
     diagnose_velocities(
         config, sine_latitude, cosine_latitude, land_mask, pressure,
         stress_x, stress_y, layer_thickness, u_velocity, v_velocity);
+    /* The divergence at an edge row needs the neighbour's new velocity. */
+    refresh_ghost_rows(config, u_velocity, nlev);
+    refresh_ghost_rows(config, v_velocity, nlev);
     diagnose_vertical_velocity(
         config, sine_latitude, cosine_latitude, land_mask, layer_thickness,
         u_velocity, v_velocity, w_velocity);
@@ -912,21 +965,9 @@ void deep_ocean_step(
                 }
             }
         }
-        /* Refresh the mirrored ghost tracers between sub-cycles. */
-        for (i = 0; i < nlon; ++i)
-        {
-            const size_t north_ghost = field_index(i, 0, nhor);
-            const size_t north_edge = field_index(nlon + i, 0, nhor);
-            const size_t south_edge =
-                field_index(config->nlat_local * nlon + i, 0, nhor);
-            const size_t south_ghost =
-                field_index((config->nlat_local + 1) * nlon + i, 0, nhor);
-
-            temperature[north_ghost] = temperature[north_edge];
-            temperature[south_ghost] = temperature[south_edge];
-            salinity[north_ghost] = salinity[north_edge];
-            salinity[south_ghost] = salinity[south_edge];
-        }
+        /* Refresh every level's ghost tracers between sub-cycles. */
+        refresh_ghost_rows(config, temperature, nlev);
+        refresh_ghost_rows(config, salinity, nlev);
     }
 
     /* 5. Recompute density, then remove static instabilities. */

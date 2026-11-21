@@ -46,6 +46,83 @@ TEMPLATE_RESTART = common.TEMPLATE_RESTART  # 与模式网格/层数匹配的模
 # 土壤层厚度（m）；体积含水量乘以层厚后得到水当量厚度（m）。
 ERA5_SOIL_DEPTHS = np.array([0.07, 0.21, 0.72, 1.89])
 
+# Sea-ice and sea-surface constants of the model
+# (initialize_sea_ice_ocean_defaults() and sea_update_surface()).
+# 中文说明：与模式一致的海冰/海表常数。
+FREEZING_POINT = 271.25          # 海水冰点 (K) / seawater freezing point
+MELTING_POINT = 273.16           # 冰面温度上限 plasic_tmelt (K) / ice skin cap
+COMPACTNESS_THRESHOLD = 0.5      # c_i^* >= 0.5 → ice mask 1 / ice-mask threshold
+REFERENCE_THICKNESS = 0.5        # h_r of ice_compactness() (m) / 紧密度增长厚度尺度
+SEA_ALBEDO = 0.069
+ICE_ALBEDO = 0.7
+SEA_ROUGHNESS = 1.5e-5           # m
+ICE_ROUGHNESS = 0.001            # m
+# ERA5 SST/sea ice are extended this many 1.5° cells over ERA5 land before
+# regridding (see extend_over_land()).
+# 中文说明：插值前将 ERA5 海温/海冰向陆地外推的格点数。
+OCEAN_EXTENSION_PASSES = 2
+
+
+def refresh_sea_surface(records: "list[tuple[str, bytes]]") -> "list[tuple[str, bytes]]":
+    """Derive the ice mask and sea-point exchange fields from ``xicecc``.
+
+    The model carries the compactness c_i^* (``xicecc``) and derives the 0/1
+    mask ``xicec = c_i^* >= 0.5`` from it.  At the end of every step
+    ``sea_update_surface()`` recomputes the sea-point albedo and roughness
+    from that mask, but a restart reuses the stored ``dalb``/``dz0`` for its
+    first step.  Whenever the ice state of a restart is replaced (ERA5
+    initial conditions, nudging cycles) the mask and these exchange fields
+    are therefore rebuilt here with the model's own formulas, so the first
+    step sees the same surface as every later one.  Land points are kept.
+
+    中文说明：由 ``xicecc`` 重新导出冰掩膜以及海点的反照率和粗糙度，
+    保证替换海冰状态后的第一步与模式自身公式一致；陆地格点保持不变。
+    """
+    current = dict(records)
+
+    def grid(name: str) -> np.ndarray:
+        return restart_io.decode_float(current[name]).astype(np.float64)
+
+    sea = grid("dls") < 0.5
+    compactness = np.clip(grid("xicecc"), 0.0, 1.0)
+    mask = np.where(sea & (compactness >= COMPACTNESS_THRESHOLD), 1.0, 0.0)
+    old_cover = np.clip(grid("dicec"), 0.0, 1.0)
+    surface_temperature = grid("dts")
+    albedo = grid("dalb")
+    roughness = grid("dz0")
+
+    ice_albedo = np.minimum(ICE_ALBEDO, 0.5 + 0.025 * (273.0 - surface_temperature))
+    new_albedo = SEA_ALBEDO * (1.0 - mask) + mask * ice_albedo
+    # Recover the open-water (Charnock) roughness of the stored state; where
+    # the old state was fully ice covered it is unknown and the model's
+    # minimum open-water roughness is used.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        open_roughness = np.where(
+            old_cover < 1.0,
+            (roughness - old_cover * ICE_ROUGHNESS) / (1.0 - old_cover),
+            SEA_ROUGHNESS,
+        )
+    open_roughness = np.maximum(np.nan_to_num(open_roughness, nan=SEA_ROUGHNESS), SEA_ROUGHNESS)
+    new_roughness = open_roughness * (1.0 - mask) + ICE_ROUGHNESS * mask
+
+    replacements = {
+        "xicec": restart_io.encode_float(np.where(sea, mask, grid("xicec"))),
+        "dicec": restart_io.encode_float(np.where(sea, mask, grid("dicec"))),
+        "dalb": restart_io.encode_float(np.where(sea, new_albedo, albedo)),
+        "dz0": restart_io.encode_float(np.where(sea, new_roughness, roughness)),
+    }
+    # Snow can only rest on ice: the model melts snow on sea points without
+    # ice volume in its first ice step (a spurious latent-heat sink for the
+    # ocean), so snow inherited from the template is removed there.
+    # 中文说明：积雪只能位于海冰之上；无冰厚的海点上从模板继承的积雪会在
+    # 第一步被融化并错误地冷却海洋，因此在这里直接清零。
+    if "xsnow" in current and "xiced" in current:
+        snow = grid("xsnow")
+        replacements["xsnow"] = restart_io.encode_float(
+            np.where(sea & (grid("xiced") <= 0.0), 0.0, snow)
+        )
+    return restart_io.replace_records(records, replacements)
+
 
 # ---------------------------------------------------------------------------
 # Gaussian grid helpers
@@ -229,6 +306,58 @@ def to_model_grid(da: xr.DataArray) -> np.ndarray:
     return out.transpose(*da.dims).values.astype(np.float64)
 
 
+def extend_over_land(da: xr.DataArray, passes: int = OCEAN_EXTENSION_PASSES) -> xr.DataArray:
+    """Extend an ocean-only ERA5 field (NaN over land) a few cells inland.
+
+    The ERA5 and PlaSiC land-sea masks differ, and bilinear regridding is
+    undefined wherever one of the four ERA5 neighbours is land: about one
+    model sea point in ten.  Each pass fills the land cells that border
+    defined cells with the mean of their defined neighbours, so coastal model
+    sea points take the adjacent ERA5 ocean instead of a land skin
+    temperature and an artificial ice-free strip.  Points further inland
+    stay undefined on purpose; ``surface_replacement_arrays()`` gives them
+    the model climatology (the Antarctic ice shelves are sea in PlaSiC but
+    land in ERA5).
+
+    中文说明：把仅在海洋上有定义的 ERA5 场（陆地为 NaN）向陆地外推几个
+    格点，使海陆掩膜不一致的沿岸模式海点取相邻海洋的值；更远的内陆点仍为
+    NaN，之后由模式气候态填补（如南极冰架在 PlaSiC 中是海）。
+    """
+    values = np.array(da.values, dtype=np.float64)
+    lon = da["longitude"].values
+    spacing = np.diff(lon)
+    periodic = (lon.size > 1 and np.allclose(spacing, spacing[0])
+                and np.isclose(abs(spacing[0]) * lon.size, 360.0))
+    lat_axis = da.dims.index("latitude")
+    lon_axis = da.dims.index("longitude")
+
+    def shifted(array: np.ndarray, dlat: int, dlon: int) -> np.ndarray:
+        out = np.roll(array, dlon, axis=lon_axis)
+        if not periodic and dlon:
+            edge = [slice(None)] * out.ndim
+            edge[lon_axis] = slice(0, dlon) if dlon > 0 else slice(dlon, None)
+            out[tuple(edge)] = 0.0
+        if dlat:
+            out = np.roll(out, dlat, axis=lat_axis)
+            edge = [slice(None)] * out.ndim
+            edge[lat_axis] = slice(0, dlat) if dlat > 0 else slice(dlat, None)
+            out[tuple(edge)] = 0.0
+        return out
+
+    neighbours = [(a, b) for a in (-1, 0, 1) for b in (-1, 0, 1) if a or b]
+    for _ in range(passes):
+        missing = ~np.isfinite(values)
+        if not missing.any():
+            break
+        defined = np.where(missing, 0.0, values)
+        weight = (~missing).astype(np.float64)
+        total = sum(shifted(defined, a, b) for a, b in neighbours)
+        count = sum(shifted(weight, a, b) for a, b in neighbours)
+        mean = np.divide(total, count, out=np.full_like(total, np.nan), where=count > 0)
+        values = np.where(missing, mean, values)
+    return da.copy(data=values)
+
+
 def hydrostatic_ps_correction(ps_era5, orog_era5, temperature, orog_model, psurf):
     """Reduce ERA5 surface pressure to the model's (smoother) orography.
     """
@@ -346,11 +475,15 @@ class CaseBuilder:
         orog_era5 = to_model_grid(sl_sel["z"]).astype(np.float64) / common.GRAVITY
         skt = to_model_grid(sl_sel["skt"]).astype(np.float64)
         t2m = to_model_grid(sl_sel["t2m"]).astype(np.float64)
-        sst = to_model_grid(sl_sel["sst"]).astype(np.float64)
-        ice = to_model_grid(sl_sel["siconc"]).astype(np.float64)
-        # ERA5 SST/sea-ice are undefined over land; fall back to skin temperature / zero ice there.
-        sst = np.where(np.isfinite(sst), sst, skt)
-        ice = np.where(np.isfinite(ice), ice, 0.0)
+        # ERA5 SST/sea ice are undefined over ERA5 land.  Extend them over the
+        # coastline before regridding; model sea points that stay undefined
+        # (NaN) are filled from the model climatology in
+        # surface_replacement_arrays().  A land skin temperature is never used
+        # as SST, and no artificial ice-free coastal strip is created.
+        # 中文说明：ERA5 海温/海冰在陆地上无定义，先向陆地外推再插值；仍为
+        # NaN 的模式海点之后由模式气候态填补，不再用陆面皮温代替海温。
+        sst = to_model_grid(extend_over_land(sl_sel["sst"])).astype(np.float64)
+        ice = to_model_grid(extend_over_land(sl_sel["siconc"])).astype(np.float64)
 
         ps = hydrostatic_ps_correction(ps_era5, orog_era5, t2m, self.orography, self.psurf)
         # 地面气压限制在 400–1080 hPa 的物理合理范围。
@@ -429,11 +562,19 @@ class CaseBuilder:
         nudged restart with the surface state from t0−window.
         """
         arrays: dict[str, np.ndarray] = {}
+        records = dict(template_records)
+
+        def template_field(name: str, slots: int = 1) -> np.ndarray:
+            """One template record as (NLAT, NLON), or (slots, NLAT, NLON)."""
+            shape = (common.NLAT, common.NLON) if slots == 1 else (slots, common.NLAT, common.NLON)
+            return restart_io.decode_float(records[name]).astype(np.float64).reshape(shape)
 
         # --- surface state -------------------------------------------------
         # dls >= 0.5 marks land (same mask convention as the model).
-        dls = restart_io.decode_float(dict(template_records)["dls"]).reshape(common.NLAT, common.NLON)
-        land = dls >= 0.5
+        land = template_field("dls") >= 0.5
+        # 14-slot climatologies are [Dec halo, Jan, ..., Dec, Jan halo].
+        # 中文说明：14 个时次的气候态排列为 [12 月, 1 月, …, 12 月, 1 月]。
+        month = state.when.month
 
         def land_or_sentinel(field, sentinel):
             """Copy a field but write ``sentinel`` over ocean points.
@@ -442,39 +583,67 @@ class CaseBuilder:
             out[~land] = sentinel
             return out
 
+        def sea_only(name: str, values: np.ndarray) -> np.ndarray:
+            """Sea-point values; land keeps the template's own value.
+
+            The model never updates these sea records over land (``dts`` is
+            zero there, ``xts``/``ysst`` hold the climatology).
+            中文说明：只替换海点；陆地保留模板中的值。
+            """
+            return np.where(land, template_field(name), values)
+
         skt = state.surface["skt"]
+        # Model sea points that ERA5 cannot reach even after
+        # extend_over_land() -- chiefly the Antarctic ice shelves, which are
+        # sea in PlaSiC but land in ERA5 -- take the model's own climatology
+        # for the start month instead of open water at the freezing point.
+        # 中文说明：外推后仍无 ERA5 值的模式海点（主要是南极冰架）取模式自身
+        # 的当月气候态，而不是冰点温度下的开阔水面。
         sst = state.surface["sst"]
-        t2m = state.surface["t2m"]
-        ice = np.clip(state.surface["ice"], 0.0, 1.0)
+        sst = np.where(np.isfinite(sst), sst, template_field("yclsst", 14)[month])
+        ice = state.surface["ice"]
+        ice = np.where(np.isfinite(ice), ice, template_field("xclicec", 14)[month])
+        ice = np.clip(ice, 0.0, 1.0)
         ice[land] = 0.0  # 陆地上不存在海冰 / no sea ice over land
 
         # The model's slab ocean cannot be colder than the freezing point, and
         # its sea-ice thermodynamics needs a consistent cover/thickness pair.
-        # ERA5 SST is undefined under ice, so fall back to the freezing point
-        # there; the ice surface temperature comes from the ERA5 skin
-        # temperature.
-        freezing_point = 271.25
-        ocean_temperature = np.where(np.isfinite(sst), np.maximum(sst, freezing_point), freezing_point)
-        ice_mask = ice >= 0.5
-        ice_surface_temperature = np.where(ice_mask, np.minimum(skt, freezing_point), ocean_temperature)
+        # Model conventions (verified on model-written restarts):
+        #   xicecc  prognostic compactness c_i^*   <- ERA5 concentration
+        #   xicec   0/1 ice mask, c_i^* >= 0.5
+        #   xts     ice-model surface temperature: ice skin temperature
+        #           (<= T_melt) under ice, mixed-layer temperature elsewhere
+        #   dts     atmosphere-facing sea surface temperature, equal to xts
+        # sea_initialize() copies xts into the lowest atmospheric level on a
+        # restart, so xts must be the open-water SST, not the freezing point.
+        # 中文说明：xts 在重启时会被写入大气最低层温度，开阔海面必须取 SST；
+        # xicecc 是逐步积分的紧密度，xicec 是由它阈值化得到的 0/1 掩膜。
+        ocean_temperature = np.maximum(sst, FREEZING_POINT)
+        ice_mask = ice >= COMPACTNESS_THRESHOLD
+        ice_surface_temperature = np.minimum(skt, MELTING_POINT)
         sea_surface_temperature = np.where(ice_mask, ice_surface_temperature, ocean_temperature)
 
-        arrays["dts"] = sea_surface_temperature   # 海表温度 / sea surface temperature
-        arrays["ysst"] = ocean_temperature        # 海洋混合层温度 / ocean mixed-layer temperature
-        arrays["xts"] = (
-            np.where(ice_mask, np.minimum(skt, 272.0), freezing_point)
-        )                                         # 海冰表面温度 / sea-ice surface temperature
-        arrays["xicec"] = ice                     # 海冰密集度 / sea-ice concentration
+        arrays["dts"] = sea_only("dts", sea_surface_temperature)   # 海表温度 / sea surface temperature
+        arrays["ysst"] = sea_only("ysst", ocean_temperature)       # 海洋混合层温度 / ocean mixed-layer temperature
+        arrays["xts"] = sea_only("xts", sea_surface_temperature)   # 冰模式表面温度 / ice-model surface temperature
+        arrays["xicecc"] = ice                    # 海冰紧密度 c_i^* / sea-ice compactness
+        arrays["xicec"] = ice_mask.astype(np.float64)  # 海冰掩膜 / 0/1 ice mask
 
-        # Ice thickness from the template's own climatology, so that a cover
-        # of one is never paired with a zero thickness.
-        # 中文说明：海冰厚度取自模板自带的气候态，避免出现覆盖度为 1 但厚度为 0
-        # 的不自洽组合。
-        climatology = restart_io.decode_float(dict(template_records)["xcliced"]).reshape(
-            14, common.NLAT, common.NLON
-        )
-        month = state.when.month
-        thickness = np.where(ice_mask, np.maximum(climatology[month], 0.5), 0.0)
+        # Compact ice (mask 1) takes the template's monthly thickness
+        # climatology, at least 0.5 m, so that a cover of one is never paired
+        # with a zero thickness.  Sub-threshold ERA5 ice takes the thickness
+        # that the model's growth law dc = (1 - c) dh / h_r gives for ice grown
+        # from open water, h = -h_r ln(1 - c) (model-written restarts follow
+        # this relation); with no volume the first ice step would reset its
+        # compactness to zero.
+        # 中文说明：紧密冰（掩膜为 1）取模板当月气候态厚度（至少 0.5 m）；
+        # 低于阈值的 ERA5 海冰按紧密度增长律 dc = (1 - c) dh / h_r 积分得到
+        # h = -h_r ln(1 - c)（与模式自身写出的重启文件一致），否则第一步就会
+        # 因冰厚为零而把紧密度清零。
+        climatology = template_field("xcliced", 14)[month]
+        open_water_growth = -REFERENCE_THICKNESS * np.log1p(-np.minimum(ice, COMPACTNESS_THRESHOLD))
+        thickness = np.where(ice_mask, np.maximum(climatology, 0.5), open_water_growth)
+        thickness[land] = 0.0
         arrays["xiced"] = thickness  # 海冰厚度 / sea-ice thickness
 
         # 陆面温度类记录：陆地上使用皮温，海洋上置哨兵值。
@@ -511,11 +680,14 @@ class CaseBuilder:
         snow[~land] = 0.0
         arrays["dsnowz"] = snow  # 积雪深度（水当量）/ snow depth (water equivalent)
 
-        # atmosphere-facing surface temperature/humidity of the lowest level
-        arrays["dt"] = skt
+        # atmosphere-facing surface temperature/humidity of the lowest level;
+        # at sea points the model uses the sea surface temperature (dt = dts).
+        # 中文说明：海点的大气最低层温度与模式一致取海表温度（dt = dts）。
+        surface_temperature = np.where(land, skt, sea_surface_temperature)
+        arrays["dt"] = surface_temperature
         # 饱和混合比（Tetens 公式）→ 饱和比湿 / saturation mixing ratio (Tetens) -> specific humidity
         sat_mixing = common.GASCON / 461.51 * 610.78 * np.exp(
-            17.2693882 * (skt - 273.16) / (skt - 35.86)
+            17.2693882 * (surface_temperature - 273.16) / (surface_temperature - 35.86)
         ) / state.ps
         sat_specific = sat_mixing / (1.0 - (1.0 / (common.GASCON / 461.51) - 1.0) * sat_mixing)
         arrays["dq"] = sat_specific
@@ -541,7 +713,7 @@ class CaseBuilder:
         # clock
         # 中文说明：写入模式时钟（时间步计数器）。
         replacements["nstep"] = restart_io.encode_int(nstep)
-        return restart_io.replace_records(template_records, replacements)
+        return refresh_sea_surface(restart_io.replace_records(template_records, replacements))
 
 
 # ---------------------------------------------------------------------------

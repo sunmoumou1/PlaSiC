@@ -18,7 +18,10 @@
  * with one ghost row on each side, so meridional finite differences are
  * two-sided everywhere.  The physics layer fills the ghost rows by exchanging
  * the boundary rows with the neighbouring processes (see
- * mp_exchange_latitude_halo).
+ * mp_exchange_latitude_halo), and deep_ocean_step() calls the same exchange
+ * through `exchange_halo` whenever it changes interior rows that a
+ * neighbour's stencil reads.  Only the global polar ghosts are mirrored, so
+ * the result does not depend on the number of processes.
  *
  * Extended storage is column-major:
  *
@@ -55,6 +58,20 @@ typedef struct deep_ocean_kernel_config
     float kappa_v;           /* vertical diffusivity (m^2/s)                 */
     float kappa_h;           /* horizontal diffusivity (m^2/s)               */
     float t_freeze;          /* freezing point of seawater (K)               */
+    /*
+     * 刷新 halo 扩展场前 `levels` 层的 ghost 行（层间跨度为 nlon *
+     * (nlat_local + DEEP_OCEAN_HALO_ROWS)）：进程边界处的 ghost 行取相邻进程
+     * 的边缘行，全球极点处的 ghost 行取相邻内部行的镜像。成功返回 0。
+     * 为 NULL 表示单个进程拥有全部纬度，所有 ghost 行都取镜像。
+     *
+     * Refresh the ghost rows of the first `levels` levels of a halo-extended
+     * field (level stride nlon * (nlat_local + DEEP_OCEAN_HALO_ROWS)): a
+     * ghost row at a process boundary receives the neighbouring process's
+     * edge row, a ghost row at a global pole mirrors the adjacent interior
+     * row.  Returns 0 on success.  NULL means one process owns every
+     * latitude, so every ghost row is mirrored.
+     */
+    int (*exchange_halo)(float *field, int32_t levels);
 } deep_ocean_kernel_config;
 
 /*
