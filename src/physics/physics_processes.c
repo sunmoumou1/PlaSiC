@@ -748,14 +748,20 @@ void physics_ocean3d_advance(void)
         ocean.stress_y, deep_ocean.layer_thickness,
         deep_ocean.temperature, deep_ocean.salinity,
         deep_ocean.u_velocity, deep_ocean.v_velocity,
-        deep_ocean.w_velocity, deep_ocean.density, deep_ocean.qflux);
-    memcpy(ocean.deep_ocean_flux, deep_ocean.qflux,
-           sizeof(ocean.deep_ocean_flux));
+        deep_ocean.w_velocity, deep_ocean.density, ocean.deep_ocean_flux);
 }
 
+/*
+ * One slab step of length dt_mix = ocean.timestep (tutorial 4.4).  The
+ * symbols of the 4.3 / 4.4 figures map onto the fields as
+ *   Q_i->o  ocean.ice_to_ocean_flux   (average of ice.ocean_heat_accumulator)
+ *   Q_deep  ocean.deep_ocean_flux     (0 in slab-only builds)
+ *   T_o^n   ocean.temperature on entry, T_o^* = trial_sst
+ *   Q_o->i  ice.ocean_to_ice_flux = -ocean.ice_flux on exit.
+ */
 static void ocean_step(void)
 {
-    double temperature[PLASIC_NHOR];
+    double trial_sst[PLASIC_NHOR];
     int output_due;
 
     ocean_copy_inputs(
@@ -764,7 +770,7 @@ static void ocean_step(void)
         ice.ocean_stress_x_accumulator, ice.ocean_stress_y_accumulator,
         ice.ocean_friction_accumulator, ice.ocean_snow_accumulator,
         ice.current_climatological_thickness, ocean.ice_cover,
-        ocean.ice_thickness, ocean.heat,
+        ocean.ice_thickness, ocean.ice_to_ocean_flux,
         ocean.precipitation_minus_evaporation, ocean.stress_x,
         ocean.stress_y, ocean.friction_velocity_cubed,
         ocean.ice_and_snow, ocean.climatological_ice_thickness);
@@ -779,8 +785,8 @@ static void ocean_step(void)
     ocean_mksst_begin(
         PLASIC_NHOR, ocean.timestep, 1030.0f,
         4180.0f, 271.25f, ocean.land_mask, ocean.ice_thickness,
-        ocean.heat, ocean.deep_ocean_flux, ocean.mixed_layer_depth,
-        ocean.temperature, temperature, ocean.ice_flux);
+        ocean.ice_to_ocean_flux, ocean.deep_ocean_flux, ocean.mixed_layer_depth,
+        ocean.temperature, trial_sst, ocean.ice_flux);
     /*
      * The mixed-layer ocean is forced to a single layer with no vertical or
      * horizontal diffusion, so the slab only exchanges heat through the
@@ -790,32 +796,32 @@ static void ocean_step(void)
         PLASIC_NHOR, ocean.prognostic_ocean,
         ocean.flux_correction, ocean.timestep, 1030.0f, 4180.0f,
         271.25f, ocean.land_mask, ocean.ice_thickness,
-        ocean.mixed_layer_depth, temperature, ocean.ice_flux,
+        ocean.mixed_layer_depth, trial_sst, ocean.ice_flux,
         ocean.temperature);
 
     output_due = ocean_finish_step(
         PLASIC_NHOR, ocean.prognostic_ocean, ocean.flux_correction,
         plasic_nstep, ocean.output_interval, ocean.timestep,
-        ocean.cooling_timescale, 1030.0f, 920.0f, 4180.0f, 3.28e5f,
+        ocean.restoring_timescale, 1030.0f, 920.0f, 4180.0f, 3.28e5f,
         271.25f, ocean.land_mask, ocean.interpolated_sst,
         ocean.mixed_layer_depth, ocean.ice_thickness,
-        ocean.climatological_ice_thickness, ocean.heat,
+        ocean.climatological_ice_thickness, ocean.ice_to_ocean_flux,
         ocean.deep_ocean_flux, ocean.temperature,
-        ocean.ice_flux, ocean.residual_ice_flux, ocean.heat_accumulator,
+        ocean.ice_flux, ocean.residual_ice_flux, ocean.ice_to_ocean_flux_accumulator,
         ocean.ice_flux_accumulator,
         ocean.deep_ocean_flux_accumulator,
         &ocean.accumulation_count);
     if (output_due != 0)
     {
         ocean_reset_diagnostics(
-            PLASIC_NHOR, ocean.heat_accumulator,
+            PLASIC_NHOR, ocean.ice_to_ocean_flux_accumulator,
             ocean.ice_flux_accumulator,
             ocean.deep_ocean_flux_accumulator,
             &ocean.accumulation_count);
     }
     ocean_copy_outputs(
         PLASIC_NHOR, ocean.temperature, ocean.mixed_layer_depth,
-        ocean.ice_flux, ice.sst, ice.mixed_layer_depth, ice.ocean_heat);
+        ocean.ice_flux, ice.sst, ice.mixed_layer_depth, ice.ocean_to_ice_flux);
 }
 
 static void reset_ice_output_accumulators(void)
@@ -824,30 +830,30 @@ static void reset_ice_output_accumulators(void)
            sizeof(ice.flux_correction_accumulator));
     memset(ice.atmospheric_heat_accumulator, 0,
            sizeof(ice.atmospheric_heat_accumulator));
-    memset(ice.ocean_heat_diagnostic_accumulator, 0,
-           sizeof(ice.ocean_heat_diagnostic_accumulator));
-    memset(ice.residual_melt_accumulator, 0,
-           sizeof(ice.residual_melt_accumulator));
-    memset(ice.conductive_flux_accumulator, 0,
-           sizeof(ice.conductive_flux_accumulator));
+    memset(ice.ocean_to_ice_flux_accumulator, 0,
+           sizeof(ice.ocean_to_ice_flux_accumulator));
+    memset(ice.melt_energy_accumulator, 0,
+           sizeof(ice.melt_energy_accumulator));
+    memset(ice.ice_to_ocean_flux_accumulator, 0,
+           sizeof(ice.ice_to_ocean_flux_accumulator));
     memset(ice.maximum_thickness_flux_accumulator, 0,
            sizeof(ice.maximum_thickness_flux_accumulator));
-    memset(ice.negative_ice_flux_accumulator, 0,
-           sizeof(ice.negative_ice_flux_accumulator));
+    memset(ice.excess_melt_flux_accumulator, 0,
+           sizeof(ice.excess_melt_flux_accumulator));
     memset(ice.snow_melt_accumulator, 0,
            sizeof(ice.snow_melt_accumulator));
-    memset(ice.ice_melt_accumulator, 0,
-           sizeof(ice.ice_melt_accumulator));
+    memset(ice.ice_energy_flux_accumulator, 0,
+           sizeof(ice.ice_energy_flux_accumulator));
     memset(ice.surface_storage_accumulator, 0,
            sizeof(ice.surface_storage_accumulator));
     memset(ice.diagnosed_conductive_accumulator, 0,
            sizeof(ice.diagnosed_conductive_accumulator));
-    memset(ice.snow_conversion_accumulator, 0,
-           sizeof(ice.snow_conversion_accumulator));
+    memset(ice.snow_to_ice_flux_accumulator, 0,
+           sizeof(ice.snow_to_ice_flux_accumulator));
     memset(ice.freshwater_diagnostic_accumulator, 0,
            sizeof(ice.freshwater_diagnostic_accumulator));
-    memset(ice.snow_to_ice_accumulator, 0,
-           sizeof(ice.snow_to_ice_accumulator));
+    memset(ice.snow_to_ice_rate_accumulator, 0,
+           sizeof(ice.snow_to_ice_rate_accumulator));
     ice.output_accumulation_count = 0;
 }
 
@@ -861,30 +867,30 @@ static void accumulate_ice_diagnostics(void)
             ice.current_flux_correction[horizontal];
         ice.atmospheric_heat_accumulator[horizontal] +=
             ice.atmospheric_heat[horizontal];
-        ice.ocean_heat_diagnostic_accumulator[horizontal] +=
-            ice.ocean_heat[horizontal];
-        ice.residual_melt_accumulator[horizontal] +=
-            ice.residual_melt_energy[horizontal];
-        ice.ice_melt_accumulator[horizontal] +=
-            ice.ice_melt_flux[horizontal];
+        ice.ocean_to_ice_flux_accumulator[horizontal] +=
+            ice.ocean_to_ice_flux[horizontal];
+        ice.melt_energy_accumulator[horizontal] +=
+            ice.melt_energy[horizontal];
+        ice.ice_energy_flux_accumulator[horizontal] +=
+            ice.ice_energy_flux[horizontal];
         ice.snow_melt_accumulator[horizontal] +=
             ice.snow_melt_flux[horizontal];
-        ice.conductive_flux_accumulator[horizontal] +=
-            ice.conductive_flux[horizontal];
+        ice.ice_to_ocean_flux_accumulator[horizontal] +=
+            ice.ice_to_ocean_flux[horizontal];
         ice.maximum_thickness_flux_accumulator[horizontal] +=
             ice.maximum_thickness_flux[horizontal];
-        ice.negative_ice_flux_accumulator[horizontal] +=
-            ice.negative_ice_flux[horizontal];
+        ice.excess_melt_flux_accumulator[horizontal] +=
+            ice.excess_melt_flux[horizontal];
         ice.surface_storage_accumulator[horizontal] +=
             ice.surface_storage_flux[horizontal];
         ice.diagnosed_conductive_accumulator[horizontal] +=
             ice.diagnosed_conductive_flux[horizontal];
-        ice.snow_conversion_accumulator[horizontal] +=
-            ice.snow_conversion_flux[horizontal];
+        ice.snow_to_ice_flux_accumulator[horizontal] +=
+            ice.snow_to_ice_flux[horizontal];
         ice.freshwater_diagnostic_accumulator[horizontal] +=
             ice.freshwater_flux[horizontal];
-        ice.snow_to_ice_accumulator[horizontal] +=
-            ice.snow_to_ice[horizontal];
+        ice.snow_to_ice_rate_accumulator[horizontal] +=
+            ice.snow_to_ice_rate[horizontal];
     }
     ++ice.output_accumulation_count;
     if (ice.output_interval > 0 &&
@@ -899,6 +905,12 @@ static void accumulate_ice_diagnostics(void)
     }
 }
 
+/*
+ * One thermodynamic sea-ice step of length dt = ice.timestep.  The step
+ * numbers in the comments below are those of the tutorial figure
+ * sea_ice_algorithm.svg (4.3); the symbol <-> field table is at the top of
+ * src/sea/icemod_kernels.c.
+ */
 static void ice_step(void)
 {
     const float freezing_temperature = 271.25f;
@@ -912,17 +924,21 @@ static void ice_step(void)
     const float latent_heat_snow = 3.337e5f;
     const float ice_energy_per_timestep =
         ice_density * latent_heat_ice / ice.timestep;
+    /* h_i^n (0 on land) and S^n at the start of the step */
+    float thickness_at_step_start[PLASIC_NHOR];
+    float snow_at_step_start[PLASIC_NHOR];
     size_t horizontal;
 
-    memset(ice.ice_melt_flux, 0, sizeof(ice.ice_melt_flux));
+    /* Step 1: forcing, Q_a^mod = Q_a - Q_max, snowfall onto the ice. */
+    memset(ice.ice_energy_flux, 0, sizeof(ice.ice_energy_flux));
     memset(ice.snow_melt, 0, sizeof(ice.snow_melt));
     memset(ice.snow_melt_flux, 0, sizeof(ice.snow_melt_flux));
     memset(ice.surface_storage_flux, 0, sizeof(ice.surface_storage_flux));
     memset(ice.diagnosed_conductive_flux, 0,
            sizeof(ice.diagnosed_conductive_flux));
-    memset(ice.snow_conversion_flux, 0,
-           sizeof(ice.snow_conversion_flux));
-    memset(ice.negative_ice_flux, 0, sizeof(ice.negative_ice_flux));
+    memset(ice.snow_to_ice_flux, 0,
+           sizeof(ice.snow_to_ice_flux));
+    memset(ice.excess_melt_flux, 0, sizeof(ice.excess_melt_flux));
     memset(ice.snow_change, 0, sizeof(ice.snow_change));
 
     memcpy(ice.atmospheric_heat, sea.heat_accumulator,
@@ -946,14 +962,16 @@ static void ice_step(void)
     }
     physics_interpolate_ice_climatology();
 
-    memcpy(work->horizontal_a, ice.snow, sizeof(ice.snow));
-    memset(work->horizontal_b, 0, sizeof(ice.ice_thickness));
+    memcpy(snow_at_step_start, ice.snow, sizeof(snow_at_step_start));
+    memset(thickness_at_step_start, 0, sizeof(thickness_at_step_start));
     for (horizontal = 0; horizontal < PLASIC_NHOR; ++horizontal)
     {
         if (ice.land_mask[horizontal] < 0.5f)
         {
-            work->horizontal_b[horizontal] = ice.ice_thickness[horizontal];
+            thickness_at_step_start[horizontal] =
+                ice.ice_thickness[horizontal];
         }
+        /* S <- S + P_s dt where c_i = 1; elsewhere ice_snow melts P_s. */
         if (ice.prognostic_snow == 1 &&
             ice.ice_cover[horizontal] >= ice.minimum_ice_cover)
         {
@@ -971,6 +989,7 @@ static void ice_step(void)
      * retreat.
      */
 
+    /* Step 2: surface temperature T_i and melt energy Q_m. */
     if (ice.prognostic_skin_temperature == 1)
     {
         ice_skin_temperature(
@@ -979,7 +998,7 @@ static void ice_step(void)
             snow_density, ice_conductivity, snow_conductivity,
             ice.timestep, ice.ice_thickness, ice.snow, ice.sst,
             ice.modified_atmospheric_heat, ice.surface_temperature,
-            ice.surface_storage_flux, ice.residual_melt_energy);
+            ice.surface_storage_flux, ice.melt_energy);
     }
     else
     {
@@ -993,6 +1012,7 @@ static void ice_step(void)
                     ice.sst[horizontal];
         }
     }
+    /* Step 3: conduction Q_c and freezing-point conduction Q_f. */
     ice_conductive_flux(
         PLASIC_NHOR, ocean.flux_correction, ice.prognostic_ice,
         ice.minimum_thickness, ice.maximum_thickness,
@@ -1001,28 +1021,35 @@ static void ice_step(void)
         ice.surface_temperature, ice.sst, ice.modified_atmospheric_heat,
         ice.diagnosed_conductive_flux, ice.conductive_flux,
         ice.freezing_flux);
+
+    /* Step 4: snow.  The running sum Q_net starts from Q_c. */
+    memcpy(ice.net_heat_flux, ice.conductive_flux,
+           sizeof(ice.net_heat_flux));
     if (ice.prognostic_snow == 1)
     {
         ice_snow(
             PLASIC_NHOR, ice.minimum_ice_cover, seawater_density,
             ice_density, latent_heat_snow, ice.timestep, ice.land_mask,
-            ice.ice_cover, ice.snowfall, ice.residual_melt_energy,
-            ice.ice_thickness, ice.snow, ice.conductive_flux,
+            ice.ice_cover, ice.snowfall, ice.melt_energy,
+            ice.ice_thickness, ice.snow, ice.net_heat_flux,
             ice.snow_melt, ice.snow_melt_flux,
-            ice.snow_conversion_flux, ice.snow_to_ice);
+            ice.snow_to_ice_flux, ice.snow_to_ice_rate);
     }
     else
     {
         memset(ice.snow, 0, sizeof(ice.snow));
     }
+    /* Step 5: ice energy ledger -> h_i, Q_i->o and Q_ex. */
     ice_make_ice(
         PLASIC_NHOR, freezing_temperature, ice_density,
         latent_heat_ice, ice.timestep, ice.land_mask,
-        ice.modified_ocean_heat, ice.sst, ice.snow_conversion_flux,
-        ice.freezing_flux, ice.conductive_flux, ice.ice_melt_flux,
-        ice.negative_ice_flux, ice.ice_thickness);
+        ice.ocean_to_ice_flux, ice.sst, ice.snow_to_ice_flux,
+        ice.freezing_flux, ice.net_heat_flux, ice.ice_energy_flux,
+        ice.excess_melt_flux, ice.ice_to_ocean_flux, ice.ice_thickness);
+
+    /* Step 6: compactness c_i^*, mask c_i, cap h_i <= h_max (Q_max). */
     ice_compactness(
-        PLASIC_NHOR, work->horizontal_b, ice.ice_thickness,
+        PLASIC_NHOR, thickness_at_step_start, ice.ice_thickness,
         ice.compactness);
 
     if (ice.prognostic_ice == 0)
@@ -1036,8 +1063,8 @@ static void ice_step(void)
                     (ice.ice_thickness[horizontal] -
                      ice.current_climatological_thickness[horizontal]) *
                         ice_energy_per_timestep -
-                    ice.conductive_flux[horizontal];
-                ice.conductive_flux[horizontal] = 0.0f;
+                    ice.ice_to_ocean_flux[horizontal];
+                ice.ice_to_ocean_flux[horizontal] = 0.0f;
                 ice.ice_thickness[horizontal] =
                     ice.current_climatological_thickness[horizontal];
                 ice.ice_cover[horizontal] =
@@ -1061,47 +1088,54 @@ static void ice_step(void)
         }
     }
 
-    memset(work->horizontal_c, 0, sizeof(ice.ice_thickness));
     memset(ice.maximum_thickness_flux, 0,
            sizeof(ice.maximum_thickness_flux));
     for (horizontal = 0; horizontal < PLASIC_NHOR; ++horizontal)
     {
+        /*
+         * Q_max = rho_i L_i (h_i - h_max) / dt.  The removed ice is not lost:
+         * Q_max is subtracted from the next step's Q_a (Q_a^mod above).
+         */
         if (ice.maximum_thickness >= 0.0f &&
             ice.ice_thickness[horizontal] > ice.maximum_thickness)
         {
-            work->horizontal_c[horizontal] =
+            ice.maximum_thickness_flux[horizontal] =
                 (ice.ice_thickness[horizontal] - ice.maximum_thickness) *
                 ice_energy_per_timestep;
             ice.ice_thickness[horizontal] = ice.maximum_thickness;
-            ice.maximum_thickness_flux[horizontal] +=
-                work->horizontal_c[horizontal];
-            ice.ice_melt_flux[horizontal] +=
-                work->horizontal_c[horizontal];
+            ice.ice_energy_flux[horizontal] +=
+                ice.maximum_thickness_flux[horizontal];
         }
         ice.ice_cover[horizontal] =
             ice.ice_cover[horizontal] >= ice.compactness_threshold ?
                 1.0f : 0.0f;
+        /* Snow left on vanished ice melts with heat taken from Q_i->o. */
         if (ice.ice_thickness[horizontal] <= 0.0f &&
             ice.snow[horizontal] > 0.0f)
         {
-            const float flux_value =
+            const float leftover_snow_melt_flux =
                 ice.snow[horizontal] * 1000.0f * latent_heat_snow /
                 ice.timestep;
             ice.snow_melt[horizontal] +=
                 ice.snow[horizontal] / ice.timestep;
-            ice.snow_melt_flux[horizontal] += flux_value;
-            ice.conductive_flux[horizontal] -= flux_value;
+            ice.snow_melt_flux[horizontal] += leftover_snow_melt_flux;
+            ice.ice_to_ocean_flux[horizontal] -= leftover_snow_melt_flux;
             ice.snow[horizontal] = 0.0f;
         }
     }
     accumulate_ice_diagnostics();
 
+    /*
+     * Step 7: ocean.  Q_i->o and the other ocean forcings are summed over
+     * the ocean-coupling window and averaged before ocean_step(), which
+     * returns T_o and Q_o->i for the next ice step.
+     */
     for (horizontal = 0; horizontal < PLASIC_NHOR; ++horizontal)
     {
         if (ice.land_mask[horizontal] < 0.5f)
         {
             ice.ocean_heat_accumulator[horizontal] +=
-                ice.conductive_flux[horizontal];
+                ice.ice_to_ocean_flux[horizontal];
             ice.ocean_freshwater_accumulator[horizontal] +=
                 ice.freshwater_flux[horizontal];
             ice.ocean_stress_x_accumulator[horizontal] +=
@@ -1139,8 +1173,6 @@ static void ice_step(void)
             }
         }
         ocean_step();
-        memcpy(ice.modified_ocean_heat, ice.ocean_heat,
-               sizeof(ice.modified_ocean_heat));
         for (horizontal = 0; horizontal < PLASIC_NHOR; ++horizontal)
         {
             if (ice.land_mask[horizontal] < 0.5f)
@@ -1161,10 +1193,12 @@ static void ice_step(void)
         if (ice.land_mask[horizontal] < 0.5f)
         {
             ice.snow_change[horizontal] +=
-                (ice.snow[horizontal] - work->horizontal_a[horizontal]) /
+                (ice.snow[horizontal] - snow_at_step_start[horizontal]) /
                 ice.timestep;
         }
     }
+
+    /* Step 8: hand T_i, c_i, h_i, S and T_o back to the atmosphere. */
     memcpy(sea.coupled_surface_temperature, ice.surface_temperature,
            sizeof(sea.coupled_surface_temperature));
     memcpy(sea.coupled_ice_cover, ice.ice_cover,

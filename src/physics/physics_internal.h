@@ -215,28 +215,39 @@ typedef struct ocean_state
     int32_t output_interval;
     int32_t prognostic_ocean;
     int32_t flux_correction;
-    float cooling_timescale;
+    /* Newtonian SST restoring time (flux_correction == 1): days as set,
+     * seconds after ocean_initialize_parameters(). */
+    float restoring_timescale;
     float timestep;
     float layer_depth;
+    /*
+     * Slab mixed layer.  Symbols are those of the tutorial figures in
+     * 4.3 / 4.4: T_o = temperature, H = mixed_layer_depth,
+     * Q_i->o = ice_to_ocean_flux, Q_deep = deep_ocean_flux and
+     * Q_o->i = -ice_flux.
+     */
     float land_mask[PLASIC_NHOR];
     float temperature[PLASIC_NHOR];
     float mixed_layer_depth[PLASIC_NHOR];
     float ice_cover[PLASIC_NHOR];
     float ice_thickness[PLASIC_NHOR];
     float climatological_ice_thickness[PLASIC_NHOR];
-    float heat[PLASIC_NHOR];
+    /* Q_i->o: sea-ice flux handed to the slab, averaged over the window */
+    float ice_to_ocean_flux[PLASIC_NHOR];
+    /* Q_deep: deep-ocean flux into the slab (0 in slab-only builds) */
     float deep_ocean_flux[PLASIC_NHOR];
     float precipitation_minus_evaporation[PLASIC_NHOR];
     float stress_x[PLASIC_NHOR];
     float stress_y[PLASIC_NHOR];
     float friction_velocity_cubed[PLASIC_NHOR];
+    /* -Q_o->i: heat the slab cannot take under ice or at T_f */
     float ice_flux[PLASIC_NHOR];
     float residual_ice_flux[PLASIC_NHOR];
     float climatological_sst[
         PLASIC_NHOR * PLASIC_CLIMATOLOGY_MONTHS];
     float interpolated_sst[PLASIC_NHOR];
     float ice_and_snow[PLASIC_NHOR];
-    float heat_accumulator[PLASIC_NHOR];
+    float ice_to_ocean_flux_accumulator[PLASIC_NHOR];
     float ice_flux_accumulator[PLASIC_NHOR];
     float deep_ocean_flux_accumulator[PLASIC_NHOR];
 } ocean_state;
@@ -285,7 +296,6 @@ typedef struct deep_ocean_state
     float v_velocity[PLASIC_DEEP_EXT_HOR * PLASIC_DEEP_NLEV];
     float w_velocity[PLASIC_DEEP_EXT_HOR * PLASIC_DEEP_NLEV];
     float density[PLASIC_DEEP_EXT_HOR * PLASIC_DEEP_NLEV];
-    float qflux[PLASIC_NHOR];
 } deep_ocean_state;
 
 typedef struct ice_state
@@ -304,37 +314,61 @@ typedef struct ice_state
     float maximum_thickness;
     float compactness_threshold;
     float minimum_ice_cover;
+    /*
+     * Field names follow the symbols of the tutorial figures in 4.3
+     * (sea_ice_algorithm.svg, sea_ice_flux_structure.svg); the full
+     * symbol table is at the top of src/sea/icemod_kernels.c.  Fluxes are
+     * W m^-2 and positive downward / towards melting.
+     */
     float land_mask[PLASIC_NHOR];
+    /* T_i */
     float surface_temperature[PLASIC_NHOR];
+    /* T_o, returned by the slab */
     float sst[PLASIC_NHOR];
     float mixed_layer_depth[PLASIC_NHOR];
+    /* h_i, c_i (0/1 mask of compactness) and S (m water equivalent) */
     float ice_thickness[PLASIC_NHOR];
     float ice_cover[PLASIC_NHOR];
     float snow[PLASIC_NHOR];
+    /* M_s and rho_w L_s M_s (diagnostics) */
     float snow_melt[PLASIC_NHOR];
     float snow_melt_flux[PLASIC_NHOR];
-    float ice_melt_flux[PLASIC_NHOR];
+    /* Q_ice = Q_net + Q_s->i - Q_f (+ Q_max), the ice energy ledger */
+    float ice_energy_flux[PLASIC_NHOR];
     float snow_change[PLASIC_NHOR];
-    float residual_melt_energy[PLASIC_NHOR];
-    float snow_to_ice[PLASIC_NHOR];
+    /* Q_m */
+    float melt_energy[PLASIC_NHOR];
+    /* snow converted to ice by flooding (m water equivalent s^-1) */
+    float snow_to_ice_rate[PLASIC_NHOR];
     /* prognostic compactness c_i^* (restart xicecc); ice_cover is its 0/1 mask */
     float compactness[PLASIC_NHOR];
+    /* Q_a and Q_a^mod = Q_a - Q_max */
     float atmospheric_heat[PLASIC_NHOR];
     float modified_atmospheric_heat[PLASIC_NHOR];
+    /* Q_c = K_z (T_i - T_o), or Q_a^mod for h_i < h_min */
     float conductive_flux[PLASIC_NHOR];
+    /* Q_f = K_z (T_f - T_o) */
     float freezing_flux[PLASIC_NHOR];
+    /* Q_net = Q_c - rho_w L_s P_s|open + Q_m^rem + Q_o->i */
+    float net_heat_flux[PLASIC_NHOR];
+    /* Q_i->o: flux handed to the slab */
+    float ice_to_ocean_flux[PLASIC_NHOR];
+    /* Q_max: ice above h_max, fed back next step through Q_a^mod */
     float maximum_thickness_flux[PLASIC_NHOR];
-    float negative_ice_flux[PLASIC_NHOR];
+    /* Q_ex: melt energy beyond the remaining ice, returned to Q_i->o */
+    float excess_melt_flux[PLASIC_NHOR];
+    /* P_s (m water equivalent s^-1) */
     float snowfall[PLASIC_NHOR];
     float freshwater_flux[PLASIC_NHOR];
     float stress_x[PLASIC_NHOR];
     float stress_y[PLASIC_NHOR];
     float friction_velocity_cubed[PLASIC_NHOR];
-    float ocean_heat[PLASIC_NHOR];
-    float modified_ocean_heat[PLASIC_NHOR];
+    /* Q_o->i: returned by the slab, used in the next ice step */
+    float ocean_to_ice_flux[PLASIC_NHOR];
     float surface_storage_flux[PLASIC_NHOR];
     float diagnosed_conductive_flux[PLASIC_NHOR];
-    float snow_conversion_flux[PLASIC_NHOR];
+    /* Q_s->i <= 0: latent heat of flooded snow */
+    float snow_to_ice_flux[PLASIC_NHOR];
     float climatological_sst[
         PLASIC_NHOR * PLASIC_CLIMATOLOGY_MONTHS];
     float climatological_ice_cover[
@@ -346,26 +380,32 @@ typedef struct ice_state
     float current_climatological_cover[PLASIC_NHOR];
     float current_climatological_thickness[PLASIC_NHOR];
     float current_flux_correction[PLASIC_NHOR];
+    /*
+     * Ocean-coupling sums over the coupling window, averaged and handed to
+     * the slab by ocean_step(); ocean_heat_accumulator is the sum of Q_i->o
+     * (restart record cheat).
+     */
     float ocean_heat_accumulator[PLASIC_NHOR];
     float ocean_freshwater_accumulator[PLASIC_NHOR];
     float ocean_stress_x_accumulator[PLASIC_NHOR];
     float ocean_stress_y_accumulator[PLASIC_NHOR];
     float ocean_friction_accumulator[PLASIC_NHOR];
     float ocean_snow_accumulator[PLASIC_NHOR];
+    /* Output-interval diagnostic sums of the fields above. */
     float flux_correction_accumulator[PLASIC_NHOR];
     float atmospheric_heat_accumulator[PLASIC_NHOR];
-    float ocean_heat_diagnostic_accumulator[PLASIC_NHOR];
-    float residual_melt_accumulator[PLASIC_NHOR];
-    float conductive_flux_accumulator[PLASIC_NHOR];
+    float ocean_to_ice_flux_accumulator[PLASIC_NHOR];
+    float melt_energy_accumulator[PLASIC_NHOR];
+    float ice_to_ocean_flux_accumulator[PLASIC_NHOR];
     float maximum_thickness_flux_accumulator[PLASIC_NHOR];
-    float negative_ice_flux_accumulator[PLASIC_NHOR];
+    float excess_melt_flux_accumulator[PLASIC_NHOR];
     float snow_melt_accumulator[PLASIC_NHOR];
-    float ice_melt_accumulator[PLASIC_NHOR];
+    float ice_energy_flux_accumulator[PLASIC_NHOR];
     float surface_storage_accumulator[PLASIC_NHOR];
     float diagnosed_conductive_accumulator[PLASIC_NHOR];
-    float snow_conversion_accumulator[PLASIC_NHOR];
+    float snow_to_ice_flux_accumulator[PLASIC_NHOR];
     float freshwater_diagnostic_accumulator[PLASIC_NHOR];
-    float snow_to_ice_accumulator[PLASIC_NHOR];
+    float snow_to_ice_rate_accumulator[PLASIC_NHOR];
 } ice_state;
 
 typedef struct physics_workspace

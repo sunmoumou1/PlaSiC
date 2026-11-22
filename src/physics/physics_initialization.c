@@ -241,18 +241,18 @@ static int load_physics_restart(const char *path)
     LOAD_ARRAY("xflxicea", ice.flux_correction_accumulator, 1);
     LOAD_ARRAY("xheata", ice.atmospheric_heat_accumulator, 1);
     LOAD_ARRAY("xcfluxr", ice.maximum_thickness_flux, 1);
-    LOAD_ARRAY("xofluxa", ice.ocean_heat_diagnostic_accumulator, 1);
-    LOAD_ARRAY("xqmelta", ice.residual_melt_accumulator, 1);
-    LOAD_ARRAY("xcfluxa", ice.conductive_flux_accumulator, 1);
+    LOAD_ARRAY("xofluxa", ice.ocean_to_ice_flux_accumulator, 1);
+    LOAD_ARRAY("xqmelta", ice.melt_energy_accumulator, 1);
+    LOAD_ARRAY("xcfluxa", ice.ice_to_ocean_flux_accumulator, 1);
     LOAD_ARRAY("xcfluxra", ice.maximum_thickness_flux_accumulator, 1);
-    LOAD_ARRAY("xcfluxna", ice.negative_ice_flux_accumulator, 1);
+    LOAD_ARRAY("xcfluxna", ice.excess_melt_flux_accumulator, 1);
     LOAD_ARRAY("xsmelta", ice.snow_melt_accumulator, 1);
-    LOAD_ARRAY("ximelta", ice.ice_melt_accumulator, 1);
+    LOAD_ARRAY("ximelta", ice.ice_energy_flux_accumulator, 1);
     LOAD_ARRAY("xtsfluxa", ice.surface_storage_accumulator, 1);
     LOAD_ARRAY("xfluxca", ice.diagnosed_conductive_accumulator, 1);
-    LOAD_ARRAY("xscflxa", ice.snow_conversion_accumulator, 1);
+    LOAD_ARRAY("xscflxa", ice.snow_to_ice_flux_accumulator, 1);
     LOAD_ARRAY("xcpmea", ice.freshwater_diagnostic_accumulator, 1);
-    LOAD_ARRAY("xstoia", ice.snow_to_ice_accumulator, 1);
+    LOAD_ARRAY("xstoia", ice.snow_to_ice_rate_accumulator, 1);
     LOAD_ARRAY("xicecc", ice.compactness, 1);
 
     /*
@@ -275,7 +275,7 @@ static int load_physics_restart(const char *path)
     LOAD_ARRAY("yiflux", ocean.ice_flux, 1);
     LOAD_ARRAY("yclsst", ocean.climatological_sst,
                PLASIC_CLIMATOLOGY_MONTHS);
-    LOAD_ARRAY("yheata", ocean.heat_accumulator, 1);
+    LOAD_ARRAY("yheata", ocean.ice_to_ocean_flux_accumulator, 1);
     LOAD_ARRAY("yifluxa", ocean.ice_flux_accumulator, 1);
     LOAD_ARRAY("yfldoa", ocean.deep_ocean_flux_accumulator, 1);
     LOAD_ARRAY("yfldo", ocean.deep_ocean_flux, 1);
@@ -556,7 +556,7 @@ static void initialize_sea_ice_ocean_defaults(void)
     ocean.output_interval = 32;
     ocean.prognostic_ocean = 1;
     ocean.flux_correction = 0;
-    ocean.cooling_timescale = 0.0f;
+    ocean.restoring_timescale = 0.0f;
     ocean.layer_depth = 50.0f;
 
     initialize_deep_ocean_defaults();
@@ -808,24 +808,24 @@ static int initialize_cold_start_physics(void)
         ice.atmospheric_heat_accumulator, 0,
         sizeof(ice.atmospheric_heat_accumulator));
     memset(
-        ice.ocean_heat_diagnostic_accumulator, 0,
-        sizeof(ice.ocean_heat_diagnostic_accumulator));
+        ice.ocean_to_ice_flux_accumulator, 0,
+        sizeof(ice.ocean_to_ice_flux_accumulator));
     memset(
-        ice.residual_melt_accumulator, 0,
-        sizeof(ice.residual_melt_accumulator));
+        ice.melt_energy_accumulator, 0,
+        sizeof(ice.melt_energy_accumulator));
     memset(
-        ice.conductive_flux_accumulator, 0,
-        sizeof(ice.conductive_flux_accumulator));
+        ice.ice_to_ocean_flux_accumulator, 0,
+        sizeof(ice.ice_to_ocean_flux_accumulator));
     memset(
         ice.maximum_thickness_flux_accumulator, 0,
         sizeof(ice.maximum_thickness_flux_accumulator));
     memset(
-        ice.negative_ice_flux_accumulator, 0,
-        sizeof(ice.negative_ice_flux_accumulator));
+        ice.excess_melt_flux_accumulator, 0,
+        sizeof(ice.excess_melt_flux_accumulator));
     memset(
         ice.snow_melt_accumulator, 0, sizeof(ice.snow_melt_accumulator));
     memset(
-        ice.ice_melt_accumulator, 0, sizeof(ice.ice_melt_accumulator));
+        ice.ice_energy_flux_accumulator, 0, sizeof(ice.ice_energy_flux_accumulator));
     memset(
         ice.surface_storage_accumulator, 0,
         sizeof(ice.surface_storage_accumulator));
@@ -833,17 +833,17 @@ static int initialize_cold_start_physics(void)
         ice.diagnosed_conductive_accumulator, 0,
         sizeof(ice.diagnosed_conductive_accumulator));
     memset(
-        ice.snow_conversion_accumulator, 0,
-        sizeof(ice.snow_conversion_accumulator));
+        ice.snow_to_ice_flux_accumulator, 0,
+        sizeof(ice.snow_to_ice_flux_accumulator));
     memset(
         ice.freshwater_diagnostic_accumulator, 0,
         sizeof(ice.freshwater_diagnostic_accumulator));
     memset(
-        ice.snow_to_ice_accumulator, 0, sizeof(ice.snow_to_ice_accumulator));
+        ice.snow_to_ice_rate_accumulator, 0, sizeof(ice.snow_to_ice_rate_accumulator));
     ice.output_accumulation_count = 0;
     ice.ocean_accumulation_count = 0;
 
-    memset(ocean.heat_accumulator, 0, sizeof(ocean.heat_accumulator));
+    memset(ocean.ice_to_ocean_flux_accumulator, 0, sizeof(ocean.ice_to_ocean_flux_accumulator));
     memset(
         ocean.ice_flux_accumulator, 0, sizeof(ocean.ice_flux_accumulator));
     memset(
@@ -863,14 +863,13 @@ static void initialize_sea_ice_ocean(int from_restart)
 
     ocean_initialize_parameters(
         PLASIC_NHOR, plasic_ntspd, plasic_solar_day,
-        &ocean.cooling_timescale, ocean.layer_depth,
+        &ocean.restoring_timescale, ocean.layer_depth,
         ocean.mixed_layer_depth, &ocean.timestep);
     physics_interpolate_ocean_climatology();
     ocean_copy_outputs(
         PLASIC_NHOR, ocean.temperature, ocean.mixed_layer_depth,
-        ocean.ice_flux, ice.sst, ice.mixed_layer_depth, ice.ocean_heat);
-    memcpy(ice.modified_ocean_heat, ice.ocean_heat,
-           sizeof(ice.modified_ocean_heat));
+        ocean.ice_flux, ice.sst, ice.mixed_layer_depth,
+        ice.ocean_to_ice_flux);
     physics_interpolate_ice_climatology();
 
     memcpy(sea.coupled_surface_temperature, ice.surface_temperature,

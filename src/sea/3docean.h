@@ -102,13 +102,15 @@ void deep_ocean_seed_state(
  * then computes density and diagnostic geostrophic plus wind-driven
  * velocities, advects and diffuses temperature and salinity, applies
  * convective adjustment and finally reports the heat flux that the deep ocean
- * exchanges with the slab in `qflux`.  Land points are excluded from every
- * horizontal stencil through masked, zero-flux coastal gradients.
+ * exchanges with the slab in `deep_ocean_flux` (Q_deep in W m^-2, positive
+ * into the slab; the caller passes ocean.deep_ocean_flux).  Land points get
+ * Q_deep = 0 and are excluded from every horizontal stencil through masked,
+ * zero-flux coastal gradients.
  *
  * `sine_latitude` and `cosine_latitude` are local, halo-extended latitude
  * coordinates of length nlat_local + DEEP_OCEAN_HALO_ROWS; `slab_temperature`,
- * `freshwater_flux`, `stress_x`, `stress_y` and `qflux` are contiguous local
- * slices of the process's interior rows.
+ * `freshwater_flux`, `stress_x`, `stress_y` and `deep_ocean_flux` are
+ * contiguous local slices of the process's interior rows.
  */
 void deep_ocean_step(
     const deep_ocean_kernel_config *config, const float *sine_latitude,
@@ -117,6 +119,6 @@ void deep_ocean_step(
     const float *stress_x, const float *stress_y,
     const float *layer_thickness, float *temperature, float *salinity,
     float *u_velocity, float *v_velocity, float *w_velocity,
-    float *density, float *qflux);
+    float *density, float *deep_ocean_flux);
 
 #endif

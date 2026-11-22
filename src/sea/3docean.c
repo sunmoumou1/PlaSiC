@@ -802,7 +802,7 @@ void deep_ocean_step(
     const float *stress_x, const float *stress_y,
     const float *layer_thickness, float *temperature, float *salinity,
     float *u_velocity, float *v_velocity, float *w_velocity,
-    float *density, float *qflux)
+    float *density, float *deep_ocean_flux)
 {
     const int32_t nlon = config->nlon;
     const int32_t nhor = extended_nhor(config);
@@ -993,7 +993,11 @@ void deep_ocean_step(
     apply_convective_adjustment(
         config, land_mask, layer_thickness, temperature, salinity, density);
 
-    /* 6. Report the heat flux exchanged with the slab mixed layer. */
+    /* 6. Report the heat flux exchanged with the slab mixed layer:
+     *    Q_deep = rho_o c_p,o (T^(0)_new - T_o^n) h_0 / dt, clamped to
+     *    +-2000 W m^-2, where T^(0)_new is the top layer after steps 2-5 and
+     *    T_o^n = slab_temperature the slab value it started from.  Positive
+     *    Q_deep warms the slab (tutorial figures 4.3 / 4.5). */
     for (row = 0; row < config->nlat_local; ++row)
     {
         const int32_t extended_row = row + 1;
@@ -1009,14 +1013,14 @@ void deep_ocean_step(
 
             if (is_land(land_mask, horizontal))
             {
-                qflux[local] = 0.0f;
+                deep_ocean_flux[local] = 0.0f;
                 continue;
             }
             flux = config->rho0 * config->cp *
                    (temperature[field_index(horizontal, 0, nhor)] -
                     slab_temperature[local]) *
                    h0 / config->dt;
-            qflux[local] = clamp_float(flux, -2000.0f, 2000.0f);
+            deep_ocean_flux[local] = clamp_float(flux, -2000.0f, 2000.0f);
         }
     }
 

@@ -108,22 +108,22 @@ int physics_write_restart(void)
     WRITE_PHYSICS_ARRAY("xheata", ice.atmospheric_heat_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xcfluxr", ice.maximum_thickness_flux, 1);
     WRITE_PHYSICS_ARRAY("xofluxa",
-                        ice.ocean_heat_diagnostic_accumulator, 1);
-    WRITE_PHYSICS_ARRAY("xqmelta", ice.residual_melt_accumulator, 1);
-    WRITE_PHYSICS_ARRAY("xcfluxa", ice.conductive_flux_accumulator, 1);
+                        ice.ocean_to_ice_flux_accumulator, 1);
+    WRITE_PHYSICS_ARRAY("xqmelta", ice.melt_energy_accumulator, 1);
+    WRITE_PHYSICS_ARRAY("xcfluxa", ice.ice_to_ocean_flux_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xcfluxra",
                         ice.maximum_thickness_flux_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xcfluxna",
-                        ice.negative_ice_flux_accumulator, 1);
+                        ice.excess_melt_flux_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xsmelta", ice.snow_melt_accumulator, 1);
-    WRITE_PHYSICS_ARRAY("ximelta", ice.ice_melt_accumulator, 1);
+    WRITE_PHYSICS_ARRAY("ximelta", ice.ice_energy_flux_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xtsfluxa", ice.surface_storage_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xfluxca",
                         ice.diagnosed_conductive_accumulator, 1);
-    WRITE_PHYSICS_ARRAY("xscflxa", ice.snow_conversion_accumulator, 1);
+    WRITE_PHYSICS_ARRAY("xscflxa", ice.snow_to_ice_flux_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xcpmea",
                         ice.freshwater_diagnostic_accumulator, 1);
-    WRITE_PHYSICS_ARRAY("xstoia", ice.snow_to_ice_accumulator, 1);
+    WRITE_PHYSICS_ARRAY("xstoia", ice.snow_to_ice_rate_accumulator, 1);
     WRITE_PHYSICS_ARRAY("xicecc", ice.compactness, 1);
 
     /* OCEANMOD */
@@ -134,7 +134,7 @@ int physics_write_restart(void)
     WRITE_PHYSICS_ARRAY("yiflux", ocean.ice_flux, 1);
     WRITE_PHYSICS_ARRAY("yclsst", ocean.climatological_sst,
                         PLASIC_CLIMATOLOGY_MONTHS);
-    WRITE_PHYSICS_ARRAY("yheata", ocean.heat_accumulator, 1);
+    WRITE_PHYSICS_ARRAY("yheata", ocean.ice_to_ocean_flux_accumulator, 1);
     WRITE_PHYSICS_ARRAY("yifluxa", ocean.ice_flux_accumulator, 1);
     WRITE_PHYSICS_ARRAY("yfldoa",
                         ocean.deep_ocean_flux_accumulator, 1);
