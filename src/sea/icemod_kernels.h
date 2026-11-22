@@ -30,7 +30,8 @@ void ice_snow(
     float *net_heat_flux, float *snow_melt, float *snow_melt_flux,
     float *snow_to_ice_flux, float *snow_to_ice_rate);
 
-// 冰雪柱导热 Q_c = K_z (T_i - T_o) 与冻结点导热 Q_f = K_z (T_f - T_o)。
+// 冰雪柱导热 Q_c = K_z (T_i - T_o) 与冻结点导热 Q_f = K_z (T_f - T_o)；
+// h_i < h_min 时 Q_f = 0，开阔水 Q_c = Q_a^mod，薄冰 Q_c = 0（热量在 Q_m 中）。
 void ice_conductive_flux(
     int32_t nhor, int32_t ocean_flux_correction, int32_t prognostic_ice,
     float minimum_thickness, float maximum_thickness,

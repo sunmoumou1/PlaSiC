@@ -336,7 +336,7 @@ typedef struct ice_state
     /* Q_ice = Q_net + Q_s->i - Q_f (+ Q_max), the ice energy ledger */
     float ice_energy_flux[PLASIC_NHOR];
     float snow_change[PLASIC_NHOR];
-    /* Q_m */
+    /* Q_m (Q_a^mod on thin ice, 0 < h_i < h_min) */
     float melt_energy[PLASIC_NHOR];
     /* snow converted to ice by flooding (m water equivalent s^-1) */
     float snow_to_ice_rate[PLASIC_NHOR];
@@ -345,7 +345,7 @@ typedef struct ice_state
     /* Q_a and Q_a^mod = Q_a - Q_max */
     float atmospheric_heat[PLASIC_NHOR];
     float modified_atmospheric_heat[PLASIC_NHOR];
-    /* Q_c = K_z (T_i - T_o), or Q_a^mod for h_i < h_min */
+    /* Q_c = K_z (T_i - T_o); Q_a^mod on open water, 0 on thin ice */
     float conductive_flux[PLASIC_NHOR];
     /* Q_f = K_z (T_f - T_o) */
     float freezing_flux[PLASIC_NHOR];

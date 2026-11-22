@@ -21,7 +21,7 @@
 //   Q_a^mod     修正大气净热通量 Q_a - Q_max                 modified_atmospheric_heat
 //   Q_m         表面达到 T_m 后的融化能量                    melt_energy
 //   Q_m^rem     融雪后剩下的 Q_m                             remaining_melt_energy
-//   Q_c         冰雪柱导热；薄冰/开阔水为 Q_a^mod            conductive_flux
+//   Q_c         冰雪柱导热；开阔水 Q_a^mod，薄冰 0           conductive_flux
 //   Q_f         冻结点导热 K_z (T_f - T_o)                   freezing_flux
 //   Q_s->i      积雪压沉转冰（flooding）通量                 snow_to_ice_flux
 //   Q_o->i      slab 上一步返回给海冰的通量                  ocean_to_ice_flux
@@ -210,7 +210,7 @@ void ice_compactness(
 // 积雪（示意图第 4 步）：更新冰上积雪 S，执行“先融雪、再融冰”和
 // 雪转冰两条能量路径，并把相应项累加进 net_heat_flux（Q_net）。
 //
-// 调用前 net_heat_flux 已等于 Q_c。本函数依次：
+// 调用前 net_heat_flux 已等于 Q_c（薄冰为 0，其热量全部在 Q_m 中）。本函数依次：
 //   1. c_i = 0 处的降雪落在开阔水面：Q_net -= rho_w L_s P_s；
 //   2. 有冰（h_i > 0）时，Q_m 先融雪：
 //        M_s = max[0, min(S/dt, Q_m/(rho_w L_s))]，S -= M_s dt，
@@ -333,7 +333,8 @@ void ice_snow(
                 flooding_snow_change * 1000.0f * latent_heat_snow / timestep;
             snow_to_ice_rate[horizontal] =
                 flooding_thickness_change * ice_density / 1000.0f / timestep;
-            // 这部分雪是转冰而非融化，故从融雪诊断中扣回。
+            // 与 PlaSim 相同，转成冰的雪也记入融雪诊断
+            // （flooding_snow_change <= 0，下面两行实际是加）。
             snow_melt[horizontal] = snow_melt[horizontal] -
                                     flooding_snow_change / timestep;
             snow_melt_flux[horizontal] = snow_melt_flux[horizontal] -
@@ -354,7 +355,10 @@ void ice_snow(
 //
 // 两者之差 Q_c - Q_f = K_z (T_i - T_f) 是冰底（T_f）与表面之间的导热，
 // 留在冰能量账里；Q_f 是冰底与 slab 之间的部分，交给 slab。
-// h_i < h_min（薄冰/开阔水）时不解析冰雪柱：Q_c = Q_a^mod，Q_f = 0。
+// h_i < h_min 时不解析冰雪柱，Q_f = 0：开阔水（h_i = 0）Q_c = Q_a^mod；
+// 薄冰（0 < h_i < h_min）Q_c = 0，因为 Q_a^mod 已在第 2 步作为 Q_m 进入 Q_net。
+// PlaSim 的 mkcflux 在薄冰上同样令 xcflux = xheat，使 Q_a^mod 被算两次；
+// 这里有意不沿用。
 // h_i >= h_max 时 K_z = 0（关闭垂直导热，冰不再因导热增厚）。
 // ----------------------------------------------------------------------------
 void ice_conductive_flux(
@@ -371,10 +375,18 @@ void ice_conductive_flux(
     for (int32_t horizontal = 0; horizontal < nhor; ++horizontal)
     {
         diagnosed_conductive_flux[horizontal] = 0.0f;
-        // h_i < h_min 时没有独立、可解析的冰雪柱；大气热量直接进入后续预算。
+        // h_i < h_min 时没有独立、可解析的冰雪柱，Q_f = 0。
+        //   开阔水（h_i = 0）：Q_c = Q_a^mod，大气热量经 Q_net 交给 slab，
+        //     或在 T_o <= T_f 时直接结冰；
+        //   薄冰（0 < h_i < h_min）：Q_a^mod 已在第 2 步作为 Q_m 进入，由
+        //     ice_snow 先融雪、余量 Q_m^rem 进入 Q_net，故 Q_c = 0，
+        //     否则 Q_a^mod 会在 Q_net 中算两次。
         if (ice_thickness[horizontal] < minimum_thickness)
         {
-            conductive_flux[horizontal] = modified_atmospheric_heat[horizontal];
+            conductive_flux[horizontal] =
+                ice_thickness[horizontal] > 0.0f
+                    ? 0.0f
+                    : modified_atmospheric_heat[horizontal];
             freezing_flux[horizontal] = 0.0f;
         }
         // 厚冰：以串联冰雪层的等效导热参数化连接 T_i 和 T_o。
@@ -432,7 +444,8 @@ void ice_conductive_flux(
 //   Q_m = Q_a^mod + K_z (T_o - T_m) - (C_i/dt)(T_m - T_i^n) > 0；
 // 否则 T_i^(n+1) = T_i^*，Q_m = 0。
 // 薄冰/无冰不建立独立表层储热：T_i^(n+1) = T_o；若仍有薄冰（0 < h_i < h_min），
-// Q_m = Q_a^mod（正负均可）。
+// Q_m = Q_a^mod（正负均可）。这是薄冰上 Q_a^mod 进入冰能量账的唯一途径，
+// ice_conductive_flux 相应令薄冰 Q_c = 0。
 // ----------------------------------------------------------------------------
 void ice_skin_temperature(
     int32_t nhor, float minimum_thickness, float maximum_thickness,

@@ -461,10 +461,21 @@ text{font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif}
 <text x="189.74" y="2412.55" font-size="14.5" fill="#64748b">.</text>
 <rect x="627.44" y="2179.42" width="322.56" height="250.82" rx="12" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.4"/>
 <text x="641.44" y="2202.26" font-size="16" font-weight="700" fill="#1d4ed8">No: thin ice or open water</text>
-<text x="641.44" y="2224.62" font-size="16" fill="#334155">No column is resolved; the forcing</text>
-<text x="641.44" y="2247.02" font-size="16" fill="#334155">passes straight through:</text>
-<g transform="translate(741.11 2275.05) scale(1.9543)" fill="#0f172a"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q84" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="14.7" y="0"/><g fill="#ea580c"><use xlink:href="#q9" x="25.22" y="0"/><use xlink:href="#q21" x="33.09" y="-4.11"/><use xlink:href="#q67" x="39.64" y="-4.11"/><use xlink:href="#q10" x="43.82" y="-4.11"/><use xlink:href="#q55" x="33.09" y="2.46"/></g></g>
-<g transform="translate(758.13 2300.17) scale(1.9543)" fill="#0f172a"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q34" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="15.81" y="0"/><use xlink:href="#q38" x="26.32" y="0"/></g>
+<text x="641.44" y="2224.62" font-size="16" fill="#334155">No column is resolved, so</text>
+<g transform="translate(758.13 2249.45) scale(1.9543)" fill="#0f172a"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q34" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="15.81" y="0"/><use xlink:href="#q38" x="26.32" y="0"/></g>
+<text x="641.44" y="2273.65" font-size="16" fill="#334155">Open water,</text>
+<g transform="translate(733.11 2273.65) scale(1.8148)" fill="#334155"><use xlink:href="#q16" x="0" y="0"/><use xlink:href="#q6" x="5.74" y="1.49"/><use xlink:href="#q31" x="11.82" y="0"/><use xlink:href="#q38" x="22.34" y="0"/></g>
+<text x="782.69" y="2273.65" font-size="16" fill="#334155">: the forcing</text>
+<text x="641.44" y="2296.05" font-size="16" fill="#334155">passes straight through:</text>
+<g transform="translate(741.11 2320.88) scale(1.9543)" fill="#0f172a"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q84" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="14.7" y="0"/><g fill="#ea580c"><use xlink:href="#q9" x="25.22" y="0"/><use xlink:href="#q21" x="33.09" y="-4.11"/><use xlink:href="#q67" x="39.64" y="-4.11"/><use xlink:href="#q10" x="43.82" y="-4.11"/><use xlink:href="#q55" x="33.09" y="2.46"/></g></g>
+<text x="641.44" y="2345.08" font-size="16" fill="#334155">Thin ice,</text>
+<g transform="translate(706.42 2345.08) scale(1.8148)" fill="#334155"><use xlink:href="#q38" x="0" y="0"/><use xlink:href="#q83" x="7.75" y="0"/><use xlink:href="#q16" x="18.26" y="0"/><use xlink:href="#q6" x="24" y="1.49"/><use xlink:href="#q83" x="30.09" y="0"/><use xlink:href="#q16" x="40.61" y="0"/><use xlink:href="#q21" x="46.35" y="1.49"/><use xlink:href="#q36" x="52.89" y="1.49"/><use xlink:href="#q37" x="55.15" y="1.49"/></g>
+<text x="815.38" y="2345.08" font-size="16" fill="#334155">:</text>
+<g transform="translate(824.29 2345.08) scale(1.8148)" fill="#334155"><g fill="#ea580c"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q21" x="7.87" y="-3.62"/><use xlink:href="#q67" x="14.42" y="-3.62"/><use xlink:href="#q10" x="18.6" y="-3.62"/><use xlink:href="#q55" x="7.87" y="2.46"/></g></g>
+<text x="641.44" y="2367.48" font-size="16" fill="#334155">already enters as</text>
+<g transform="translate(768.72 2367.48) scale(1.8148)" fill="#334155"><g fill="#dc2626"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q25" x="7.88" y="1.49"/></g></g>
+<text x="801.23" y="2367.48" font-size="16" fill="#334155">(step 2), so</text>
+<g transform="translate(759.21 2392.31) scale(1.9543)" fill="#0f172a"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q84" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="14.7" y="0"/><use xlink:href="#q38" x="25.22" y="0"/></g>
 <path d="M495 2149.42 V2162.02 H326.72 V2177.42" class="flow"/>
 <path d="M495 2149.42 V2162.02 H788.72 V2177.42" class="flow"/>
 <g transform="translate(40 2453.44) scale(1.6446)" fill="#64748b"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q34" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="15.81" y="0"/><use xlink:href="#q38" x="26.32" y="0"/></g>
@@ -616,21 +627,25 @@ text{font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif}
 <text x="277.7" y="3795.86" font-size="16" fill="#334155">) is returned to the ocean, not lost:</text>
 <g transform="translate(162.26 3833.08) scale(1.9543)" fill="#0f172a"><g fill="#b45309"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q11" x="7.88" y="1.49"/><use xlink:href="#q22" x="11.42" y="1.49"/></g><use xlink:href="#q31" x="18.87" y="0"/><use xlink:href="#q66" x="29.39" y="0"/><use xlink:href="#q16" x="38.33" y="-6.74"/><use xlink:href="#q6" x="44.07" y="-5.25"/><use xlink:href="#q40" x="49.05" y="-6.74"/><use xlink:href="#q6" x="54.2" y="-5.25"/><use xlink:href="#q54" x="57.51" y="-6.74"/><use xlink:href="#q6" x="64.29" y="-5.25"/><rect x="38.33" y="-2.69" width="29.28" height="0.4"/><use xlink:href="#q1" x="47.02" y="6.83"/><use xlink:href="#q0" x="55.32" y="6.83"/><use xlink:href="#q70" x="68.81" y="0"/><g fill="#059669"><use xlink:href="#q9" x="93.16" y="0"/><use xlink:href="#q6" x="101.04" y="1.49"/><use xlink:href="#q8" x="103.86" y="1.49"/><use xlink:href="#q7" x="111.8" y="1.49"/></g><use xlink:href="#q69" x="119" y="0"/><g fill="#059669"><use xlink:href="#q9" x="131.73" y="0"/><use xlink:href="#q6" x="139.6" y="1.49"/><use xlink:href="#q8" x="142.42" y="1.49"/><use xlink:href="#q7" x="150.36" y="1.49"/></g><use xlink:href="#q62" x="157.01" y="0"/><g fill="#b45309"><use xlink:href="#q9" x="166.97" y="0"/><use xlink:href="#q11" x="174.85" y="1.49"/><use xlink:href="#q22" x="178.39" y="1.49"/></g><use xlink:href="#q70" x="183.07" y="0"/><g fill="#4f46e5"><use xlink:href="#q9" x="207.43" y="0"/><use xlink:href="#q36" x="215.3" y="1.49"/><use xlink:href="#q95" x="217.56" y="1.49"/><use xlink:href="#q11" x="221.1" y="1.49"/></g><use xlink:href="#q69" x="227.91" y="0"/><g fill="#4f46e5"><use xlink:href="#q9" x="240.64" y="0"/><use xlink:href="#q36" x="248.51" y="1.49"/><use xlink:href="#q95" x="250.77" y="1.49"/><use xlink:href="#q11" x="254.31" y="1.49"/></g><use xlink:href="#q66" x="260.56" y="0"/><g fill="#b45309"><use xlink:href="#q9" x="270.53" y="0"/><use xlink:href="#q11" x="278.4" y="1.49"/><use xlink:href="#q22" x="281.95" y="1.49"/></g><use xlink:href="#q70" x="286.63" y="0"/><use xlink:href="#q16" x="310.98" y="0"/><use xlink:href="#q6" x="316.72" y="1.49"/><use xlink:href="#q69" x="322.81" y="0"/><use xlink:href="#q38" x="335.54" y="0"/></g>
 <text x="40" y="3885.34" font-size="14.5" fill="#64748b">On thin ice,</text>
-<g transform="translate(117.43 3885.34) scale(1.6446)" fill="#64748b"><use xlink:href="#q38" x="0" y="0"/><use xlink:href="#q83" x="7.75" y="0"/><use xlink:href="#q16" x="18.26" y="0"/><use xlink:href="#q6" x="24" y="1.49"/><use xlink:href="#q83" x="30.09" y="0"/><use xlink:href="#q16" x="40.61" y="0"/><use xlink:href="#q21" x="46.35" y="1.49"/><use xlink:href="#q36" x="52.89" y="1.49"/><use xlink:href="#q37" x="55.15" y="1.49"/></g>
-<text x="216.18" y="3885.34" font-size="14.5" fill="#64748b">, steps 2 and 3 both set</text>
-<g transform="translate(371.11 3885.34) scale(1.6446)" fill="#64748b"><g fill="#dc2626"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q25" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="18.21" y="0"/><g fill="#0e7490"><use xlink:href="#q9" x="28.73" y="0"/><use xlink:href="#q84" x="36.6" y="1.49"/></g><use xlink:href="#q31" x="43.43" y="0"/><g fill="#ea580c"><use xlink:href="#q9" x="53.95" y="0"/><use xlink:href="#q21" x="61.82" y="-3.62"/><use xlink:href="#q67" x="68.37" y="-3.62"/><use xlink:href="#q10" x="72.55" y="-3.62"/><use xlink:href="#q55" x="61.82" y="2.46"/></g></g>
-<text x="498.49" y="3885.34" font-size="14.5" fill="#64748b">, so</text>
-<g transform="translate(525.97 3885.34) scale(1.6446)" fill="#64748b"><g fill="#ea580c"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q21" x="7.88" y="-3.62"/><use xlink:href="#q67" x="14.42" y="-3.62"/><use xlink:href="#q10" x="18.61" y="-3.62"/><use xlink:href="#q55" x="7.88" y="2.46"/></g></g>
-<text x="568.69" y="3885.34" font-size="14.5" fill="#64748b">enters</text>
-<g transform="translate(613.06 3885.34) scale(1.6446)" fill="#64748b"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q37" x="7.88" y="1.49"/><use xlink:href="#q11" x="12.28" y="1.49"/><use xlink:href="#q23" x="15.82" y="1.49"/></g>
-<text x="649.07" y="3885.34" font-size="14.5" fill="#64748b">twice: once as</text>
-<g transform="translate(744.99 3885.34) scale(1.6446)" fill="#64748b"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q84" x="7.88" y="1.49"/></g></g>
-<text x="768.68" y="3885.34" font-size="14.5" fill="#64748b">and once through</text>
-<g transform="translate(885.55 3885.34) scale(1.6446)" fill="#64748b"><g fill="#dc2626"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q92" x="7.88" y="-3.62"/><use xlink:href="#q11" x="10.99" y="-3.62"/><use xlink:href="#q21" x="14.53" y="-3.62"/><use xlink:href="#q25" x="7.88" y="2.46"/></g></g>
-<text x="921.03" y="3885.34" font-size="14.5" fill="#64748b">.</text>
-<text x="40" y="3905.64" font-size="14.5" fill="#64748b">This follows PlaSim's</text>
-<text x="179.56" y="3905.64" class="mono" font-size="12.47" fill="#475569">icemod.f90</text>
-<text x="254.38" y="3905.64" font-size="14.5" fill="#64748b">.</text>
+<g transform="translate(117.38 3885.34) scale(1.6446)" fill="#64748b"><use xlink:href="#q38" x="0" y="0"/><use xlink:href="#q83" x="7.75" y="0"/><use xlink:href="#q16" x="18.26" y="0"/><use xlink:href="#q6" x="24" y="1.49"/><use xlink:href="#q83" x="30.09" y="0"/><use xlink:href="#q16" x="40.61" y="0"/><use xlink:href="#q21" x="46.35" y="1.49"/><use xlink:href="#q36" x="52.89" y="1.49"/><use xlink:href="#q37" x="55.15" y="1.49"/></g>
+<text x="216.12" y="3885.34" font-size="14.5" fill="#64748b">, step 3 sets</text>
+<g transform="translate(298.34 3885.34) scale(1.6446)" fill="#64748b"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q84" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="14.7" y="0"/><use xlink:href="#q38" x="25.22" y="0"/></g>
+<text x="348" y="3885.34" font-size="14.5" fill="#64748b">, so</text>
+<g transform="translate(375.41 3885.34) scale(1.6446)" fill="#64748b"><g fill="#ea580c"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q21" x="7.87" y="-3.62"/><use xlink:href="#q67" x="14.42" y="-3.62"/><use xlink:href="#q10" x="18.6" y="-3.62"/><use xlink:href="#q55" x="7.87" y="2.46"/></g></g>
+<text x="418.14" y="3885.34" font-size="14.5" fill="#64748b">enters</text>
+<g transform="translate(462.47 3885.34) scale(1.6446)" fill="#64748b"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q37" x="7.88" y="1.49"/><use xlink:href="#q11" x="12.28" y="1.49"/><use xlink:href="#q23" x="15.82" y="1.49"/></g>
+<text x="498.48" y="3885.34" font-size="14.5" fill="#64748b">only once, through</text>
+<g transform="translate(621.81 3885.34) scale(1.6446)" fill="#64748b"><g fill="#dc2626"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q92" x="7.88" y="-3.62"/><use xlink:href="#q11" x="10.99" y="-3.62"/><use xlink:href="#q21" x="14.53" y="-3.62"/><use xlink:href="#q25" x="7.88" y="2.46"/></g></g>
+<text x="657.29" y="3885.34" font-size="14.5" fill="#64748b">.</text>
+<text x="40" y="3905.64" font-size="14.5" fill="#64748b">PlaSim's</text>
+<text x="99.97" y="3905.64" class="mono" font-size="12.47" fill="#475569">icemod.f90</text>
+<text x="178.82" y="3905.64" font-size="14.5" fill="#64748b">(</text>
+<text x="183.65" y="3905.64" class="mono" font-size="12.47" fill="#475569">mkcflux</text>
+<text x="236.02" y="3905.64" font-size="14.5" fill="#64748b">) also sets</text>
+<g transform="translate(306.13 3905.64) scale(1.6446)" fill="#64748b"><g fill="#0e7490"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q84" x="7.88" y="1.49"/></g><use xlink:href="#q31" x="14.7" y="0"/><g fill="#ea580c"><use xlink:href="#q9" x="25.22" y="0"/><use xlink:href="#q21" x="33.09" y="-3.62"/><use xlink:href="#q67" x="39.64" y="-3.62"/><use xlink:href="#q10" x="43.82" y="-3.62"/><use xlink:href="#q55" x="33.09" y="2.46"/></g></g>
+<text x="390.29" y="3905.64" font-size="14.5" fill="#64748b">there and so counts</text>
+<g transform="translate(521.68 3905.64) scale(1.6446)" fill="#64748b"><g fill="#ea580c"><use xlink:href="#q9" x="0" y="0"/><use xlink:href="#q21" x="7.87" y="-3.62"/><use xlink:href="#q67" x="14.42" y="-3.62"/><use xlink:href="#q10" x="18.6" y="-3.62"/><use xlink:href="#q55" x="7.87" y="2.46"/></g></g>
+<text x="564.41" y="3905.64" font-size="14.5" fill="#64748b">twice; PlaSiC departs from it here.</text>
 <path d="M495 3928.83 V3965.83" class="flow"/>
 <rect x="20" y="3968.83" width="950" height="563.54" rx="18" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.6"/>
 <circle cx="57" cy="4001.83" r="17" fill="#15803d"/>

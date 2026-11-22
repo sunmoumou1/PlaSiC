@@ -1010,6 +1010,17 @@ static void ice_step(void)
                         0.1f ?
                     ice.current_climatological_sst[horizontal] :
                     ice.sst[horizontal];
+            /*
+             * Without a skin there is no melt energy on resolved ice, but
+             * thin ice (0 < h_i < h_min) must still carry Q_m = Q_a^mod,
+             * because ice_conductive_flux() sets Q_c = 0 there.
+             */
+            ice.melt_energy[horizontal] =
+                ice.ice_thickness[horizontal] > 0.0f &&
+                        ice.ice_thickness[horizontal] <
+                            ice.minimum_thickness ?
+                    ice.modified_atmospheric_heat[horizontal] :
+                    0.0f;
         }
     }
     /* Step 3: conduction Q_c and freezing-point conduction Q_f. */
