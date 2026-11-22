@@ -33,10 +33,14 @@ PLASIM-master/
 
 docs-site/PlaSiC_tutorial_sunsencan.pdf
 
-historical_3d_500y/
-
 experiments/co2_4xCO2_1pctCO2/
 
-experiments/historical_3d_500y/
-
 分享如何利用agent辅助开发.MOV
+
+experiments/historical_3d_500y/CMIP_data/
+experiments/historical_3d_500y/control_A/
+experiments/historical_3d_500y/control_B/
+experiments/historical_3d_500y/historical_A/
+experiments/historical_3d_500y/historical_B/
+experiments/historical_3d_500y/spinup/
+experiments/historical_3d_500y/pipeline.log
