@@ -377,7 +377,7 @@ link to the paper here. In the meantime, please cite the project as follows:
 
 ## License and attribution
 
-Except for third-party materials stated otherwise, PlaSiC's C code, build and test
+Except where stated otherwise, PlaSiC's C code, build and test
 scripts, desktop application, online tutorial, and website source are released under
 the **GNU General Public License version 3 or later** (SPDX: `GPL-3.0-or-later`).
 
@@ -434,6 +434,9 @@ disciplines.<br><br>
 <p align="center">
   <img src="docs-site/docs/tutorial/assets/images/my_research_interest_plain.png" width="880" alt="Research interests spanning data assimilation, weather forecasting, and subseasonal-to-seasonal and climate prediction">
 </p>
+
+> **Image rights.** The author created this figure. It is excluded from the
+> project's GPL license. Use in any form is prohibited.
 
 > *"Good educational models — models that come with complete source code and a
 > complete tutorial, that are small enough to understand yet complete in all their
