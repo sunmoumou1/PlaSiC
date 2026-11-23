@@ -35,6 +35,8 @@ Fig. 0.2.1. **The two kinds of readers this tutorial addresses.** The first grou
 
 - **A complete and detailed textbook.** These online materials are more than a user manual: every component is derived from its governing equations and then mapped onto the corresponding source files, so that the reader learns both the physics and its implementation. Note that this textbook will be updated as the model evolves, so it is not a static document.
 
+- **Historical atmospheric forcing.** Monthly CO₂ and three-dimensional ozone fields can drive the same coupled simulation. [Monthly ozone input format](1-user-guide/1.1-Running-PlaSiC-first.md#monthly-ozone-input-format)
+
 - **An interactive visual interface.** The model is shipped with PlaSiC Studio, a graphical front end that lets you set the horizontal resolution, vertical levels, integration length and initial data, build the model, and start or stop a run with a click. Results are streamed while the model is running and can be inspected as 2-D fields on a rotatable globe or as 3-D volumes over a selected region, which makes it easy to build intuition before working with the raw model output.
 
     ![PlaSiC Studio: experiment configuration on the left and the live climate field on an interactive globe on the right](assets/images/app1.png)
@@ -69,7 +71,6 @@ Among these, **SpeedyWeather.jl** is the closest modern peer in terms of scope, 
 PlaSiC is an actively developed model. The following features are not yet implemented, but are planned for future releases:
 
 - **Aerosol-related physical processes.** 
-- **External ozone forcing.** Ozone will be changed from an internally prescribed distribution to a field that can be read from external data, so that historical experiments can be driven by both ozone and carbon dioxide forcing simultaneously.
 - **Particle tracking and visualization.** A particle tracking algorithm will be added, together with visualization support, so that the transport of air parcels and tracers can be followed through the simulated circulation.
 - **Weather simulation experiments.** A forecast-mode experiment will be added in which the model is initialized from an observed weather state and integrated forward. The growth of forecast error as a function of lead time, from day 0 to day 10, can then be quantified.
 

@@ -1,5 +1,6 @@
 #include "runtime_internal.h"
 #include "co2_forcing.h"
+#include "ozone_forcing.h"
 #include "monthly_netcdf.h"
 
 runtime_workspace *runtime_fields;
@@ -91,6 +92,7 @@ void plasic_runtime_finalize(void)
 
     runtime_monthly_netcdf_abort();
     runtime_co2_forcing_close();
+    runtime_ozone_forcing_close();
     plasic_physics_finalize();
     sht_finalize();
     free(runtime_fields);
@@ -98,21 +100,31 @@ void plasic_runtime_finalize(void)
     (void)mp_stop();
 }
 
-int plasic_runtime_initialize(const plasic_runtime_options *options)
+static int apply_monthly_forcing(int dynamics_only)
 {
-    /*
-     * Single entry point for the overall initialization of a PlaSiC run. 
-     */
-    int status; /* Uniformly receives the runtime status code returned by each initialization substep. */
+    const int year = plasic_ndatim[0];
+    const int month = plasic_ndatim[1];
+    const int status = runtime_co2_forcing_apply(year, month);
+    if (status != PLASIC_RUNTIME_OK || dynamics_only || plasic_nrad <= 0)
+        return status;
+    return runtime_ozone_forcing_apply();
+}
 
-    /*
-     * Support repeated initialization within the same process: first close any
-     * leftover from the previous run, then start from a clean state. The error message for this
-     * run is also cleared here.
-     */
-    plasic_runtime_finalize();
-    runtime_error_message[0] = '\0';
+/* The final restart clock includes the increment after the last step. */
+static int validate_run_length(int32_t steps)
+{
+    int status = PLASIC_RUNTIME_OK;
+    if (steps <= 0 || (int64_t)plasic_nstep + steps > INT32_MAX)
+    {
+        runtime_set_error("cannot advance %d steps from nstep=%d within the model clock range",
+                          steps, plasic_nstep);
+        status = PLASIC_RUNTIME_BAD_ARGUMENT;
+    }
+    return status;
+}
 
+static int validate_options(const plasic_runtime_options *options)
+{
     {
         const int has_forcing =
             options->co2_forcing_input != NULL &&
@@ -163,6 +175,32 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         return PLASIC_RUNTIME_BAD_ARGUMENT;
     }
 
+    return PLASIC_RUNTIME_OK;
+}
+
+static int initialize(const plasic_runtime_options *options, int report_on_root)
+{
+    /*
+     * Single entry point for the overall initialization of a PlaSiC run.
+     */
+    int status; /* Uniformly receives the runtime status code returned by each initialization substep. */
+
+    /*
+     * Support repeated initialization within the same process: first close any
+     * leftover from the previous run, then start from a clean state. The error message for this
+     * run is also cleared here.
+     */
+    plasic_runtime_finalize();
+    runtime_error_message[0] = '\0';
+
+    /* Ordinary library callers can correct invalid options and retry without
+     * consuming MPI's single init/finalize lifetime. The CLI needs a rank for
+     * its diagnostic even if option validation failed before model startup. */
+    const int option_status = validate_options(options);
+    if (option_status != PLASIC_RUNTIME_OK && !report_on_root)
+        return option_status;
+
+
     {
         int32_t mpi_error;
         int32_t process_count;
@@ -181,10 +219,12 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
                 "parallel initialization failed: expected %d processes, "
                 "got %d (backend status %d)",
                 PLASIC_NPRO, process_count, mpi_error);
-            plasic_runtime_finalize();
             return PLASIC_RUNTIME_UNSUPPORTED_CONFIGURATION;
         }
     }
+
+    if (option_status != PLASIC_RUNTIME_OK)
+        return option_status;
 
     /*
      * Initialize the global arrays and default scalars managed by
@@ -209,7 +249,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     status = runtime_initialize_dynamics(options->step_minutes);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -244,7 +283,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
                 options->start_minute,
                 calmod_calendar_name(cold_calendar),
                 calmod_status_text(calendar_status));
-            plasic_runtime_finalize();
             return PLASIC_RUNTIME_BAD_ARGUMENT;
         }
     }
@@ -253,7 +291,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         options->restart_input, options->surface_data_directory);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -306,7 +343,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     status = runtime_prepare_orography_grid();
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -331,20 +367,20 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         {
             runtime_set_error("could not initialize atmospheric physics state");
         }
-        plasic_runtime_finalize();
         return status;
     }
 
-    status = runtime_co2_forcing_open(
-        options->co2_forcing_input, options->co2_ppm);
+    status = validate_run_length(options->steps);
     if (status == PLASIC_RUNTIME_OK)
-    {
-        status = runtime_co2_forcing_apply(
-            plasic_ndatim[0], plasic_ndatim[1]);
-    }
+        status = runtime_co2_forcing_open(options->co2_forcing_input, options->co2_ppm);
+    if (status == PLASIC_RUNTIME_OK)
+        status = runtime_ozone_forcing_open(options->ozone_forcing_input);
+    if (status == PLASIC_RUNTIME_OK)
+        status = runtime_ozone_forcing_validate(options->steps);
+    if (status == PLASIC_RUNTIME_OK)
+        status = apply_monthly_forcing(options->dynamics_only);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -352,18 +388,34 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         options->monthly_output_directory);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
     status = runtime_open_live_outputs(options);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
     return PLASIC_RUNTIME_OK;
+}
+
+int plasic_runtime_initialize_with_diagnostic(
+    const plasic_runtime_options *options, void (*on_error)(const char *message))
+{
+    const int status = initialize(options, on_error != NULL);
+    if (status != PLASIC_RUNTIME_OK)
+    {
+        if (on_error != NULL && mp_is_root())
+            on_error(plasic_runtime_error());
+        plasic_runtime_finalize();
+    }
+    return status;
+}
+
+int plasic_runtime_initialize(const plasic_runtime_options *options)
+{
+    return plasic_runtime_initialize_with_diagnostic(options, NULL);
 }
 
 // The most important function is the one below.
@@ -380,12 +432,20 @@ int plasic_runtime_run(const plasic_runtime_options *options)
      * Advance step by step; options->steps is always >= 1 because the CLI and
      * the JSON loader reject a missing or zero step count.
      */
+    status = validate_run_length(options->steps);
+    if (status != PLASIC_RUNTIME_OK)
+        return status;
+
+    /* A library caller can request another interval on an initialized model. */
+    status = runtime_ozone_forcing_validate(options->steps);
+    if (status != PLASIC_RUNTIME_OK)
+        return status;
+
     for (step = 0; step < options->steps; ++step)
     {
         step2cal(plasic_calendar, plasic_nstep, plasic_ndatim);
 
-        status = runtime_co2_forcing_apply(
-            plasic_ndatim[0], plasic_ndatim[1]);
+        status = apply_monthly_forcing(options->dynamics_only);
         if (status != PLASIC_RUNTIME_OK)
         {
             return status;

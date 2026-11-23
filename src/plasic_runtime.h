@@ -43,9 +43,14 @@ typedef struct plasic_runtime_options
      * A user step is used as given, without any stability check.
      */
     double step_minutes;
+    /* Optional monthly ozone NetCDF on the model grid. */
+    const char *ozone_forcing_input;
 } plasic_runtime_options;
 
 int plasic_runtime_initialize(const plasic_runtime_options *options);
+/* Like initialize(), with a root-only error callback before MPI and I/O teardown. */
+int plasic_runtime_initialize_with_diagnostic(
+    const plasic_runtime_options *options, void (*on_error)(const char *message));
 int plasic_runtime_run(const plasic_runtime_options *options);
 int plasic_runtime_write_restart(const char *path);
 void plasic_runtime_finalize(void);

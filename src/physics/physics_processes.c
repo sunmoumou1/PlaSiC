@@ -33,6 +33,32 @@ static void orbital_declination(
     *distance_factor = inverse_distance * inverse_distance;
 }
 
+/* Integrate with the same layer masses, gravity and ozone density as radiation.
+ * One Dobson unit is equivalent to 10 micrometres of ozone at STP. */
+double plasic_physics_ozone_column_du(size_t horizontal)
+{
+    double mixing_ratio = 0.0;
+    for (size_t k = 0; k < PLASIC_NLEV; ++k)
+        mixing_ratio += (double)plasic_dsigma[k] * radiation.ozone[k * PLASIC_NHOR + horizontal];
+    return mixing_ratio * plasic_dp[horizontal] / (plasic_ga * 2.14e-5);
+}
+
+/* Report the first radiation calculation. Gaussian weights sum to two globally. */
+static int report_external_ozone_column(void)
+{
+    double weighted_column = 0.0;
+    for (size_t h = 0; h < PLASIC_NHOR; ++h)
+        weighted_column += plasic_gwd[h / PLASIC_NLON] * plasic_physics_ozone_column_du(h);
+    float global_column = (float)(weighted_column / (2.0 * PLASIC_NLON));
+    if (mp_allreduce_real(&global_column, 1) != 0)
+        return PLASIC_RUNTIME_NUMERICAL_FAILURE;
+    if (mp_is_root())
+        fprintf(stderr, "External ozone at first radiation step: global mean column = %.3f DU.\n",
+                (double)global_column);
+    radiation.external_ozone_column_reported = 1;
+    return PLASIC_RUNTIME_OK;
+}
+
 static int radiation_step(void)
 {
     float calendar_day;
@@ -61,7 +87,7 @@ static int radiation_step(void)
         distance_factor, plasic_sid, plasic_cola,
         radiation.cosine_zenith,
         &radiation.sun_distance_factor);
-    if (radiation.ozone_mode == 1)
+    if (radiation.use_synthetic_ozone == 1)
     {
         status = rad_synthetic_ozone(
             PLASIC_NLON, PLASIC_NLPP, PLASIC_NLEV, calendar_day,
@@ -76,6 +102,12 @@ static int radiation_step(void)
         {
             return PLASIC_RUNTIME_NUMERICAL_FAILURE;
         }
+    }
+    else if (radiation.external_ozone_column_reported == 0)
+    {
+        status = report_external_ozone_column();
+        if (status != PLASIC_RUNTIME_OK)
+            return status;
     }
     if (radiation.shortwave != 0)
     {

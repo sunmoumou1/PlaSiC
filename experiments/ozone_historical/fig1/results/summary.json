@@ -1,0 +1,72 @@
+{
+  "temperature_variable": "tas",
+  "units": "K",
+  "anomaly_baseline": "Each series uses its own 1850-1900 mean.",
+  "period": [
+    1850,
+    2014
+  ],
+  "experiments": {
+    "co2_ozone": {
+      "years": 165,
+      "baseline_1850_1900_K": 286.5452924411141,
+      "mean_anomaly_2005_2014_K": 0.6969695250927941,
+      "anomaly_2014_K": 0.677664708261716,
+      "temperature_2014_K": 287.2229571493758
+    },
+    "ozone_only": {
+      "years": 165,
+      "baseline_1850_1900_K": 286.4778537622345,
+      "mean_anomaly_2005_2014_K": -0.0995508669011258,
+      "anomaly_2014_K": -0.065508403185504,
+      "temperature_2014_K": 286.41234535904897
+    },
+    "co2_only": {
+      "years": 165,
+      "baseline_1850_1900_K": 286.5490299042028,
+      "mean_anomaly_2005_2014_K": 0.42851141293999717,
+      "anomaly_2014_K": 0.47119252641408593,
+      "temperature_2014_K": 287.0202224306169
+    }
+  },
+  "paired_surface_temperature_differences_K": {
+    "co2_ozone_minus_co2_only_K": {
+      "mean_1850_1900": -0.00373746308868668,
+      "mean_2005_2014": 0.2647206490640713,
+      "year_2014": 0.20273471875890436
+    },
+    "co2_ozone_minus_ozone_only_K": {
+      "mean_1850_1900": 0.06743867887969128,
+      "mean_2005_2014": 0.8639590708735454,
+      "year_2014": 0.8106117903268455
+    }
+  },
+  "antarctic_spring_top_layer": {
+    "field": "ta",
+    "sigma_interfaces": [
+      0.0,
+      0.0766
+    ],
+    "domain": "60\u201390\u00b0S; September\u2013November; area and month-length weighted",
+    "experiments": {
+      "co2_ozone": {
+        "mean_1960_1979_K": 217.97186127213422,
+        "mean_1980_1999_K": 216.4714338496546,
+        "mean_2000_2014_K": 214.8657318460535,
+        "slope_1980_2014_K_per_decade": -0.9010863897774444
+      },
+      "ozone_only": {
+        "mean_1960_1979_K": 219.39278643591928,
+        "mean_1980_1999_K": 218.7769262121075,
+        "mean_2000_2014_K": 218.20650536603185,
+        "slope_1980_2014_K_per_decade": -0.3634997223296655
+      },
+      "co2_only": {
+        "mean_1960_1979_K": 218.07557808393872,
+        "mean_1980_1999_K": 217.07178471958204,
+        "mean_2000_2014_K": 216.25294726564218,
+        "slope_1980_2014_K_per_decade": -0.515666026491064
+      }
+    }
+  }
+}

@@ -18,6 +18,7 @@ typedef struct plasic_config_storage
     char progress_output[PLASIC_CONFIG_PATH_BYTES];
     char frame_output[PLASIC_CONFIG_PATH_BYTES];
     char co2_forcing_input[PLASIC_CONFIG_PATH_BYTES];
+    char ozone_forcing_input[PLASIC_CONFIG_PATH_BYTES];
     char monthly_output_directory[PLASIC_CONFIG_PATH_BYTES];
 } plasic_config_storage;
 

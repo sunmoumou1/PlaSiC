@@ -134,6 +134,10 @@ int32_t mp_broadcast_real(float *buffer, int32_t count);
  */
 int32_t mp_allreduce_real(float *buffer, int32_t count);
 
+/* Share the status and message of the lowest rank reporting a nonzero status.
+ * Returns a backend communication error independently of the shared status. */
+int32_t mp_sync_error(int32_t *status, char *message, int32_t bytes);
+
 /*
  * 全收集格点场：每个进程贡献自己在每层中的 local_rows 个格点，MPI 按 rank
  * 顺序拼成 global_rows 长的全局层并发给所有进程。
