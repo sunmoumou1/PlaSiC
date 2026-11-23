@@ -415,7 +415,7 @@ Without these two resources, PlaSiC could not have been designed.
 
 <table>
 <tr>
-<td width="150"><img src="docs-site/docs/tutorial/assets/images/author.jpg" width="130" alt="Portrait of Sencan Sun"></td>
+<td width="200"><img src="docs-site/docs/tutorial/assets/images/author.jpg" width="200" alt="Portrait of Sencan Sun"></td>
 <td>
 <b>Sencan Sun (孙森灿)</b><br>
 Doctoral student in Atmospheric Science<br>
