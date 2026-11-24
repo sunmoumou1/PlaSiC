@@ -7,7 +7,7 @@
  * are implemented by functions such as plasic_runtime_*.
  */
 
-#include "plasic_runtime.h"
+#include "runtime/runtime_internal.h"
 
 #include "plasic_cli.h"
 #include "plasic_config.h"
@@ -621,26 +621,9 @@ int plasic_cli_run(int argc, char **argv)
     /*
      * PlaSiC runtime initialization
      */
-    status = plasic_runtime_initialize(&options);
-
-    /*
-     * Runtime initialization failed.
-     */
+    status = runtime_initialize(&options, 1);
     if (status != PLASIC_RUNTIME_OK)
-    {
-        fprintf(stderr, "PlaSiC initialization failed: %s\n",
-                plasic_runtime_error());
-
-        /*
-         * Call finalize even if initialization failed.
-         *
-         * This lets the runtime release some resources
-         * that were successfully created during initialization.
-         */
-        plasic_runtime_finalize();
-
         return EXIT_FAILURE;
-    }
 
     if (plasic_mypid == 0)
     {
