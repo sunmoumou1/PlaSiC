@@ -102,24 +102,25 @@ NLON = 2 * NLAT
 NLEV = _env_int("PLASIC_NLEV", 25)
 NRSP = (NTRU + 1) * (NTRU + 2)
 
-# The model chooses its atmospheric time step from NLAT.  Keep the same rule
-# here so nudge windows, frame intervals and date-to-step conversion stay in
-# sync for resolutions whose model day contains whole-hour intervals.
-# 中文说明：模式根据 NLAT 选择基本时间步；这里复现同一规则，并要求每天的
-# 步数可以整除 24，使松弛窗口、帧间隔和日期到步数的换算保持一致。
-# Mirrors default_step_minutes() in src/runtime/runtime_initialization.c: the
-# largest standard step (45 minutes or a divisor of 60) not exceeding
-# 1440/NLAT minutes, i.e. at least NLAT steps per day (10 minutes, 144 steps
-# per day, at T85).
-# 中文说明：与 runtime_initialization.c 的 default_step_minutes() 一致，取不超过
-# 1440/NLAT 分钟的最大标准步长（45 分钟或 60 的约数），即每天至少 NLAT 步
-# （T85 为 10 分钟、每天 144 步）。
-MINUTES_PER_STEP = next(
-    (d for d in (45, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1) if d <= (24 * 60) // NLAT), 1
-)
-NTSPD = _env_int("PLASIC_STEPS_PER_DAY", int(round(86400 / (MINUTES_PER_STEP * 60))))
-if NTSPD % 2:
-    NTSPD += 1
+# Default time step of each supported resolution in minutes, mirroring
+# PLASIC_DEFAULT_STEP_SECONDS in src/state/plasicmod_state.h (T85: 7.5
+# minutes, 192 steps per day).  PLASIC_STEPS_PER_DAY overrides it; the step
+# 1440 / NTSPD is then passed to the model with --step-minutes, so nudge
+# windows, frame intervals and date-to-step conversion always match the model.
+# The model day must contain whole-hour intervals.
+# 中文说明：各支持分辨率的默认步长（分钟），与 src/state/plasicmod_state.h 的
+# PLASIC_DEFAULT_STEP_SECONDS 一致（T85 为 7.5 分钟、每天 192 步）。
+# PLASIC_STEPS_PER_DAY 可以覆盖默认值；对应的步长 1440 / NTSPD 会通过
+# --step-minutes 传给模式，使松弛窗口、帧间隔和日期到步数的换算始终与模式
+# 一致。每天的步数必须能被 24 整除。
+DEFAULT_STEP_MINUTES = {32: 30.0, 48: 18.0, 64: 12.0, 128: 7.5, 256: 2.5}
+if NLAT not in DEFAULT_STEP_MINUTES:
+    raise ValueError(
+        f"NLAT={NLAT} is not supported; use one of "
+        f"{sorted(DEFAULT_STEP_MINUTES)} (T21, T31, T42, T85, T170)"
+    )
+NTSPD = _env_int("PLASIC_STEPS_PER_DAY", round(1440 / DEFAULT_STEP_MINUTES[NLAT]))
+MINUTES_PER_STEP = 1440 / NTSPD
 STEPS_PER_6H = NTSPD // 4
 STEPS_PER_HOUR = NTSPD // 24
 if NTSPD % 24 != 0:

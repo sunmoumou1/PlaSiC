@@ -42,7 +42,7 @@ static void print_usage(FILE *stream, const char *program)
             "          [--calendar gregorian|360day]\n"
             "          [--start-year YEAR] [--start-yday DAY]\n"
             "          [--start-hour HOUR] [--start-minute MINUTE]\n"
-            "          [--reset-nstep N]\n"
+            "          [--reset-nstep N] [--step-minutes MINUTES]\n"
             "          [--sea-coupling-interval N] [--dynamics-only]\n\n"
             "Standalone C PlaSiC (T%d, %d latitude rows, %d levels).\n"
             "--steps is mandatory. A cold start (no --restart) begins at\n"
@@ -54,8 +54,14 @@ static void print_usage(FILE *stream, const char *program)
             "used only when explicitly selected by CLI or JSON config.\n"
             "--sea-coupling-interval N runs sea ice and the ocean once every\n"
             "N atmospheric steps (default 1); sea-surface fluxes are still\n"
-            "averaged over every step of the interval.\n",
-            program, PLASIC_NTRU, PLASIC_NLAT, PLASIC_NLEV);
+            "averaged over every step of the interval.\n"
+            "--step-minutes M sets the time step in minutes (fractions such\n"
+            "as 7.5 are allowed). Without it the resolution default is used:\n"
+            "T21 30, T31 18, T42 12, T85 7.5, T170 2.5 minutes (this build:\n"
+            "%g). A step given here is used as is and is not checked for\n"
+            "stability; it only has to divide the day into whole steps.\n",
+            program, PLASIC_NTRU, PLASIC_NLAT, PLASIC_NLEV,
+            (double)PLASIC_DEFAULT_STEP_SECONDS / 60.0);
 }
 
 /*
@@ -139,6 +145,26 @@ static int parse_positive_float(const char *text, float *value)
     return 1;
 }
 
+static int parse_positive_double(const char *text, double *value)
+{
+    char *end = NULL;
+    double parsed;
+
+    if (text == NULL || value == NULL || text[0] == '\0')
+    {
+        return 0;
+    }
+    errno = 0;
+    parsed = strtod(text, &end);
+    if (errno != 0 || end == text || *end != '\0' ||
+        !isfinite(parsed) || parsed <= 0.0)
+    {
+        return 0;
+    }
+    *value = parsed;
+    return 1;
+}
+
 // The most important function in this document
 int plasic_cli_run(int argc, char **argv)
 {
@@ -186,7 +212,10 @@ int plasic_cli_run(int argc, char **argv)
         .dynamics_only = 0,
 
         /* Sea ice and the ocean run every atmospheric step by default. */
-        .sea_coupling_interval = 1};
+        .sea_coupling_interval = 1,
+
+        /* Zero selects the default time step of the resolution. */
+        .step_minutes = 0.0};
 
     plasic_config_storage config_storage = {0};
 
@@ -393,6 +422,22 @@ int plasic_cli_run(int argc, char **argv)
             }
         }
 
+        else if (strcmp(argv[argument], "--step-minutes") == 0 &&
+                 argument + 1 < argc)
+        {
+            /*
+             * The step is used as given; only a positive number is required.
+             * Its stability is the user's responsibility.
+             */
+            if (!parse_positive_double(
+                    argv[++argument], &options.step_minutes))
+            {
+                fprintf(stderr, "Invalid --step-minutes value: %s\n",
+                        argv[argument]);
+                return EXIT_FAILURE;
+            }
+        }
+
         else if (strcmp(argv[argument], "--calendar") == 0 &&
                  argument + 1 < argc)
         {
@@ -595,6 +640,24 @@ int plasic_cli_run(int argc, char **argv)
         plasic_runtime_finalize();
 
         return EXIT_FAILURE;
+    }
+
+    if (plasic_mypid == 0)
+    {
+        if (options.step_minutes > 0.0)
+        {
+            fprintf(stderr,
+                    "Time step: %g minutes (%d steps per day), set by the "
+                    "user and not checked for stability.\n",
+                    (double)plasic_mpstep, plasic_ntspd);
+        }
+        else
+        {
+            fprintf(stderr,
+                    "Time step: %g minutes (%d steps per day), the T%d "
+                    "default.\n",
+                    (double)plasic_mpstep, plasic_ntspd, PLASIC_NTRU);
+        }
     }
 
     /*

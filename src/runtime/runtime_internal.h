@@ -107,7 +107,7 @@ int runtime_broadcast_status(int status);
 int runtime_load_atmosphere_restart(
     const char *path, const char *surface_data_directory);
 int runtime_prepare_orography_grid(void);
-int runtime_initialize_dynamics(void);
+int runtime_initialize_dynamics(double step_minutes);
 
 int runtime_gridpoint_adiabatic(void);
 int runtime_spectral_adiabatic(void);

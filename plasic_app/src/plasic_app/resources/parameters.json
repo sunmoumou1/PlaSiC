@@ -412,7 +412,7 @@
       "name": "timesteps_per_day",
       "label": "Timesteps per day",
       "type": "integer",
-      "default": 32,
+      "default": 48,
       "minimum": 8,
       "maximum": 288,
       "unit": "steps day-1",

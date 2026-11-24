@@ -36,6 +36,13 @@ typedef struct plasic_runtime_options
      * run once per interval and integrate the whole interval.
      */
     int32_t sea_coupling_interval;
+    /*
+     * Time step in minutes (--step-minutes, or step_minutes in the JSON
+     * config); fractions such as 7.5 are allowed. Zero means "not set" and
+     * selects the default of the resolution (PLASIC_DEFAULT_STEP_SECONDS).
+     * A user step is used as given, without any stability check.
+     */
+    double step_minutes;
 } plasic_runtime_options;
 
 int plasic_runtime_initialize(const plasic_runtime_options *options);

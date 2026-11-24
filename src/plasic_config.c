@@ -118,6 +118,27 @@ static int load_float(const cJSON *root, const char *key, float *option)
     return 1;
 }
 
+/*
+ * Time step in minutes: a positive number (fractions allowed), or null for
+ * the default of the resolution. The value is not checked for stability.
+ */
+static int load_step_minutes(const cJSON *root, const char *key, double *option)
+{
+    const cJSON *item = cJSON_GetObjectItemCaseSensitive(root, key);
+
+    if (item == NULL)
+        return 1;
+    if (cJSON_IsNull(item))
+    {
+        *option = 0.0;
+        return 1;
+    }
+    if (!cJSON_IsNumber(item) || !(item->valuedouble > 0.0))
+        return 0;
+    *option = item->valuedouble;
+    return 1;
+}
+
 /* Boolean option (JSON true/false). */
 static int load_boolean(const cJSON *root, const char *key, int32_t *option)
 {
@@ -206,6 +227,7 @@ int plasic_config_load(
         load_integer(root, "start_hour", &options->start_hour) &&
         load_integer(root, "start_minute", &options->start_minute) &&
         load_integer(root, "reset_nstep", &options->reset_nstep) &&
+        load_step_minutes(root, "step_minutes", &options->step_minutes) &&
         load_calendar(root, "calendar", &options->calendar) &&
         load_boolean(root, "dynamics_only", &options->dynamics_only);
 #undef LOAD_STRING

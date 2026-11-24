@@ -14,7 +14,7 @@ int32_t plasic_nstep = 0;
 // It decides how nstep maps to a date, is restored from the restart file on a
 // warm start, and is always saved back into the restart file.
 int32_t plasic_calendar = 0;
-int32_t plasic_mpstep = 0; // minutes per timestep
+float plasic_mpstep = 0; // minutes per timestep (may be fractional, e.g. 7.5)
 int32_t plasic_ntspd = 0;
 
 // Current model date & time array:
@@ -357,7 +357,7 @@ void plasic_state_init(void)
 
     plasic_nstep = (int32_t)(0);
     plasic_calendar = (int32_t)(0);
-    plasic_mpstep = (int32_t)(0);
+    plasic_mpstep = (float)(0.0);
     plasic_ntspd = (int32_t)(0);
     plasic_fill_int32(plasic_ndatim, sizeof(plasic_ndatim) / sizeof(plasic_ndatim[0]), (int32_t)(-1));
     plasic_nafter = (int32_t)(0);

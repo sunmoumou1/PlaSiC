@@ -68,6 +68,9 @@ def run_model(restart: Path, steps: int, output: Path, frames: Path | None,
         "--restart", str(restart),
         "--co2-ppm", repr(co2_ppm),
         "--steps", str(steps),
+        # 显式传入步长，保证模式步长与 common.NTSPD 一致。
+        # Pass the step explicitly so the model always uses common.NTSPD.
+        "--step-minutes", repr(common.MINUTES_PER_STEP),
         "--output", str(output),
         "--progress", str(log),
         "--progress-interval", str(max(1, steps // 8)),

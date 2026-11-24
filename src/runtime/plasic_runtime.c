@@ -206,7 +206,7 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         return PLASIC_RUNTIME_INITIALIZATION_FAILED;
     }
 
-    status = runtime_initialize_dynamics();
+    status = runtime_initialize_dynamics(options->step_minutes);
     if (status != PLASIC_RUNTIME_OK)
     {
         plasic_runtime_finalize();

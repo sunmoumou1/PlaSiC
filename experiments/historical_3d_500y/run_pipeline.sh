@@ -185,12 +185,19 @@ CO2_CSV="data/forcing/CO2/mole-fraction-of-carbon-dioxide-in-air_input4MIPs_GHGC
 # 当前流水线固定使用公历（Gregorian）和 T21/L10 分辨率：
 # The pipeline uses the Gregorian calendar and the T21/L10 resolution:
 #
-#   NTSPD = 32：每个太阳日 32 个动力步（45 分钟/步）。
-#   NTSPD = 32: 32 dynamical steps per solar day (45 minutes per step).
+#   NTSPD = 48：每个太阳日 48 个动力步（T21 默认步长 30 分钟/步）。
+#   NTSPD = 48: 48 dynamical steps per solar day (the T21 default step of
+#   30 minutes).
+#
+# 发布的 500 年结果是用旧的 45 分钟步长（NTSPD = 32）算出的；现在的流水线
+# 使用新的默认步长，因此会多花约一半的时间。
+# The published 500-year results were computed with the earlier 45-minute
+# step (NTSPD = 32); the pipeline now uses the new default step and takes
+# about half as long again.
 #
 # 纪元固定为 nstep = 0 ≡ 第 0 年 1 月 1 日 00:00，与模型内部一致。
 # The epoch is nstep = 0 ≡ year 0, January 1, 00:00, as in the model.
-NTSPD=32
+NTSPD=48
 
 
 # 返回第 0 年 1 月 1 日到 year 年 1 月 1 日的公历天数。
@@ -456,7 +463,7 @@ phase_spinup() {
             \
             --progress "$HERE/spinup/progress_y$((100 * (i + 1))).jsonl" \
             \
-            --progress-interval 11686 \
+            --progress-interval 17532 \
             \
             --output "$out" \
             \
@@ -494,7 +501,7 @@ phase_spinup() {
         #   将运行过程中的诊断信息写入 JSON Lines 文件。
         #   Write runtime progress diagnostics to a JSON Lines file.
         #
-        # --progress-interval 11686
+        # --progress-interval 17532
         #   每隔指定模型步数/内部时间间隔写一次 progress。
         #   Write progress information at the specified model-step/internal
         #   interval.
@@ -628,7 +635,7 @@ phase_initial_conditions() {
             \
             --progress "$HERE/initial_conditions/ic_$(printf '%02d' "$j").progress.jsonl" \
             \
-            --progress-interval 11686 \
+            --progress-interval 17532 \
             \
             --output "$out" \
             \
@@ -875,7 +882,7 @@ phase_historical() {
                 \
                 --progress "$cdir/progress.jsonl" \
                 \
-                --progress-interval 320 \
+                --progress-interval 480 \
                 \
                 --output "$cdir/final.restart"
 
@@ -921,7 +928,7 @@ phase_historical() {
                 \
                 --progress "$hdir/progress.jsonl" \
                 \
-                --progress-interval 320 \
+                --progress-interval 480 \
                 \
                 --output "$hdir/final.restart"
 

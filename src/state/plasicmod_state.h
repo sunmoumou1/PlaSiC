@@ -7,6 +7,31 @@
 #error "Define PLASIC_NLAT, PLASIC_NLEV, and PLASIC_NPRO"
 #endif
 
+/*
+ * 目前支持的水平分辨率及其默认时间步长（秒）；其他 NLAT 直接编译失败。
+ * 这些默认步长足够短，保证长时间气候积分稳定、不发生数值发散。用户用
+ * --step-minutes（JSON 配置中的 step_minutes）给出的步长会直接替代默认值，
+ * 程序不检验其稳定性。
+ *
+ * Supported horizontal resolutions and their default time step in seconds;
+ * any other NLAT fails to compile. The defaults are short enough to keep long
+ * climate integrations stable. A step given with --step-minutes (step_minutes
+ * in the JSON config) replaces the default and is not checked for stability.
+ */
+#if PLASIC_NLAT == 32 /* T21 */
+#define PLASIC_DEFAULT_STEP_SECONDS 1800 /* 30 min, 48 steps per day */
+#elif PLASIC_NLAT == 48 /* T31 */
+#define PLASIC_DEFAULT_STEP_SECONDS 1080 /* 18 min, 80 steps per day */
+#elif PLASIC_NLAT == 64 /* T42 */
+#define PLASIC_DEFAULT_STEP_SECONDS 720 /* 12 min, 120 steps per day */
+#elif PLASIC_NLAT == 128 /* T85 */
+#define PLASIC_DEFAULT_STEP_SECONDS 450 /* 7.5 min, 192 steps per day */
+#elif PLASIC_NLAT == 256 /* T170 */
+#define PLASIC_DEFAULT_STEP_SECONDS 150 /* 2.5 min, 576 steps per day */
+#else
+#error "Unsupported resolution: PLASIC_NLAT must be 32 (T21), 48 (T31), 64 (T42), 128 (T85) or 256 (T170)"
+#endif
+
 #define PLASIC_NLON (PLASIC_NLAT + PLASIC_NLAT)
 #define PLASIC_NTRU ((PLASIC_NLON - 1) / 3)
 #define PLASIC_NLPP (PLASIC_NLAT / PLASIC_NPRO)
@@ -59,7 +84,7 @@ static inline int32_t plasic_local_spectral_count(int32_t rank)
 
 extern int32_t plasic_nstep;
 extern int32_t plasic_calendar;
-extern int32_t plasic_mpstep;
+extern float plasic_mpstep;
 extern int32_t plasic_ntspd;
 extern int32_t plasic_ndatim[(7)];
 extern int32_t plasic_nafter;

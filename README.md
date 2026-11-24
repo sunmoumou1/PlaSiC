@@ -35,6 +35,31 @@
 | **Understand the design** | [Project website](https://sunmoumou1.github.io/PlaSiC/) · [Source tour](https://sunmoumou1.github.io/PlaSiC/source.html) · [Benchmarks](#benchmarks) |
 | **Join in** | [Roadmap](#roadmap) · [Contributors & thanks](CONTRIBUTING.md#contributors--acknowledgements) · [Contributing](CONTRIBUTING.md) · [Citing PlaSiC](#citing-plasic) · [About the author](#about-the-author) |
 
+> [!IMPORTANT]
+> **New default time steps (November 24 2026).** PlaSiC now supports five resolutions,
+> each with a fixed default time step; any other `NLAT` stops the build with an error.
+>
+> | Resolution | T21 | T31 | T42 | T85 | T170 |
+> |---|---|---|---|---|---|
+> | `NLAT` | 32 | 48 | 64 | 128 | 256 |
+> | Default time step | 30 min | 18 min | 12 min | 7.5 min | 2.5 min |
+> | Steps per day | 48 | 80 | 120 | 192 | 576 |
+>
+> These steps are shorter than before, so that long climate integrations stay stable
+> and never diverge numerically or crash. The old formula that derived the step from
+> `NLAT` (45, 30, 20 and 10 minutes at T21, T31, T42 and T85) has been removed. To use
+> another step, pass `STEP_MINUTES=…` to `make run` or `make historical`,
+> `--step-minutes …` to `plasic.x`, or `"step_minutes"` in a JSON configuration.
+> PlaSiC then uses that step as given, without any stability check, so whether it is
+> stable is your responsibility; it only has to divide the 1440-minute day into a
+> whole number of steps.
+>
+> **The restart files have not been updated yet.** The restarts in `src/data` were
+> written with the old steps, and we will replace them with restarts written with the
+> new ones. A restart stores the step count, not the date, so with the new steps an
+> old restart starts at an earlier model date unless `--reset-nstep` sets the clock.
+> The experiment results shown below were produced with the earlier steps.
+
 ## What is PlaSiC?
 
 **PlaSiC** (*Planet Simulator in C*) is a general circulation model of intermediate
@@ -52,7 +77,7 @@ The project exists for two audiences:
 |---|---|
 | **Language** | C11 — about 20,000 lines of C in `src/`, no Fortran |
 | **Dynamical core** | Primitive equations in σ coordinates; spectral transform via [SHTns](https://nschaeff.bitbucket.io/shtns/); leapfrog time stepping with a semi-implicit gravity-wave solver and Robert–Asselin filtering |
-| **Resolution** | T21 / T31 / T42 / T85 (64 × 32 → 256 × 128 Gaussian grids), user-defined σ levels |
+| **Resolution** | T21 / T31 / T42 / T85 / T170 (64 × 32 → 512 × 256 Gaussian grids), user-defined σ levels; T170 has no bundled surface data or restart yet |
 | **Physics** | Radiation, clouds, moist convection and precipitation, surface fluxes, horizontal and vertical diffusion |
 | **Coupled surfaces** | Land surface, thermodynamic sea ice, slab ocean, user-defined three-dimensional ocean |
 | **Parallelism** | MPI; 4 processes are the practical optimum on m5 macbook (32G memory) (up to ~3× faster than 1) |
@@ -93,8 +118,8 @@ The project exists for two audiences:
 
 **Built for running and showing**
 
-- MPI parallel builds with restart files shipped for every resolution, so a first
-  run needs no data preparation.
+- MPI parallel builds with restart files shipped for T21, T31, T42 and T85, so a
+  first run needs no data preparation.
 - Monthly-mean NetCDF output, JSON progress records, and a documented restart file
   format for analysis pipelines.
 - **PlaSiC Studio**, a graphical front end that builds, launches, monitors and
@@ -175,7 +200,8 @@ Prescribed monthly CO₂ from the CMIP6 dataset (284.3 → 397.6 ppmv) drives a 
 10-level coupled run, after a 500-year ocean spin-up. The ensemble-mean
 near-surface warming reaches **+1.04 K by 2014**, close to the observational
 estimate, with stratospheric cooling and tropospheric warming aloft. The full
-pipeline takes roughly 7–8 hours on a modern laptop.
+pipeline took roughly 7–8 hours on a modern laptop with the earlier 45-minute
+step; at the new 30-minute default it needs about 1.5 times as long.
 
 ```bash
 make -C src historical INITIAL_CONDITION=data/earth_t21_l10.restart
@@ -221,8 +247,9 @@ the earlier runs lost all Arctic sea ice and gave TCR = 3.29 K and ECS = 5.59 K.
 ### 3. Weather forecast (ERA5-initialized 10-day forecasts)
 
 PlaSiC is initialized from ERA5 reanalysis and integrated freely for 10 days at
-T85/L25 (128 × 256 Gaussian grid, 25 σ levels, 10-minute dynamics, 144 steps
-per day), then verified against ERA5 at matching valid times with the WeatherBench 2
+T85/L25 (128 × 256 Gaussian grid, 25 σ levels; the archived runs used 10-minute
+dynamics, 144 steps per day, and the scripts now use the 7.5-minute T85 default),
+then verified against ERA5 at matching valid times with the WeatherBench 2
 headline variables and metrics. Three 2020 cases are archived: a winter
 mid-latitude flow, a summer circulation and Typhoon Maysak. Each case is run
 from two initial states — a **direct** analysis, written to the two leapfrog levels
@@ -248,12 +275,14 @@ with the full three-dimensional ocean and full physics:
 
 | Truncation | Grid | Levels | Steps per day | Simulated years per day | 100 simulated years |
 |---|---|---|---|---|---|
-| T21 | 64 × 32 | 10 | 32 | **2,650** | ≈ 0.9 hours |
-| T31 | 96 × 48 | 13 | 48 | 518 | ≈ 4.6 hours |
-| T42 | 128 × 64 | 16 | 72 | 131 | ≈ 18 hours |
-| T85 | 256 × 128 | 25 | 144 | 6.3 | ≈ 16 days |
+| T21 | 64 × 32 | 10 | 48 | **1,760** | ≈ 1.4 hours |
+| T31 | 96 × 48 | 13 | 80 | 310 | ≈ 7.7 hours |
+| T42 | 128 × 64 | 16 | 120 | 78 | ≈ 31 hours |
+| T85 | 256 × 128 | 25 | 192 | 4.7 | ≈ 21 days |
 
-Values use the best configuration (4 MPI processes) in each case. Memory is modest:
+Values use the best configuration (4 MPI processes) in each case. The speed per
+step was measured with the earlier time steps (the work in one step does not depend
+on its length); the simulated-time columns are recomputed for the new defaults. Memory is modest:
 a T42 process needs about 100 MiB when running alone, or 38 MiB per rank at 4
 processes. The full study — speed-up, parallel efficiency and a memory model — is in
 [Chapter 6.1](https://sunmoumou1.github.io/PlaSiC/tutorial/6-experiments/6.1-speed-and-memory-benchmark/).

@@ -5,9 +5,10 @@
 # 本区域集中放置日常构建和运行时最常修改的变量。
 # 大多数变量使用 “?=” 设置默认值，因此可以在命令行中直接覆盖，例如：
 #
-#   make NLAT=96 NLEV=20
+#   make NLAT=64 NLEV=20
 #   make MPI=1 NPRO=8
 #   make run STEPS=64
+#   make run STEP_MINUTES=10
 #   make run RESTART=path/to/restart
 #
 # 通常情况下，使用者只需要阅读和修改这一部分；
@@ -39,9 +40,11 @@ PYTHON ?= python3
 # 模型网格配置
 # -----------------------------------------------------------------------------
 
-# 纬向网格参数，默认值为 64。
+# 纬向网格参数（高斯纬圈数），默认值为 48（T31）。
 # 该值会通过 CPPFLAGS 传递给 C 预处理器，
 # 最终在 C 代码中以 PLASIC_NLAT 宏的形式使用。
+# 目前只支持以下五种分辨率，其他取值直接报错：
+#   NLAT=32 → T21，NLAT=48 → T31，NLAT=64 → T42，NLAT=128 → T85，NLAT=256 → T170
 NLAT ?= 48
 
 # 垂直层数，默认值为 16。
@@ -141,6 +144,13 @@ STEPS ?= 100
 #   make run STEPS=20000 PROGRESS_INTERVAL=100
 PROGRESS_INTERVAL ?= 1
 
+# 时间步长（分钟，可以是小数，例如 7.5）。留空时使用当前分辨率的默认步长：
+#   T21 30、T31 18、T42 12、T85 7.5、T170 2.5 分钟。
+# 设置后模型直接使用该步长，不检验其稳定性（步长是否合理由用户负责）；
+# 步长只需把一天（1440 分钟）分成整数步。例如：
+#   make run STEP_MINUTES=10
+STEP_MINUTES ?=
+
 # 大气–海冰耦合间隔（单位：大气步）。海面通量每一步都计入平均；海冰和海洋
 # 每 SEA_COUPLING_INTERVAL 步运行一次，一步积分整个间隔。默认 1 即每步耦合。
 # 例如每两个大气步耦合一次：
@@ -169,16 +179,19 @@ RESTART ?=
 # The model CLI no longer has --end-year or --reset-calendar: a warm start
 # rebases the clock with --reset-nstep and takes an explicit --steps. The two
 # convenience values below are derived here from the start/end years with
-# proleptic-Gregorian day counts and the T21 step length (ntspd = 32).
+# proleptic-Gregorian day counts and the steps per day. HISTORICAL_NTSPD
+# follows STEP_MINUTES when it is set, and otherwise the default step of
+# HISTORICAL_NLAT (T21: 30 minutes, ntspd = 48).
 HISTORICAL_NLAT ?= 32
 HISTORICAL_NLEV ?= 10
 HISTORICAL_NPRO ?= 2
 HISTORICAL_START_YEAR ?= 1850
 HISTORICAL_END_YEAR ?= 2014
-HISTORICAL_NTSPD ?= 32
+HISTORICAL_STEP_MINUTES = $(if $(strip $(STEP_MINUTES)),$(STEP_MINUTES),$(DEFAULT_STEP_MINUTES_$(HISTORICAL_NLAT)))
+HISTORICAL_NTSPD ?= $(shell $(PYTHON) -c "print(round(1440 / $(HISTORICAL_STEP_MINUTES)))")
 HISTORICAL_RESET_NSTEP ?= $(shell $(PYTHON) -c "y=$(HISTORICAL_START_YEAR); print((365*y+(y+3)//4-(y+99)//100+(y+399)//400)*$(HISTORICAL_NTSPD))")
 HISTORICAL_STEPS ?= $(shell $(PYTHON) -c "d=lambda y:365*y+(y+3)//4-(y+99)//100+(y+399)//400; print((d($(HISTORICAL_END_YEAR)+1)-d($(HISTORICAL_START_YEAR)))*$(HISTORICAL_NTSPD))")
-HISTORICAL_PROGRESS_INTERVAL ?= 320
+HISTORICAL_PROGRESS_INTERVAL ?= 480
 INITIAL_CONDITION ?=
 CO2_FORCING ?= data/forcing/CO2/mole-fraction-of-carbon-dioxide-in-air_input4MIPs_GHGConcentrations_CMIP_UoM-CMIP-1-2-0_gn-15x360deg_000001-201412.csv
 CO2_PPM ?=
@@ -337,6 +350,32 @@ endif
 #
 # 反斜杠用于转义圆括号，避免圆括号被 shell 解释为子 shell 语法。
 TRUNCATION = $(shell expr \( $(NLAT) \* 2 - 1 \) / 3)
+
+
+# -----------------------------------------------------------------------------
+# 支持的分辨率与默认时间步长
+# -----------------------------------------------------------------------------
+#
+# 目前只支持 T21/T31/T42/T85/T170，其他 NLAT 在解析 Makefile 时直接报错。
+# 默认步长（分钟）必须与 state/plasicmod_state.h 中的
+# PLASIC_DEFAULT_STEP_SECONDS 保持一致；Makefile 只用它推算历史试验的步数。
+SUPPORTED_NLAT = 32 48 64 128 256
+DEFAULT_STEP_MINUTES_32 = 30
+DEFAULT_STEP_MINUTES_48 = 18
+DEFAULT_STEP_MINUTES_64 = 12
+DEFAULT_STEP_MINUTES_128 = 7.5
+DEFAULT_STEP_MINUTES_256 = 2.5
+
+ifeq ($(filter $(strip $(NLAT)),$(SUPPORTED_NLAT)),)
+$(error Unsupported resolution NLAT=$(NLAT); supported: NLAT=32 (T21), 48 (T31), 64 (T42), 128 (T85), 256 (T170))
+endif
+
+# 用户设置 STEP_MINUTES 时向模型传 --step-minutes；为空则不传，使用默认步长。
+ifneq ($(strip $(STEP_MINUTES)),)
+  STEP_FLAG = --step-minutes $(STEP_MINUTES)
+else
+  STEP_FLAG =
+endif
 
 
 # -----------------------------------------------------------------------------
@@ -583,9 +622,10 @@ help:
 	@echo ""
 	@echo "Common options:"
 	@echo "  MPI=0                 Build without MPI"
-	@echo "  NLAT=64 NLEV=16      Set horizontal and vertical resolution"
+	@echo "  NLAT=64 NLEV=16       Set resolution (NLAT 32/48/64/128/256 = T21/T31/T42/T85/T170)"
 	@echo "  NPRO=4                Set the number of MPI processes"
 	@echo "  STEPS=100             Set the number of run steps"
+	@echo "  STEP_MINUTES=10       Override the time step in minutes (not checked)"
 	@echo "  SEA_COUPLING_INTERVAL=2  Run sea ice and ocean every 2 steps"
 	@echo "  SHTNS_PREFIX=/path    Use a custom SHTns installation"
 
@@ -723,7 +763,10 @@ strict: clean all
 #     否则模型执行冷启动。
 #
 #   --steps $(STEPS)
-#     执行 $(STEPS) 个模型步，默认值为 32。
+#     执行 $(STEPS) 个模型步，默认值为 100。
+#
+#   $(STEP_FLAG)
+#     设置 STEP_MINUTES 时传入 --step-minutes，否则使用分辨率默认步长。
 #
 #   --progress $(RUN_DIR)/progress.txt
 #     持续追加 JSON 进度记录，便于在运行过程中监控模型状态。
@@ -738,7 +781,7 @@ strict: clean all
 # 行末反斜杠使 shell 将多行视为一条完整命令。
 run: all
 	@mkdir -p $(RUN_DIR)
-	$(RUNNER) $(PROGRAM) $(RESTART_FLAG) --steps $(STEPS) \
+	$(RUNNER) $(PROGRAM) $(RESTART_FLAG) --steps $(STEPS) $(STEP_FLAG) \
 		$(RUN_CO2_FLAG) \
 		--progress $(RUN_DIR)/progress.txt \
 		--progress-interval $(PROGRESS_INTERVAL) \
@@ -778,7 +821,7 @@ historical-run: all
 		--restart "$(INITIAL_CONDITION)" \
 		--co2-forcing "$(CO2_FORCING)" \
 		--reset-nstep $(HISTORICAL_RESET_NSTEP) \
-		--steps $(HISTORICAL_STEPS) \
+		--steps $(HISTORICAL_STEPS) $(STEP_FLAG) \
 		--monthly-output "$(HISTORICAL_OUTPUT_DIR)/monthly" \
 		--progress "$(HISTORICAL_OUTPUT_DIR)/progress.txt" \
 		--progress-interval $(HISTORICAL_PROGRESS_INTERVAL) \

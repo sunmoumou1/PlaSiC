@@ -488,48 +488,67 @@ int runtime_prepare_orography_grid(void)
 }
 
 /*
- * 默认时间步长（分钟）。半隐式格式消除了重力波限制，但平流仍是显式蛙跳：
- * 截断波数 N 的平流 Courant 数约为 N·U·Δt/a，一个步长能承载的最大风速约为
- * U_max ≈ a/(N·Δt)。每天至少取 NLAT 步（Δt ≤ 1 天/NLAT）时，由于
- * N ≈ 2·NLAT/3，各分辨率的 U_max 都不低于约 110 m/s，足以容纳模式最强的
- * 冬季急流。步长取不超过 1440/NLAT 分钟的最大“标准”值：45 分钟，或 60 的
- * 约数（保证每小时为整数步）——T21 45、T31 30、T42 20、T63 15、T85 10、
- * T170 5 分钟。PlaSim 原先的 T31 36 分钟、T42 30 分钟以及 30*64/NLAT 规则
- * （T85 15 分钟）只能承载约 95、84、83 m/s：修正海冰密集度后，T42 和 T85
- * 的 3-D 冷启动都在冬季急流中数值发散，T31 的急流也达到了其上限的 97%。
+ * 时间步长。
  *
- * Default step length in minutes. The semi-implicit scheme removes the
- * gravity-wave limit, but advection is still explicit (leapfrog): the
- * advective Courant number of the truncation wavenumber N is about
- * N*U*dt/a, so a step carries winds up to U_max ~ a/(N*dt). With at least
- * NLAT steps per day (dt <= 1 day / NLAT) and N ~ 2*NLAT/3, U_max stays at
- * about 110 m/s or more at every resolution, enough for the strongest winter
- * jets of the model. The step is the largest standard length not exceeding
- * 1440/NLAT minutes: 45 minutes, or a divisor of 60 so that every hour holds
- * a whole number of steps -- 45 at T21, 30 at T31, 20 at T42, 15 at T63,
- * 10 at T85 and 5 at T170. PlaSim's earlier 36 minutes at T31, 30 minutes
- * at T42 and its 30*64/NLAT rule (15 minutes at T85) carry only about 95,
- * 84 and 83 m/s: with the corrected sea-ice compactness, 3-D cold starts
- * diverged in winter jets at T42 and T85, and a T31 jet reached 97% of its
- * limit.
+ * 用户给出步长（--step-minutes，或 JSON 配置中的 step_minutes）时直接使用，
+ * 不检验其稳定性：步长是否合理完全由用户负责。未给出时使用当前分辨率的
+ * 默认步长 PLASIC_DEFAULT_STEP_SECONDS（见 state/plasicmod_state.h）：
+ * T21 30、T31 18、T42 12、T85 7.5、T170 2.5 分钟，保证长时间气候积分稳定、
+ * 不发生数值发散。
+ *
+ * 日历按“每天整数步”计时（calmod_init(ntspd)），所以步长必须把一个太阳日
+ * 分成整数步。做不到的步长无法表示，这里直接报错，而不是悄悄换成另一个步长。
+ *
+ * Time step.
+ *
+ * A step given by the user (--step-minutes, or step_minutes in the JSON
+ * config) is used as given, without any stability check: whether it is
+ * reasonable is entirely the user's responsibility. Otherwise the default of
+ * this resolution, PLASIC_DEFAULT_STEP_SECONDS in state/plasicmod_state.h, is
+ * used: 30 minutes at T21, 18 at T31, 12 at T42, 7.5 at T85 and 2.5 at T170,
+ * short enough to keep long climate integrations stable.
+ *
+ * The calendar counts a whole number of steps per day (calmod_init(ntspd)),
+ * so the step must divide the solar day into whole steps. A step that cannot
+ * is rejected rather than silently replaced by a different one.
  */
-static int32_t default_step_minutes(int32_t nlat)
+static int select_time_step(double step_minutes)
 {
-    static const int32_t standard_steps[] = {45, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1};
-    const int32_t limit = (24 * 60) / nlat;
-    size_t k;
+    // lroundf 将单精度浮点数四舍五入为长整型整数
+    // lroundf rounds a single-precision float to a long integer
+    const double solar_day = (double)lroundf(plasic_solar_day);
+    double step_seconds = (double)PLASIC_DEFAULT_STEP_SECONDS;
+    double steps_per_day;
+    double whole_steps;
 
-    for (k = 0; k < sizeof(standard_steps) / sizeof(standard_steps[0]); ++k)
+    if (!isfinite(step_minutes) || step_minutes < 0.0)
     {
-        if (standard_steps[k] <= limit)
-        {
-            return standard_steps[k];
-        }
+        runtime_set_error("invalid time step of %g minutes", step_minutes);
+        return PLASIC_RUNTIME_BAD_ARGUMENT;
     }
-    return 1;
+    if (step_minutes > 0.0)
+    {
+        step_seconds = step_minutes * 60.0;
+    }
+
+    steps_per_day = solar_day / step_seconds;
+    whole_steps = round(steps_per_day);
+    if (whole_steps < 1.0 || whole_steps > (double)INT32_MAX ||
+        fabs(steps_per_day - whole_steps) > 1.0e-9 * steps_per_day)
+    {
+        runtime_set_error(
+            "a time step of %g minutes does not divide the %g-minute day "
+            "into a whole number of steps (%.6g steps per day)",
+            step_seconds / 60.0, solar_day / 60.0, steps_per_day);
+        return PLASIC_RUNTIME_BAD_ARGUMENT;
+    }
+
+    plasic_ntspd = (int32_t)whole_steps;
+    plasic_mpstep = (float)(step_seconds / 60.0);
+    return PLASIC_RUNTIME_OK;
 }
 
-int runtime_initialize_dynamics(void)
+int runtime_initialize_dynamics(double step_minutes)
 {
     int status;
     int latitude;
@@ -541,14 +560,11 @@ int runtime_initialize_dynamics(void)
         &plasic_ra4, &plasic_pnu, &plasic_ga,
         &plasic_plarad);
 
-    plasic_mpstep = default_step_minutes(PLASIC_NLAT);
-
-    plasic_ntspd =
-        (int32_t)lroundf(plasic_solar_day) /
-        (plasic_mpstep * 60);
-    // lroundf 用于将单精度浮点数四舍五入转换为长整型（long int）整数
-    // lroundf is used to round single-precision floating-point numbers to convert them to long int integers
-    plasic_ntspd += plasic_ntspd % 2;
+    status = select_time_step(step_minutes);
+    if (status != PLASIC_RUNTIME_OK)
+    {
+        return status;
+    }
     plasic_nafter = plasic_ntspd;
     plasic_nkits = 0;
 
