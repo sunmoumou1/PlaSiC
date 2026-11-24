@@ -74,6 +74,8 @@ int32_t mpi_native_allgather_spectral(
 /* Element-wise MPI_SUM reduction over count floats, with the result sent to
  * every process. */
 int32_t mpi_native_allreduce_real(float *buffer, int32_t count);
+int32_t mpi_native_sync_error(
+    int32_t *status, char *message, int32_t bytes, int32_t rank);
 
 /*
  * 用两次 MPI_Sendrecv 与相邻 rank 交换纬度 halo 行；

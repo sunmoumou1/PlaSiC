@@ -195,6 +195,7 @@ HISTORICAL_PROGRESS_INTERVAL ?= 480
 INITIAL_CONDITION ?=
 CO2_FORCING ?= data/forcing/CO2/mole-fraction-of-carbon-dioxide-in-air_input4MIPs_GHGConcentrations_CMIP_UoM-CMIP-1-2-0_gn-15x360deg_000001-201412.csv
 CO2_PPM ?=
+OZONE_FORCING ?=
 HISTORICAL_OUTPUT_DIR ?= $(RUN_ROOT)/historical_T21_L10_MPI_P$(HISTORICAL_NPRO)_$(HISTORICAL_START_YEAR)-$(HISTORICAL_END_YEAR)
 
 
@@ -402,8 +403,12 @@ else
   RESTART_FLAG =
 endif
 
+ifneq ($(strip $(OZONE_FORCING)),)
+  RUN_OZONE_FLAG = --ozone-forcing "$(OZONE_FORCING)"
+endif
+
 # Normal runs use the external forcing by default. Setting CO2_PPM switches
-# only `make run` to a spatially and temporally fixed concentration.
+# both `run` and `historical` to a spatially and temporally fixed concentration.
 ifneq ($(strip $(CO2_PPM)),)
   RUN_CO2_FLAG = --co2-ppm $(CO2_PPM)
 else
@@ -549,6 +554,7 @@ KERNEL_SOURCES = \
 RUNTIME_SOURCES = \
 	runtime/plasic_runtime.c \
 	runtime/co2_forcing.c \
+	runtime/ozone_forcing.c \
 	runtime/monthly_netcdf.c \
 	runtime/runtime_initialization.c \
 	runtime/runtime_dynamics.c \
@@ -603,7 +609,7 @@ PROGRAM = $(BUILD_DIR)/plasic.x
 #
 # 即使源码目录中恰好存在名为 all、clean、run 等文件，
 # make 仍然会执行对应规则，而不会错误地认为目标已经是最新状态。
-.PHONY: all clean help strict run historical historical-run test test-data test-runtime
+.PHONY: all clean help strict run historical historical-run test test-data test-runtime test-serial-model test-ozone test-ozone-mpi
 
 
 # ----------------------------------------------------------------------------
@@ -617,6 +623,8 @@ help:
 	@echo "  make                  Build the model"
 	@echo "  make run              Build and run a short integration"
 	@echo "  make test             Run data and runtime tests"
+	@echo "  make test-ozone       Run serial external ozone forcing tests"
+	@echo "  make test-ozone-mpi   Run two-rank initialization and forcing tests"
 	@echo "  make strict           Build with warnings treated as errors"
 	@echo "  make clean            Remove build and run products"
 	@echo ""
@@ -624,6 +632,7 @@ help:
 	@echo "  MPI=0                 Build without MPI"
 	@echo "  NLAT=64 NLEV=16       Set resolution (NLAT 32/48/64/128/256 = T21/T31/T42/T85/T170)"
 	@echo "  NPRO=4                Set the number of MPI processes"
+	@echo "  OZONE_FORCING=/path   Use a monthly ozone NetCDF in run or historical"
 	@echo "  STEPS=100             Set the number of run steps"
 	@echo "  STEP_MINUTES=10       Override the time step in minutes (not checked)"
 	@echo "  SEA_COUPLING_INTERVAL=2  Run sea ice and ocean every 2 steps"
@@ -782,7 +791,7 @@ strict: clean all
 run: all
 	@mkdir -p $(RUN_DIR)
 	$(RUNNER) $(PROGRAM) $(RESTART_FLAG) --steps $(STEPS) $(STEP_FLAG) \
-		$(RUN_CO2_FLAG) \
+		$(RUN_CO2_FLAG) $(RUN_OZONE_FLAG) \
 		--progress $(RUN_DIR)/progress.txt \
 		--progress-interval $(PROGRESS_INTERVAL) \
 		--sea-coupling-interval $(SEA_COUPLING_INTERVAL) \
@@ -801,15 +810,17 @@ historical:
 		echo "Initial condition not found: $(INITIAL_CONDITION)" >&2; \
 		exit 2; \
 	}
+ifeq ($(strip $(CO2_PPM)),)
 	@test -f "$(CO2_FORCING)" || { \
 		echo "CO2 forcing not found: $(CO2_FORCING)" >&2; \
 		exit 2; \
 	}
+endif
 	$(MAKE) historical-run MPI=1 \
 		NLAT=$(HISTORICAL_NLAT) NLEV=$(HISTORICAL_NLEV) \
 		NPRO=$(HISTORICAL_NPRO) \
 		INITIAL_CONDITION="$(INITIAL_CONDITION)" \
-		CO2_FORCING="$(CO2_FORCING)" \
+		CO2_PPM="$(CO2_PPM)" CO2_FORCING="$(CO2_FORCING)" OZONE_FORCING="$(OZONE_FORCING)" \
 		HISTORICAL_START_YEAR=$(HISTORICAL_START_YEAR) \
 		HISTORICAL_END_YEAR=$(HISTORICAL_END_YEAR) \
 		HISTORICAL_PROGRESS_INTERVAL=$(HISTORICAL_PROGRESS_INTERVAL) \
@@ -819,7 +830,7 @@ historical-run: all
 	@mkdir -p "$(HISTORICAL_OUTPUT_DIR)/monthly"
 	$(RUNNER) $(PROGRAM) \
 		--restart "$(INITIAL_CONDITION)" \
-		--co2-forcing "$(CO2_FORCING)" \
+		$(RUN_CO2_FLAG) $(RUN_OZONE_FLAG) \
 		--reset-nstep $(HISTORICAL_RESET_NSTEP) \
 		--steps $(HISTORICAL_STEPS) $(STEP_FLAG) \
 		--monthly-output "$(HISTORICAL_OUTPUT_DIR)/monthly" \
@@ -849,7 +860,22 @@ test-runtime:
 		--earth-t21 src/data/earth_t21_l10.restart \
 		--earth-t42 src/data/earth_t42_l16.restart
 
-test: test-data test-runtime
+# NetCDF command-line checks run when the corresponding utilities are available.
+test-serial-model:
+	$(MAKE) all MPI=0 NPRO=1 NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/ozone
+
+test-ozone: test-serial-model
+	cd .. && $(PYTHON) tests/test_ozone_forcing.py "$(ABS_BUILD_ROOT)/tests/ozone/plasic.x"
+
+$(BUILD_DIR)/ozone_retry: ../tests/ozone_retry.c $(RUNTIME_OBJECTS) $(LIBRARY)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< \
+		$(filter-out $(BUILD_DIR)/app/plasic_standalone.o,$(RUNTIME_OBJECTS)) $(LIBRARY) $(LDLIBS)
+
+test-ozone-mpi:
+	$(MAKE) all $(BUILD_ROOT)/tests/ozone-mpi/ozone_retry MPI=1 NPRO=2 NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/ozone-mpi
+	cd .. && $(PYTHON) tests/test_ozone_forcing.py --mpi-model "$(ABS_BUILD_ROOT)/tests/ozone-mpi/plasic.x" --mpirun "$(MPIRUN)" -ktest_mpi
+
+test: test-data test-runtime test-ozone
 
 
 # -----------------------------------------------------------------------------

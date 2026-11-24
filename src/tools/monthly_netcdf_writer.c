@@ -40,7 +40,7 @@ static int put_text_attribute(
 int monthly_netcdf_create(
     monthly_netcdf_file *file, const monthly_netcdf_spec *spec,
     const char *directory, const char *co2_forcing_source,
-    const char *calendar,
+    const char *ozone_forcing_source, const char *calendar,
     const float *latitudes, int32_t latitude_count,
     const float *longitudes, int32_t longitude_count,
     const float *levels, int32_t level_count,
@@ -62,6 +62,7 @@ int monthly_netcdf_create(
     float fill_value = 1.0e20f;
 
     if (file == NULL || spec == NULL || directory == NULL ||
+        co2_forcing_source == NULL || ozone_forcing_source == NULL ||
         calendar == NULL || calendar[0] == '\0' ||
         (latitude_count > 0 && latitudes == NULL) ||
         (longitude_count > 0 && longitudes == NULL) ||
@@ -209,7 +210,10 @@ int monthly_netcdf_create(
             MONTHLY_NETCDF_OK ||
         put_text_attribute(
             file->ncid, NC_GLOBAL, "co2_forcing_source",
-            co2_forcing_source, error) != MONTHLY_NETCDF_OK)
+            co2_forcing_source, error) != MONTHLY_NETCDF_OK ||
+        put_text_attribute(
+            file->ncid, NC_GLOBAL, "ozone_forcing_source",
+            ozone_forcing_source, error) != MONTHLY_NETCDF_OK)
     {
         return MONTHLY_NETCDF_DEFINE_FAILED;
     }

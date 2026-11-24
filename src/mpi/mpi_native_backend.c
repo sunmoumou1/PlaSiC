@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* PlaSiC 固定以 rank 0 作为根进程，因此调用者从不传 root。 */
-/* PlaSiC always uses rank 0 as the root, so callers never pass a root. */
+/* 模型数据以 rank 0 为根；错误消息由报告该错误的进程广播。 */
+/* Model data use rank 0 as root. Error messages come from the reporting rank. */
 enum
 {
     ROOT_RANK = 0
@@ -152,6 +152,24 @@ int32_t mpi_native_broadcast_real(float *buffer, int32_t count)
     }
     return (int32_t)MPI_Bcast(buffer, (int)count, MPI_FLOAT,
                               ROOT_RANK, active_world);
+}
+
+int32_t mpi_native_sync_error(
+    int32_t *status, char *message, int32_t bytes, int32_t rank)
+{
+    int32_t reporter = *status == 0 ? INT32_MAX : rank;
+    int rc = MPI_Allreduce(MPI_IN_PLACE, &reporter, 1, MPI_INT32_T,
+                           MPI_MIN, active_world);
+    if (rc != MPI_SUCCESS || reporter == INT32_MAX)
+    {
+        return (int32_t)rc;
+    }
+    rc = MPI_Bcast(status, 1, MPI_INT32_T, reporter, active_world);
+    if (rc == MPI_SUCCESS)
+    {
+        rc = MPI_Bcast(message, bytes, MPI_CHAR, reporter, active_world);
+    }
+    return (int32_t)rc;
 }
 
 /*

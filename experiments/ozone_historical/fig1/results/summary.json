@@ -1,0 +1,44 @@
+{
+  "temperature_variable": "tas",
+  "units": "K",
+  "anomaly_baseline": "Each series uses its own 1850-1900 mean.",
+  "period": [
+    1850,
+    2014
+  ],
+  "experiments": {
+    "co2_ozone": {
+      "years": 165,
+      "baseline_1850_1900_K": 286.5452924411141,
+      "mean_anomaly_2005_2014_K": 0.6969695250927941,
+      "anomaly_2014_K": 0.677664708261716,
+      "temperature_2014_K": 287.2229571493758
+    },
+    "ozone_only": {
+      "years": 165,
+      "baseline_1850_1900_K": 286.4778537622345,
+      "mean_anomaly_2005_2014_K": -0.0995508669011258,
+      "anomaly_2014_K": -0.065508403185504,
+      "temperature_2014_K": 286.41234535904897
+    },
+    "co2_only": {
+      "years": 165,
+      "baseline_1850_1900_K": 286.5490299042028,
+      "mean_anomaly_2005_2014_K": 0.42851141293999717,
+      "anomaly_2014_K": 0.47119252641408593,
+      "temperature_2014_K": 287.0202224306169
+    }
+  },
+  "paired_surface_temperature_differences_K": {
+    "co2_ozone_minus_co2_only_K": {
+      "mean_1850_1900": -0.00373746308868668,
+      "mean_2005_2014": 0.2647206490640713,
+      "year_2014": 0.20273471875890436
+    },
+    "co2_ozone_minus_ozone_only_K": {
+      "mean_1850_1900": 0.06743867887969128,
+      "mean_2005_2014": 0.8639590708735454,
+      "year_2014": 0.8106117903268455
+    }
+  }
+}

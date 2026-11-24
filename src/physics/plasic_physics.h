@@ -2,6 +2,7 @@
 #define PLASIC_PHYSICS_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 /* sea_coupling_interval: atmospheric steps per sea-ice/ocean step (>= 1). */
 int plasic_physics_initialize(
@@ -19,6 +20,13 @@ int plasic_physics_frame_field(
     int32_t variable_id, const float **values, int32_t *layers);
 int plasic_physics_set_co2_bands(const float *bands, int32_t band_count);
 const float *plasic_physics_co2_field(void);
+/* Total column used at this step, in Dobson units on the local grid. */
+double plasic_physics_ozone_column_du(size_t horizontal);
+/*
+ * Set radiation ozone to current + weight * (neighbor - current). Both are
+ * local [lev][lat][lon] slabs of ozone mass fractions (kg/kg).
+ */
+void plasic_physics_interpolate_ozone(const double *current, const double *neighbor, float weight);
 /*
  * Return the centre depth (metres) of every three-dimensional deep-ocean
  * level and write the level count to *count.  The pointer remains owned by

@@ -1,5 +1,6 @@
 #include "runtime_internal.h"
 #include "co2_forcing.h"
+#include "ozone_forcing.h"
 #include "monthly_netcdf.h"
 
 runtime_workspace *runtime_fields;
@@ -71,6 +72,16 @@ const char *plasic_runtime_error(void)
     return runtime_error_message;
 }
 
+static int apply_monthly_forcing(int dynamics_only)
+{
+    const int year = plasic_ndatim[0];
+    const int month = plasic_ndatim[1];
+    const int status = runtime_co2_forcing_apply(year, month);
+    if (status != PLASIC_RUNTIME_OK || dynamics_only || plasic_nrad <= 0)
+        return status;
+    return runtime_ozone_forcing_apply();
+}
+
 void plasic_runtime_finalize(void)
 {
     /*
@@ -91,6 +102,7 @@ void plasic_runtime_finalize(void)
 
     runtime_monthly_netcdf_abort();
     runtime_co2_forcing_close();
+    runtime_ozone_forcing_close();
     plasic_physics_finalize();
     sht_finalize();
     free(runtime_fields);
@@ -304,6 +316,11 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     }
 
     status = runtime_prepare_orography_grid();
+    /* The restart clock and the Gaussian/sigma grid are now authoritative. */
+    if (status == PLASIC_RUNTIME_OK)
+        status = runtime_ozone_forcing_open(options->ozone_forcing_input);
+    if (status == PLASIC_RUNTIME_OK)
+        status = runtime_ozone_forcing_validate(options->steps);
     if (status != PLASIC_RUNTIME_OK)
     {
         plasic_runtime_finalize();
@@ -338,10 +355,7 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     status = runtime_co2_forcing_open(
         options->co2_forcing_input, options->co2_ppm);
     if (status == PLASIC_RUNTIME_OK)
-    {
-        status = runtime_co2_forcing_apply(
-            plasic_ndatim[0], plasic_ndatim[1]);
-    }
+        status = apply_monthly_forcing(options->dynamics_only);
     if (status != PLASIC_RUNTIME_OK)
     {
         plasic_runtime_finalize();
@@ -376,6 +390,11 @@ int plasic_runtime_run(const plasic_runtime_options *options)
     int32_t step; /* Relative step number within this plasic_runtime_run() call, starting from 0. */
     int status;   /* Runtime status code uniformly returned by each stage. */
 
+    /* A library caller can request another interval on an initialized model. */
+    status = runtime_ozone_forcing_validate(options->steps);
+    if (status != PLASIC_RUNTIME_OK)
+        return status;
+
     /*
      * Advance step by step; options->steps is always >= 1 because the CLI and
      * the JSON loader reject a missing or zero step count.
@@ -384,8 +403,7 @@ int plasic_runtime_run(const plasic_runtime_options *options)
     {
         step2cal(plasic_calendar, plasic_nstep, plasic_ndatim);
 
-        status = runtime_co2_forcing_apply(
-            plasic_ndatim[0], plasic_ndatim[1]);
+        status = apply_monthly_forcing(options->dynamics_only);
         if (status != PLASIC_RUNTIME_OK)
         {
             return status;

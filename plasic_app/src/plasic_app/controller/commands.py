@@ -398,6 +398,9 @@ def run_invocation(
         str(runtime["start_minute"]),
     ]
 
+    if runtime.get("ozone_forcing"):
+        model_arguments.extend(["--ozone-forcing", runtime["ozone_forcing"]])
+
     if runtime.get("data_dir"):
         model_arguments.extend(["--data-dir", runtime["data_dir"]])
 
