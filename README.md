@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://sunmoumou1.github.io/PlaSiC/"><img src="https://img.shields.io/badge/Project%20website-visit-1f4e79?style=for-the-badge" alt="Project website"></a>
   <a href="https://sunmoumou1.github.io/PlaSiC/tutorial/"><img src="https://img.shields.io/badge/Tutorial-read%20online-0f766e?style=for-the-badge" alt="Read the tutorial online"></a>
-  <a href="https://drive.usercontent.google.com/download?id=1PaMNy_Bc8rSRLUIjQizExJ17wFgWT9Ag&amp;export=download&amp;confirm=t"><img src="https://img.shields.io/badge/PDF-download%20(63%20MB)-b45309?style=for-the-badge" alt="Download the tutorial PDF"></a>
+  <a href="https://drive.usercontent.google.com/download?id=1PaMNy_Bc8rSRLUIjQizExJ17wFgWT9Ag&amp;export=download&amp;confirm=t"><img src="https://img.shields.io/badge/PDF-download-b45309?style=for-the-badge" alt="Download the tutorial PDF"></a>
   <a href="https://www.bilibili.com/video/BV1Q4h26FELk/"><img src="https://img.shields.io/badge/Bilibili-%E2%96%B6%20watch%20the%20Studio%20walkthrough-FB7299?style=for-the-badge&amp;logo=bilibili&amp;logoColor=white" alt="Watch the PlaSiC Studio interface walkthrough on Bilibili"></a>
 </p>
 
@@ -29,7 +29,7 @@
 
 | Where to go | |
 |---|---|
-| **Read the book** | [Online tutorial](https://sunmoumou1.github.io/PlaSiC/tutorial/) · [PDF, 63 MB](https://drive.usercontent.google.com/download?id=1PaMNy_Bc8rSRLUIjQizExJ17wFgWT9Ag&export=download&confirm=t) · [Preface](https://sunmoumou1.github.io/PlaSiC/tutorial/preface/) |
+| **Read the book** | [Online tutorial](https://sunmoumou1.github.io/PlaSiC/tutorial/) · [PDF](https://drive.usercontent.google.com/download?id=1PaMNy_Bc8rSRLUIjQizExJ17wFgWT9Ag&export=download&confirm=t) · [Preface](https://sunmoumou1.github.io/PlaSiC/tutorial/preface/) |
 | **Run the model** | [Quick start](#quick-start) · [PlaSiC Studio](#plasic-studio) · [Experiments](#experiments-out-of-the-box) · [Build dependencies](INSTALL.md) |
 | **Watch the video** | **▶ [PlaSiC Studio interface walkthrough on Bilibili](https://www.bilibili.com/video/BV1Q4h26FELk/)** |
 | **Understand the design** | [Project website](https://sunmoumou1.github.io/PlaSiC/) · [Source tour](https://sunmoumou1.github.io/PlaSiC/source.html) · [Benchmarks](#benchmarks) |
@@ -300,7 +300,7 @@ processes. The full study — speed-up, parallel efficiency and a memory model �
 The PlaSiC tutorial is a complete, self-contained textbook: 400+ pages across
 eight chapters and six appendices.<br><br>
 <a href="https://sunmoumou1.github.io/PlaSiC/tutorial/">Read online</a> &nbsp;·&nbsp;
-<a href="https://drive.usercontent.google.com/download?id=1PaMNy_Bc8rSRLUIjQizExJ17wFgWT9Ag&export=download&confirm=t">Download PDF (63 MB)</a> &nbsp;·&nbsp;
+<a href="https://drive.usercontent.google.com/download?id=1PaMNy_Bc8rSRLUIjQizExJ17wFgWT9Ag&export=download&confirm=t">Download PDF</a> &nbsp;·&nbsp;
 <a href="https://sunmoumou1.github.io/PlaSiC/tutorial.html">Book landing page</a>
 </td>
 </tr>
