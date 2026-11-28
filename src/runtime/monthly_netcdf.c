@@ -30,6 +30,7 @@
 #include "runtime_internal.h"
 
 #include "co2_forcing.h"
+#include "ozone_forcing.h"
 #include "monthly_netcdf.h"
 #include "tools/monthly_netcdf_writer.h"
 
@@ -103,7 +104,8 @@ typedef enum monthly_source
     SOURCE_MLD,
     SOURCE_CO2,
     SOURCE_THETAO,
-    SOURCE_SO
+    SOURCE_SO,
+    SOURCE_TOZ
 } monthly_source;
 
 /*
@@ -193,7 +195,9 @@ static const monthly_definition definitions[] = {
     {"mlotst", "ocean_mixed_layer_thickness", "Ocean mixed-layer depth", "m", SOURCE_MLD, 1, MASK_OCEAN},
     {"thetao", "sea_water_potential_temperature", "Sea water potential temperature", "K", SOURCE_THETAO, PLASIC_DEEP_NLEV, MASK_OCEAN},
     {"so", "sea_water_salinity", "Sea water salinity", "1e-3", SOURCE_SO, PLASIC_DEEP_NLEV, MASK_OCEAN},
-    {"co2", "mole_fraction_of_carbon_dioxide_in_air", "Prescribed atmospheric carbon dioxide mole fraction", "1e-6", SOURCE_CO2, 1, MASK_NONE}};
+    {"co2", "mole_fraction_of_carbon_dioxide_in_air", "Prescribed atmospheric carbon dioxide mole fraction", "1e-6", SOURCE_CO2, 1, MASK_NONE},
+    /* The last field requires an active radiation scheme. */
+    {"toz", "equivalent_thickness_at_stp_of_atmosphere_ozone_content", "Total ozone column in Dobson units", "1e-5 m", SOURCE_TOZ, 1, MASK_NONE}};
 
 /*
  * 三维海洋变量使用深海深度坐标轴，而不是大气 sigma 轴。
@@ -216,6 +220,7 @@ enum
 };
 
 static monthly_variable variables[MONTHLY_VARIABLE_COUNT];
+static int active_variable_count;
 static float *global_buffer;
 static float *global_land_mask;
 static float monthly_latitudes[PLASIC_NLAT];
@@ -347,6 +352,8 @@ static float source_value(
         return deep_temperature == NULL ? 0.0f : deep_temperature[cell];
     case SOURCE_SO:
         return deep_salinity == NULL ? 0.0f : deep_salinity[cell];
+    case SOURCE_TOZ:
+        return (float)plasic_physics_ozone_column_du(horizontal);
     /* CO2 体积混合比由物理模块提供，单位为 ppmv（1e-6）。 */
     /* CO2 volume mixing ratio is provided by the physics module in ppmv
      * (1e-6). */
@@ -383,7 +390,7 @@ static int ensure_variable_files(void)
         /* 根进程串行创建全部变量文件；任何失败都会跳出循环并广播给其他进程。 */
         /* The root creates every variable file sequentially; any failure
          * breaks the loop and is broadcast to the other ranks. */
-        for (int index = 0; index < MONTHLY_VARIABLE_COUNT; ++index)
+        for (int index = 0; index < active_variable_count; ++index)
         {
             monthly_variable *variable = &variables[index];
             const monthly_definition *definition = variable->definition;
@@ -420,7 +427,7 @@ static int ensure_variable_files(void)
              * the coordinates and metadata passed in. */
             writer_status = monthly_netcdf_create(
                 &variable->file, &spec, monthly_directory,
-                runtime_co2_forcing_source(),
+                runtime_co2_forcing_source(), runtime_ozone_forcing_source(),
                 calmod_cf_calendar_name(plasic_calendar),
                 monthly_latitudes, PLASIC_NLAT,
                 monthly_longitudes, PLASIC_NLON,
@@ -428,7 +435,7 @@ static int ensure_variable_files(void)
             // signature: int monthly_netcdf_create(
             //     monthly_netcdf_file *file, const monthly_netcdf_spec *spec,
             //     const char *directory, const char *co2_forcing_source,
-            //     const char *calendar,
+            //     const char *ozone_forcing_source, const char *calendar,
             //     const float *latitudes, int32_t latitude_count,
             //     const float *longitudes, int32_t longitude_count,
             //     const float *levels, int32_t level_count,
@@ -499,7 +506,7 @@ static int flush_month(void)
     {
         /* 月份不完整：丢弃累加和，不产生文件记录。 */
         /* Incomplete month: discard the sums and emit no record. */
-        for (int index = 0; index < MONTHLY_VARIABLE_COUNT; ++index)
+        for (int index = 0; index < active_variable_count; ++index)
         {
             const size_t local_count =
                 (size_t)PLASIC_NHOR *
@@ -518,7 +525,7 @@ static int flush_month(void)
         return status;
     }
 
-    for (int index = 0; index < MONTHLY_VARIABLE_COUNT; ++index)
+    for (int index = 0; index < active_variable_count; ++index)
     {
         /* 逐变量独立处理：先本地求平均、再全局聚合、最后根进程落盘。 */
         /* Handle one variable at a time: local average, then global gather,
@@ -643,6 +650,10 @@ int runtime_monthly_netcdf_open(const char *directory)
     (void)snprintf(
         monthly_directory, sizeof(monthly_directory), "%s", directory);
 
+    active_variable_count = MONTHLY_VARIABLE_COUNT;
+    if (plasic_nrad <= 0)
+        --active_variable_count;
+
     /* 高斯格点存的是纬度正弦值，这里还原为度数坐标。 */
     /* The Gaussian grid stores the sine of latitude; convert it back to degrees for the coordinate. */
     for (int32_t latitude = 0; latitude < PLASIC_NLAT; ++latitude)
@@ -676,7 +687,7 @@ int runtime_monthly_netcdf_open(const char *directory)
 
     /* 初始化每个变量的定义、根进程专用句柄与本地累加和。 */
     /* Initialize each variable's definition, root-only handle and local sums. */
-    for (int index = 0; index < MONTHLY_VARIABLE_COUNT; ++index)
+    for (int index = 0; index < active_variable_count; ++index)
     {
         variables[index].definition = &definitions[index];
         variables[index].file.ncid = -1;
@@ -776,7 +787,7 @@ int runtime_monthly_netcdf_accumulate(int year, int month)
 
     /* 把本步所有变量累加到各自的 sum 数组。 */
     /* Accumulate every variable of this step into its own sum array. */
-    for (int index = 0; index < MONTHLY_VARIABLE_COUNT; ++index)
+    for (int index = 0; index < active_variable_count; ++index)
     {
         monthly_variable *variable = &variables[index];
 
@@ -818,7 +829,7 @@ int runtime_monthly_netcdf_close(void)
         status = flush_month();
     }
 
-    for (int index = 0; index < MONTHLY_VARIABLE_COUNT; ++index)
+    for (int index = 0; index < active_variable_count; ++index)
     {
         monthly_variable *variable = &variables[index];
 
@@ -868,7 +879,7 @@ void runtime_monthly_netcdf_abort(void)
     /* 逐个变量释放句柄与累加和；非根进程的句柄本来就是 -1。 */
     /* Release each variable's handle and sums; handles are already -1 on
      * non-root ranks. */
-    for (int index = 0; index < MONTHLY_VARIABLE_COUNT; ++index)
+    for (int index = 0; index < active_variable_count; ++index)
     {
         monthly_variable *variable = &variables[index];
 

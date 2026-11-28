@@ -69,6 +69,7 @@ static void initialize_radiation(void)
     const float beta = sqrtf(1.0f - eccentricity_squared);
 
     radiation.ozone_mode = 1;
+    radiation.external_ozone_column_reported = 0;
     radiation.shortwave = 1;
     radiation.longwave = 1;
     radiation.rayleigh_scattering = 1;

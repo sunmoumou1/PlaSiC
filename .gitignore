@@ -44,3 +44,7 @@ experiments/historical_3d_500y/historical_A/
 experiments/historical_3d_500y/historical_B/
 experiments/historical_3d_500y/spinup/
 experiments/historical_3d_500y/pipeline.log
+
+# Local historical ozone inputs and model output
+/experiments/ozone_historical/data/
+/experiments/ozone_historical/runs/

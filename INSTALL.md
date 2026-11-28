@@ -11,6 +11,23 @@
 | Open MPI (`mpicc`, `mpirun`) | MPI builds and runs |
 | `pkg-config` | locates libraries and link flags |
 
+## Historical ozone tools and tests
+
+The C model requires the libraries above. The historical data converter,
+climate analysis and ozone integration tests use Python 3.10 or newer and
+the following packages. Install them in an activated Python environment.
+
+```bash
+python -m pip install numpy scipy netCDF4 matplotlib
+make -C src test-data test-ozone test-ozone-mpi
+```
+
+The serial and MPI targets build the matching test executables. With
+prebuilt T21/L10 models, `python -m unittest discover` from the repository root also
+discovers those cases. Set `PLASIC_TEST_MODEL` and `PLASIC_TEST_MPI_MODEL`
+to the respective executable paths. NetCDF command-line tools (`ncgen`
+and `ncdump`) enable the NetCDF header and string-unit checks.
+
 ## Installing on macOS
 
 PlaSiC's horizontal scalar and vector spherical-harmonic transforms are performed by

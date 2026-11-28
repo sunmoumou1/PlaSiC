@@ -212,6 +212,17 @@ step; at the new 30-minute default it needs about 1.5 times as long.
 make -C src historical INITIAL_CONDITION=data/earth_t21_l10.restart
 ```
 
+To drive a historical run with both CO₂ and ozone, supply a monthly ozone file
+on the T21/L10 grid that covers the experiment dates:
+
+```bash
+make -C src historical INITIAL_CONDITION=data/earth_t21_l10.restart \
+  OZONE_FORCING=/path/to/monthly_ozone.nc STEP_MINUTES=45
+```
+
+Set `CO2_PPM=284.316853` with `make historical` to hold CO₂ fixed while reading the monthly ozone file. Omitting `OZONE_FORCING` uses the synthetic ozone profile used for the results
+shown here. For the three forcing contrasts, see the [input4MIPs historical experiment](experiments/ozone_historical/README.md). The user guide describes the [monthly ozone input format](docs-site/docs/tutorial/1-user-guide/1.1-Running-PlaSiC-first.md#monthly-ozone-input-format).
+
 → [Chapter 6.2, Historical experiment](https://sunmoumou1.github.io/PlaSiC/tutorial/6-experiments/6.2-historical-experiment-1850-2014/)
 
 <p align="center">
@@ -358,9 +369,8 @@ python3 -m venv .venv
 Planned for future releases (✅ = delivered, ⬜ = planned):
 
 - ⬜ **Aerosol-related physical processes.**
-- ⬜ **External ozone forcing** — ozone will be read from external data rather than
-  prescribed internally, so historical experiments can be driven by CO₂ and ozone
-  together.
+- ✅ **External ozone forcing** — historical experiments can combine monthly
+  three-dimensional ozone fields with CO₂ forcing.
 - ⬜ **Particle tracking and visualization** — follow air parcels and tracers through
   the simulated circulation, with visualization support.
 - ✅ **Weather simulation experiments** — initialize from an observed weather state
