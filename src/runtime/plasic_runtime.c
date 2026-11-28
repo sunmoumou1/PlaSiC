@@ -11,6 +11,18 @@ double integration_start_time;
 char runtime_error_message[512];
 
 
+/* The closing restart includes the increment after the last requested step. */
+static int validate_step_limit(int32_t start_step, int32_t steps)
+{
+    if ((int64_t)start_step + steps > INT32_MAX)
+    {
+        runtime_set_error("cannot advance %d steps from nstep=%d within the model clock range",
+                          steps, start_step);
+        return PLASIC_RUNTIME_BAD_ARGUMENT;
+    }
+    return PLASIC_RUNTIME_OK;
+}
+
 /*
  * Set the runtime error message.
  */
@@ -251,6 +263,11 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
 
     status = runtime_load_atmosphere_restart(
         options->restart_input, options->surface_data_directory);
+    if (status == PLASIC_RUNTIME_OK)
+    {
+        const int32_t start_step = options->reset_nstep >= 0 ? options->reset_nstep : plasic_nstep;
+        status = validate_step_limit(start_step, options->steps);
+    }
     if (status != PLASIC_RUNTIME_OK)
     {
         plasic_runtime_finalize();
@@ -380,6 +397,10 @@ int plasic_runtime_run(const plasic_runtime_options *options)
      * Advance step by step; options->steps is always >= 1 because the CLI and
      * the JSON loader reject a missing or zero step count.
      */
+    status = validate_step_limit(plasic_nstep, options->steps);
+    if (status != PLASIC_RUNTIME_OK)
+        return status;
+
     for (step = 0; step < options->steps; ++step)
     {
         step2cal(plasic_calendar, plasic_nstep, plasic_ndatim);

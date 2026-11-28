@@ -828,6 +828,15 @@ historical-run: all
 		--sea-coupling-interval $(SEA_COUPLING_INTERVAL) \
 		--output "$(HISTORICAL_OUTPUT_DIR)/final.restart"
 
+$(BUILD_DIR)/runtime_clock_test: ../tests/runtime_clock.c $(RUNTIME_OBJECTS) $(LIBRARY)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< \
+		$(filter-out $(BUILD_DIR)/app/plasic_standalone.o,$(RUNTIME_OBJECTS)) $(LIBRARY) $(LDLIBS)
+
+.PHONY: test-runtime-clock
+test-runtime-clock:
+	$(MAKE) $(BUILD_ROOT)/tests/runtime-clock/runtime_clock_test MPI=0 NPRO=1 NLAT=32 NLEV=10 BUILD_DIR=$(BUILD_ROOT)/tests/runtime-clock
+	"$(ABS_BUILD_ROOT)/tests/runtime-clock/runtime_clock_test"
+
 # Surface-data integrity: validate the complete 45-file archive, grid-specific
 # filenames, dimensions, time axes, and finite field values.
 test-data:
