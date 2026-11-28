@@ -98,21 +98,8 @@ void plasic_runtime_finalize(void)
     (void)mp_stop();
 }
 
-int plasic_runtime_initialize(const plasic_runtime_options *options)
+static int validate_options(const plasic_runtime_options *options)
 {
-    /*
-     * Single entry point for the overall initialization of a PlaSiC run. 
-     */
-    int status; /* Uniformly receives the runtime status code returned by each initialization substep. */
-
-    /*
-     * Support repeated initialization within the same process: first close any
-     * leftover from the previous run, then start from a clean state. The error message for this
-     * run is also cleared here.
-     */
-    plasic_runtime_finalize();
-    runtime_error_message[0] = '\0';
-
     {
         const int has_forcing =
             options->co2_forcing_input != NULL &&
@@ -163,6 +150,21 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         return PLASIC_RUNTIME_BAD_ARGUMENT;
     }
 
+    return PLASIC_RUNTIME_OK;
+}
+
+static int initialize(const plasic_runtime_options *options, int report_errors)
+{
+    plasic_runtime_finalize();
+    runtime_error_message[0] = '\0';
+
+    /* A library caller can correct invalid options before starting MPI.
+     * The CLI needs its rank even when option validation failed. */
+    const int option_status = validate_options(options);
+    if (option_status != PLASIC_RUNTIME_OK && !report_errors)
+        return option_status;
+
+    int status;
     {
         int32_t mpi_error;
         int32_t process_count;
@@ -181,10 +183,12 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
                 "parallel initialization failed: expected %d processes, "
                 "got %d (backend status %d)",
                 PLASIC_NPRO, process_count, mpi_error);
-            plasic_runtime_finalize();
             return PLASIC_RUNTIME_UNSUPPORTED_CONFIGURATION;
         }
     }
+
+    if (option_status != PLASIC_RUNTIME_OK)
+        return option_status;
 
     /*
      * Initialize the global arrays and default scalars managed by
@@ -209,7 +213,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     status = runtime_initialize_dynamics(options->step_minutes);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -244,7 +247,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
                 options->start_minute,
                 calmod_calendar_name(cold_calendar),
                 calmod_status_text(calendar_status));
-            plasic_runtime_finalize();
             return PLASIC_RUNTIME_BAD_ARGUMENT;
         }
     }
@@ -253,7 +255,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         options->restart_input, options->surface_data_directory);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -306,7 +307,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     status = runtime_prepare_orography_grid();
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -331,7 +331,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         {
             runtime_set_error("could not initialize atmospheric physics state");
         }
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -344,7 +343,6 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
     }
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
@@ -352,18 +350,37 @@ int plasic_runtime_initialize(const plasic_runtime_options *options)
         options->monthly_output_directory);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
     status = runtime_open_live_outputs(options);
     if (status != PLASIC_RUNTIME_OK)
     {
-        plasic_runtime_finalize();
         return status;
     }
 
     return PLASIC_RUNTIME_OK;
+}
+
+/* Report once while the MPI rank is still available, then release resources. */
+int runtime_initialize(const plasic_runtime_options *options, int report_errors)
+{
+    const int status = initialize(options, report_errors);
+    if (status != PLASIC_RUNTIME_OK)
+    {
+        if (report_errors && mp_is_root())
+        {
+            fprintf(stderr, "PlaSiC initialization failed: %s\n", plasic_runtime_error());
+            fflush(stderr);
+        }
+        plasic_runtime_finalize();
+    }
+    return status;
+}
+
+int plasic_runtime_initialize(const plasic_runtime_options *options)
+{
+    return runtime_initialize(options, 0);
 }
 
 // The most important function is the one below.

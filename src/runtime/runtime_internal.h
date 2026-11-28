@@ -101,6 +101,8 @@ extern plasic_stream_writer frame_writer;
 extern double integration_start_time;
 extern char runtime_error_message[512];
 
+/* The CLI reports shared initialization errors before releasing MPI. */
+int runtime_initialize(const plasic_runtime_options *options, int report_errors);
 void runtime_set_error(const char *format, ...);
 int runtime_broadcast_status(int status);
 
