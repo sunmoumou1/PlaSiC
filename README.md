@@ -27,6 +27,11 @@
 
 ---
 
+> [!NOTE]
+> **[Read the PlaSiC Bug Fix Log](bug_fix.md)**
+>
+> See which serious bugs were discovered during development, how they affected the model, and how they were fixed.
+
 | Where to go | |
 |---|---|
 | **Read the book** | [Online tutorial](https://sunmoumou1.github.io/PlaSiC/tutorial/) · [PDF](https://drive.usercontent.google.com/download?id=1PaMNy_Bc8rSRLUIjQizExJ17wFgWT9Ag&export=download&confirm=t) · [Preface](https://sunmoumou1.github.io/PlaSiC/tutorial/preface/) |

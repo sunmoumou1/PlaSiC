@@ -20,7 +20,7 @@ void calcgp(
     const float *absolute_vorticity,
     const float *inverse_double_sigma_thickness,
     const float *reference_temperature_difference,
-    const float *pressure_velocity_integral,
+    const float *compression_matrix,
     const float *kappa_reference_temperature,
     const float *hydrostatic_integral,
     float *pressure_vertical_velocity, float *temperature_source,

@@ -662,19 +662,22 @@ void vdiff(
             }
         }
 
-        /*
-         * 计算耗散加热：
-         */
+        /* 耗散加热来自动能输送倾向与风场动能倾向之差。 */
         for (level = 0; level < nlev; ++level)
         {
             for (horizontal = 0; horizontal < nhor; ++horizontal)
             {
                 const size_t index = field_index(horizontal, level, nhor);
-                const float wind_energy_change =
-                    (zun[index] * zun[index] - zu[index] * zu[index] + zvn[index] * zvn[index] - zv[index] * zv[index]) / deltsec2;
-                const float transported_energy_change =
+                const float wind_energy_tendency =
+                    0.5f * (zun[index] * zun[index] - zu[index] * zu[index] +
+                            zvn[index] * zvn[index] - zv[index] * zv[index]) /
+                    deltsec2;
+                const float transported_energy_tendency =
                     (zken[index] - zke[index]) / deltsec2;
-                zdtdt[index] = -(wind_energy_change - transported_energy_change) * 0.5f / cpd / (1.0f + cpv_cpd_minus1 * dq[index]);
+
+                zdtdt[index] =
+                    (transported_energy_tendency - wind_energy_tendency) /
+                    cpd / (1.0f + cpv_cpd_minus1 * dq[index]);
 
                 /* 将耗散加热累加到总温度倾向。 */
                 dtdt[index] = dtdt[index] + zdtdt[index];

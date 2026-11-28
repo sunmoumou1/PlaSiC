@@ -1403,6 +1403,8 @@ int32_t rad_longwave(
                                  RAD_AT(zbd, horizontal, nlev, nhor);
         zeps[horizontal] =
             (1.0f - zeps[horizontal]) * downward_flux[surface];
+        /* Include the unattenuated reflected flux at the surface. */
+        upward_flux[surface] -= zeps[horizontal];
     }
     for (level = 0; level < nlev; ++level)
     {

@@ -53,7 +53,7 @@ void calcgp(
     const float *absolute_vorticity,
     const float *inverse_double_sigma_thickness,
     const float *reference_temperature_difference,
-    const float *pressure_velocity_integral,
+    const float *compression_matrix,
     const float *kappa_reference_temperature,
     const float *hydrostatic_integral,
     float *pressure_vertical_velocity, float *temperature_source,
@@ -88,7 +88,7 @@ void calcgp(
     float *compression_temperature_perturbation =
         (float *)malloc(field_values * sizeof(float));
 
-    // 自模式顶累计到各内部界面的 ΣΔσ(D+P)，只用于诊断 sigma_dot。
+    // 自模式顶累计到各内部界面的 ΣΔσ(D+P)，用于诊断 σdot 和 ω。
     float *cumulative_mass_divergence_at_interface =
         (float *)malloc(interface_values * sizeof(float));
 
@@ -215,6 +215,12 @@ void calcgp(
         cumulative_mass_divergence_at_interface[top] =
             column_integrated_divergence[point] +
             column_pressure_advection[point];
+
+        // 顶层上界为 σ=0，层中心的 ω/(ps Ω) = -(Δσ_0/2) D_0。
+        pressure_vertical_velocity[top] =
+            -0.5f * sigma_thickness[0] * divergence[top] *
+            surface_pressure_ratio[point] * reference_surface_pressure *
+            rotation_rate;
     }
 
     // 继续累计内部整层（不含顶层 0 和底层 level_count-1）。
@@ -253,9 +259,10 @@ void calcgp(
                 surface_log_pressure_advection[bottom];
     }
 
-    // 阶段 3：在每个内部界面计算 σdot。
+    // 阶段 3：计算内部界面的 σdot 和界面下方整层中心的 ω。
     for (level = 0; level < interface_count; ++level)
     {
+        const float half_thickness_below = 0.5f * sigma_thickness[level + 1];
         for (point = 0; point < horizontal_count; ++point)
         {
             // index 指向界面上方整层 level 的平面位置。
@@ -269,6 +276,16 @@ void calcgp(
                     (column_integrated_divergence[point] +
                      column_pressure_advection[point]) -
                 cumulative_mass_divergence_at_interface[index];
+
+            // 连续方程给出 ω/(ps Ω) = σ_k P_k - ∫_0^σ_k (D+P) dσ。
+            // σ_k P_k 中的半层 P_k 与积分中的对应项相消。
+            pressure_vertical_velocity[below] =
+                (lower_interface_sigma[level] *
+                     surface_log_pressure_advection[below] -
+                 cumulative_mass_divergence_at_interface[index] -
+                 half_thickness_below * divergence[below]) *
+                surface_pressure_ratio[point] * reference_surface_pressure *
+                rotation_rate;
 
             // 温度垂直项使用相邻层温度扰动差值：(下层 - 上层)。
             temperature_vertical[index] =
@@ -336,11 +353,6 @@ void calcgp(
                 virtual_temperature_perturbation[index] -
             inverse_double_sigma_thickness[0] *
                 meridional_vertical[index];
-
-        // 顶层有量纲压力垂直速度按模型的顶层离散式直接由 D 得到。
-        pressure_vertical_velocity[index] =
-            divergence[index] * surface_pressure_ratio[point] *
-            reference_surface_pressure * rotation_rate;
     }
 
     // 阶段 5：内部层同时接收上下两个界面贡献，并用 C 矩阵计算垂直积分。
@@ -352,13 +364,12 @@ void calcgp(
             // 下标 level*level_count 即矩阵第 level 行第 0 列。
             const size_t top = (size_t)point;
             pressure_advection_vertical_integral[point] =
-                pressure_velocity_integral[(size_t)level * (size_t)level_count] *
+                compression_matrix[(size_t)level * (size_t)level_count] *
                 surface_log_pressure_advection[top];
 
-            // C(P+D)=C(A) 进入 ω/p=P-C(A)。
+            // C(P+D)=C(A) 用于压缩加热的层平均 ω/p。
             mass_divergence_vertical_integral[point] =
-                pressure_velocity_integral[(size_t)level *
-                                           (size_t)level_count] *
+                compression_matrix[(size_t)level * (size_t)level_count] *
                 (surface_log_pressure_advection[top] + divergence[top]);
         }
         // 单独作用域仅用于限制 inner 的生命周期，不改变控制流。
@@ -370,7 +381,7 @@ void calcgp(
             {
                 // 取 C 矩阵的 [level][inner] 系数。
                 const float coefficient =
-                    pressure_velocity_integral[
+                    compression_matrix[
                         (size_t)level * (size_t)level_count +
                         (size_t)inner];
                 for (point = 0; point < horizontal_count; ++point)
@@ -450,13 +461,6 @@ void calcgp(
                 inverse_double_sigma_thickness[level] *
                     (meridional_vertical[index] +
                      meridional_vertical[upper_interface]);
-
-            // 有量纲压力垂直速度由离散 P-C(A) 缩放得到。
-            pressure_vertical_velocity[index] =
-                (surface_log_pressure_advection[index] -
-                 mass_divergence_vertical_integral[point]) *
-                surface_pressure_ratio[point] *
-                reference_surface_pressure * rotation_rate;
         }
     }
 
@@ -467,10 +471,10 @@ void calcgp(
     {
         const size_t top = (size_t)point;
         pressure_advection_vertical_integral[point] =
-            pressure_velocity_integral[(size_t)level * (size_t)level_count] *
+            compression_matrix[(size_t)level * (size_t)level_count] *
             surface_log_pressure_advection[top];
         mass_divergence_vertical_integral[point] =
-            pressure_velocity_integral[(size_t)level * (size_t)level_count] *
+            compression_matrix[(size_t)level * (size_t)level_count] *
             (surface_log_pressure_advection[top] + divergence[top]);
     }
 
@@ -482,7 +486,7 @@ void calcgp(
         for (inner = 1; inner < level_count; ++inner)
         {
             const float coefficient =
-                pressure_velocity_integral[
+                compression_matrix[
                     (size_t)level * (size_t)level_count + (size_t)inner];
             for (point = 0; point < horizontal_count; ++point)
             {
@@ -540,13 +544,6 @@ void calcgp(
                 virtual_temperature_perturbation[index] -
             inverse_double_sigma_thickness[level] *
                 meridional_vertical[interface];
-                
-        // 底层压力垂直速度仍由离散 P-C(A) 缩放得到。
-        pressure_vertical_velocity[index] =
-            (surface_log_pressure_advection[index] -
-             mass_divergence_vertical_integral[point]) *
-            surface_pressure_ratio[point] *
-            reference_surface_pressure * rotation_rate;
     }
 
     // 阶段 7：静力矩阵 G 沿气柱积分 δTv=Tv-T，得到湿非线性位势修正。
